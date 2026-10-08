@@ -2,8 +2,11 @@
 #include "VisualAssetsWindows.hpp"
 #include <commctrl.h>
 #include <objbase.h>
-#include <UIAutomation.h>
+// oleacc.h supplies these annotation GUIDs via DEFINE_GUID. Instantiate them
+// here, before UIAutomation.h can include oleacc.h with declarations only.
+#include <initguid.h>
 #include <oleacc.h>
+#include <UIAutomation.h>
 #include <atomic>
 #include <new>
 namespace just {
