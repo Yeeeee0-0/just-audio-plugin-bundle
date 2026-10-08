@@ -13,6 +13,7 @@ BASE_COMMIT = 'd0abf4f71c5a4b56e68a1441edf4dfc11dee8d04'
 ARCHIVE_SHA = 'edc84f4c49ebd17df2fa8d84ed592460d710d9f4f4926385839e38b8bb782726'
 URL = 'https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/JUST-0.1.0-Windows-x64-preview.13-Portable.zip'
 EXPECTED = 'selection notification preserves native combo lifetime'
+BUTTON_EXPECTED = 'button dispatch preserves native sender until callback returns'
 
 
 def digest(path):
@@ -77,10 +78,19 @@ def main():
     result = json.loads((result_dir/'result.json').read_text(encoding='utf-8-sig'))
     if run.returncode != 1 or result['status'] != 'FAIL' or not result['actual_vst3_dll_loaded'] or EXPECTED not in result['error']:
         raise RuntimeError('Old candidate did not fail the intended lifetime assertion; do not claim regression detection')
+    button_dir = output/'preview13-button'
+    button_run = subprocess.run([str(hosts[0]), str(cache/eq['bundle']), 'eq', str(button_dir), '--button-lifetime-only'],
+                                capture_output=True, timeout=120, encoding='utf-8', errors='replace')
+    (output/'previous-button-candidate.log').write_text(button_run.stdout+button_run.stderr, encoding='utf-8')
+    button_result = json.loads((button_dir/'result.json').read_text(encoding='utf-8-sig'))
+    if button_run.returncode != 1 or button_result['status'] != 'FAIL' or not button_result['actual_vst3_dll_loaded'] or BUTTON_EXPECTED not in button_result['error']:
+        raise RuntimeError('Old candidate did not fail the intended button lifetime assertion')
     report = {'result': 'PASS_OLD_CANDIDATE_REJECTED', 'baseline_commit': BASE_COMMIT,
               'previous_archive_sha256': ARCHIVE_SHA, 'previous_eq_sha256': eq['sha256'],
               'test_host_sha256': digest(hosts[0]), 'expected_failure': result['error'],
               'old_candidate_exit': run.returncode, 'actual_dll_loaded': True,
+              'old_button_candidate_exit': button_run.returncode, 'expected_button_failure': button_result['error'],
+              'button_negative_control': 'PASS_OLD_CANDIDATE_REJECTED',
               'real_reaper': 'NOT_RUN'}
     (output/'negative-control.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report, indent=2))

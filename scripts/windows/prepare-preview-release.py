@@ -53,10 +53,10 @@ def main():
     if len(validations) != 10 or any(p['validatorExit'] or p['failed'] or p['machine'] != 'AMD64' for p in validations):
         raise SystemExit('All ten VST3 validators must pass')
     native_results = [read(p) for p in (native/'native').glob('*/result.json')]
-    if len(native_results) != 10 or any(p['status'] != 'PASS' or p.get('combo_stress_cycles') != 16 or not p.get('concurrent_combo_audio_blocks') for p in native_results):
+    if len(native_results) != 10 or any(p['status'] != 'PASS' or p.get('combo_stress_cycles') != 16 or not p.get('concurrent_combo_audio_blocks') or p.get('button_dispatch_checks',0) < 100 or p.get('escape_dispatch_checks') != 8 for p in native_results):
         raise SystemExit('Concurrent combo/modal regression evidence required for all ten DLLs')
     regression = read(ROOT/'build/windows-evidence/combo-regression/negative-control.json')
-    if regression['result'] != 'PASS_OLD_CANDIDATE_REJECTED':
+    if regression['result'] != 'PASS_OLD_CANDIDATE_REJECTED' or regression.get('button_negative_control') != 'PASS_OLD_CANDIDATE_REJECTED':
         raise SystemExit('Previous candidate must fail the new lifetime regression')
     junit = ET.parse(native/'ctest.xml').getroot()
     if int(junit.get('failures', '0')) or int(junit.get('errors', '0')):
@@ -116,11 +116,13 @@ def main():
         'github_runner_image': {'os': os.environ.get('ImageOS'), 'version': os.environ.get('ImageVersion')},
         'stable_mac_release_modified': False,
         'fix_candidate': {
-            'issue': 'Native combo sender lifetime and bypassed native control repaint',
+            'issue': 'Native combo/button sender lifetime and bypassed native control repaint',
             'base_commit': 'd0abf4f71c5a4b56e68a1441edf4dfc11dee8d04',
             'received_patch_sha256': '3a698767f3b60292d4deae7a96feae47af0051206eb350f2287ff119517da7d0',
             'product_file': 'common/ui/NativeEditorWindows.cpp',
-            'change': 'Update scale, language and preset selection in place; preserve native combo lifetime; repaint bypassed native controls after direct setters; retain preview.13 sibling clipping',
+            'additional_reviewed_fix': 'CI run16 captured native button dispatch resuming after Delete rebuilt its parent. Queue modal button and Escape actions on the surviving editor; invalidate stale queued actions by modal generation.',
+            'diagnostic_run_url': 'https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/runs/37841801452',
+            'change': 'Update scale, language and preset selection in place; preserve native combo lifetime; defer destructive modal button/Escape actions until dispatch returns; repaint bypassed native controls after direct setters; retain preview.13 sibling clipping',
             'reaper_7_41_at_175_percent_dpi_revalidation': 'NOT_RUN_FOR_THIS_CANDIDATE',
             'concurrent_combo_cycles_per_plugin': 16,
             'negative_control': regression,
@@ -131,11 +133,11 @@ def main():
 
 **Unsigned Windows UI fix candidate; real REAPER playback/scale and bypass-color revalidation remains pending.**
 
-Preview.13 has a reported REAPER 7.41 access violation in COMCTL32.dll while changing EQ overlay scale during playback. This candidate is based on `d0abf4f71c5a4b56e68a1441edf4dfc11dee8d04` and keeps scale/language/preset combo HWNDs alive through selection notifications, updating their UI in place. The native grayscale wrapper also repaints bypassed controls after direct native state/text setters, addressing the reported blue Limiter checkbox. The earlier sibling-clipping fix is retained. DSP, plugin IDs, parameters, state formats and Mac code are unchanged.
+Preview.13 has a reported REAPER 7.41 access violation in COMCTL32.dll while changing EQ overlay scale during playback. This candidate is based on `d0abf4f71c5a4b56e68a1441edf4dfc11dee8d04` and keeps scale/language/preset combo HWNDs alive through selection notifications, updating their UI in place. CI additionally captured a native button crash after Delete rebuilt the modal inside its click notification. Destructive modal button/Escape actions are now queued on the surviving editor window, with stale-action generation checks. The native grayscale wrapper also repaints bypassed controls after direct native state/text setters, addressing the reported blue Limiter checkbox. The earlier sibling-clipping fix is retained. DSP, plugin IDs, parameters, state formats and Mac code are unchanged.
 
-The native host now observes sender destruction (including handle reuse), verifies real common-control keyboard selection and host resize rejection, exercises user/factory preset selection, and performs 16 modal/view/scale cycles per plugin while actual float32/float64 DLL audio processing continues on a separate thread with unchanged twin output. The same new test host rejects the pinned preview.13 EQ DLL at the intended lifetime assertion. Limiter additionally verifies native checkbox state, text, lifetime and unchanged automation after setters, with immediate and post-refresh offscreen captures. These are hidden-window native tests, not physical input or real REAPER acceptance; live native themed animation/color remains unverified.
+The native host now observes sender destruction (including handle reuse), verifies real common-control keyboard selection and host resize rejection, exercises user/factory preset selection, and performs 16 modal/view/scale cycles per plugin while actual float32/float64 DLL audio processing continues on a separate thread with unchanged twin output. Every native button click is also observed for sender lifetime, and eight Escape callbacks per plugin must preserve their sender until returning. The same new test host rejects the pinned preview.13 EQ DLL at both combo and explicit button-notification lifetime assertions. Limiter additionally verifies native checkbox state, text, lifetime and unchanged automation after setters, with immediate and post-refresh offscreen captures. These are hidden-window native tests, not physical input or real REAPER acceptance; live native themed animation/color remains unverified.
 
-本包修复候选针对 preview.13 播放中切换 EQ 浮层缩放时的 COMCTL32.dll 崩溃：下拉框选择通知改为原位更新，不在其回调尚未返回时销毁控件。另补上 Limiter 等原生控件设置状态后的旁路灰度重绘。请在 REAPER 7.41、175% DPI 下重新检查十款播放中缩放、语言／预设切换、浮层开关和重复操作，以及 Limiter 勾选框旁路后立即、悬停、点击和等待刷新时的黑白显示；保留旧测试证据，单独记录本包结果。实机确认前不作为正式版。
+本包修复候选针对 preview.13 播放中切换 EQ 浮层缩放时的 COMCTL32.dll 崩溃：下拉框选择通知改为原位更新，不在其回调尚未返回时销毁控件。CI 另定位到按钮点击中同步重建浮层的同类崩溃，现将破坏性浮层按钮与 Escape 操作排到回调返回后执行，并过滤过期操作。另补上 Limiter 等原生控件设置状态后的旁路灰度重绘。请在 REAPER 7.41、175% DPI 下重新检查十款播放中缩放、语言／预设切换、浮层开关和重复操作，以及 Limiter 勾选框旁路后立即、悬停、点击和等待刷新时的黑白显示；保留旧测试证据，单独记录本包结果。实机确认前不作为正式版。
 
 - Download `JUST-{suffix}-Setup.exe` for the selectable installer (all ten selected by default).
 - `Portable.zip` contains the exact ten tested x64 VST3 bundles and installation scripts.

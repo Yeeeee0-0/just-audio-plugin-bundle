@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <cwchar>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -50,6 +51,7 @@ using just_windows_test::Product;
 namespace {
 std::atomic<unsigned> checks{0};
 unsigned comboStressCycles = 0;
+unsigned buttonDispatchChecks = 0, escapeDispatchChecks = 0;
 std::uint64_t comboAudioBlocks = 0;
 std::string phase = "startup";
 std::ofstream logFile;
@@ -203,12 +205,44 @@ HWND control(HWND parent, int id) {
     HWND body = GetDlgItem(panel, 302);
     return body ? GetDlgItem(body, id) : nullptr;
 }
+// An HWND may be reused immediately after destruction. Observe WM_NCDESTROY
+// instead of relying on IsWindow/handle equality alone to detect that bug.
+class WindowLifetime {
+    HWND window;
+    bool destroyed = false;
+    static LRESULT CALLBACK observe(HWND h, UINT message, WPARAM w, LPARAM l, UINT_PTR id, DWORD_PTR data) {
+        auto* self = reinterpret_cast<WindowLifetime*>(data);
+        if (message == WM_NCDESTROY) { self->destroyed = true; RemoveWindowSubclass(h, observe, id); }
+        return DefSubclassProc(h, message, w, l);
+    }
+public:
+    explicit WindowLifetime(HWND value) : window(value) {
+        check(SetWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this), reinterpret_cast<DWORD_PTR>(this)) != FALSE,
+            "observe actual native sender destruction");
+    }
+    ~WindowLifetime() { if (!destroyed) RemoveWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this)); }
+    bool alive() const { return !destroyed && IsWindow(window); }
+};
+
 void click(HWND parent, int id) {
     log("ACTION click " + std::to_string(id));
     auto button = control(parent, id);
     check(button != nullptr && IsWindowEnabled(button), "enabled shell control " + std::to_string(id));
     // Synchronous control messages exercise handler code; these are NOT physical input.
-    SendMessageW(button, BM_CLICK, 0, 0); settle();
+    WindowLifetime lifetime(button);
+    SendMessageW(button, BM_CLICK, 0, 0);
+    check(lifetime.alive(), "button dispatch preserves native sender until callback returns");
+    ++buttonDispatchChecks;
+    settle();
+}
+void escapeModal(HWND parent) {
+    log("ACTION native Escape on modal button");
+    HWND button=control(parent,204);check(button!=nullptr,"Escape modal target exists");
+    WindowLifetime lifetime(button);
+    SendMessageW(button,WM_KEYDOWN,VK_ESCAPE,1);
+    check(lifetime.alive(),"Escape dispatch preserves modal sender until callback returns");
+    SendMessageW(button,WM_KEYUP,VK_ESCAPE,LPARAM(0xc0000001));
+    settle();check(control(parent,204)==nullptr,"deferred Escape closes the modal");++escapeDispatchChecks;
 }
 std::wstring windowText(HWND window) {
     std::wstring text(static_cast<std::size_t>(GetWindowTextLengthW(window)) + 1, L'\0');
@@ -498,25 +532,6 @@ public:
     }
 };
 
-// An HWND may be reused immediately after destruction. Observe WM_NCDESTROY
-// instead of relying on IsWindow/handle equality alone to detect that bug.
-class WindowLifetime {
-    HWND window;
-    bool destroyed = false;
-    static LRESULT CALLBACK observe(HWND h, UINT message, WPARAM w, LPARAM l, UINT_PTR id, DWORD_PTR data) {
-        auto* self = reinterpret_cast<WindowLifetime*>(data);
-        if (message == WM_NCDESTROY) { self->destroyed = true; RemoveWindowSubclass(h, observe, id); }
-        return DefSubclassProc(h, message, w, l);
-    }
-public:
-    explicit WindowLifetime(HWND value) : window(value) {
-        check(SetWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this), reinterpret_cast<DWORD_PTR>(this)) != FALSE,
-            "observe actual native sender destruction");
-    }
-    ~WindowLifetime() { if (!destroyed) RemoveWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this)); }
-    bool alive() const { return !destroyed && IsWindow(window); }
-};
-
 class ConcurrentAudio {
     std::atomic<bool> stop{false};
     std::atomic<std::uint64_t> processed{0};
@@ -681,7 +696,7 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         for (int cycle = 0; cycle < 8; ++cycle) {
             log("CYCLE " + suffix + " " + std::to_string(cycle));
             const auto beforeBlocks = playing.count();
-            click(s.window.handle, 204); // close, then change underlying view
+            if(cycle % 2)escapeModal(s.window.handle);else click(s.window.handle, 204);
             click(s.window.handle, 102);
             click(s.window.handle, 103);
             const int index = cycle % 4, target = index == 3 ? 2 : index + 1;
@@ -839,6 +854,8 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
         << ",\n  \"float32_passed\": " << (passed32 ? "true" : "false")
         << ",\n  \"float64_passed\": " << (passed64 ? "true" : "false")
         << ",\n  \"combo_stress_cycles\": " << comboStressCycles
+        << ",\n  \"button_dispatch_checks\": " << buttonDispatchChecks
+        << ",\n  \"escape_dispatch_checks\": " << escapeDispatchChecks
         << ",\n  \"concurrent_combo_audio_blocks\": " << comboAudioBlocks
         << ",\n  \"real_reaper_validation\": \"NOT_RUN\",\n  \"physical_mouse_keyboard_input\": \"NOT_RUN\","
         << "\n  \"audio_device_playback\": \"NOT_RUN\",\n  \"mac_vs_windows_audio_comparison\": \"NOT_RUN\","
@@ -851,8 +868,8 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
 
 int wmain(int argc, wchar_t** argv) {
     static_assert(sizeof(void*) == 8, "build the host for Windows x64");
-    if (argc != 4) {
-        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory>\n"; return 2;
+    if (argc != 4 && !(argc == 5 && !std::wcscmp(argv[4],L"--button-lifetime-only"))) {
+        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory> [--button-lifetime-only]\n"; return 2;
     }
     fs::path evidence; std::string slug; bool comReady = false;
     try {
@@ -881,8 +898,23 @@ int wmain(int argc, wchar_t** argv) {
         check(bool(module), "load actual candidate DLL: " + error); dllLoaded = true; loadedBinary = binary.u8string(); phase = "factory";
         HostApplication host; module->getFactory().setHostContext(&host);
         const auto ids = validateFactory(module, *product);
-        run<float>(module, host, ids, *product, evidence); passed32 = true;
-        run<double>(module, host, ids, *product, evidence); passed64 = true;
+        if(argc == 5) {
+            // Deterministic old-build counterexample without traversing a combo.
+            phase="button-lifetime-only";
+            Session session;session.initialize(module,host,ids);session.open();
+            click(session.window.handle,103);
+            HWND button=control(session.window.handle,202);check(button!=nullptr,"button notification target exists");
+            WindowLifetime lifetime(button);
+            // Observe the old unsafe BN_CLICKED mutation deterministically,
+            // without asking the destroyed old native button to resume input.
+            SendMessageW(GetParent(button),WM_COMMAND,MAKEWPARAM(202,BN_CLICKED),reinterpret_cast<LPARAM>(button));
+            check(lifetime.alive(),"button dispatch preserves native sender until callback returns");
+            settle();
+            check(control(session.window.handle,204)!=nullptr,"deferred modal navigation completes");
+        } else {
+            run<float>(module, host, ids, *product, evidence); passed32 = true;
+            run<double>(module, host, ids, *product, evidence); passed64 = true;
+        }
         module->getFactory().setHostContext(nullptr); module.reset();
         phase = "completed"; report(evidence / "result.json", slug, true, "");
         log("PASS native CLI checks=" + std::to_string(checks.load()) + "; real REAPER/visual/input/audio acceptance remains NOT_RUN");
