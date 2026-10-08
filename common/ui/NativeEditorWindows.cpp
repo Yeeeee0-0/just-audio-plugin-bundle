@@ -14,6 +14,14 @@ LRESULT CALLBACK buttonProc(HWND,UINT,WPARAM,LPARAM,UINT_PTR,DWORD_PTR);
 // Desaturate their actual native paint only while the ancestor is bypassed.
 LRESULT CALLBACK nativeGrayProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR){
     if((m==WM_PAINT || m==WM_PRINTCLIENT) && win::paused(h)){win::Paint p(h,true,m==WM_PRINTCLIENT?reinterpret_cast<HDC>(w):nullptr);DefSubclassProc(h,WM_PRINTCLIENT,reinterpret_cast<WPARAM>(p.dc()),PRF_CLIENT|PRF_ERASEBKGND);return 0;}
+    // Native setters can draw immediately, without going through WM_PAINT.
+    // Limiter refreshes its checked BUTTON every timer tick. Repaint that
+    // control through the grayscale buffer before the setter returns.
+    if(win::paused(h) && (m==BM_SETCHECK || m==BM_SETSTATE || m==WM_SETTEXT || m==WM_ENABLE || m==WM_SETFONT)){
+        LRESULT result=DefSubclassProc(h,m,w,l);
+        if(IsWindow(h))RedrawWindow(h,nullptr,nullptr,RDW_INVALIDATE|RDW_UPDATENOW);
+        return result;
+    }
     if(m==WM_NCDESTROY)RemoveWindowSubclass(h,nativeGrayProc,0x4a555354);return DefSubclassProc(h,m,w,l);
 }
 BOOL CALLBACK prepareNativeGray(HWND h,LPARAM exclude){if(h==reinterpret_cast<HWND>(exclude))return TRUE;wchar_t name[64]{};GetClassNameW(h,name,64);if(!lstrcmpiW(name,L"STATIC") || !lstrcmpiW(name,L"EDIT") || !lstrcmpiW(name,L"COMBOBOX") || !lstrcmpiW(name,L"BUTTON"))SetWindowSubclass(h,nativeGrayProc,0x4a555354,0);return TRUE;}

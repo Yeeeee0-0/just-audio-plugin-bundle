@@ -21,6 +21,8 @@
 #include <windows.h>
 #include <objbase.h>
 #include <commctrl.h>
+#include <dbghelp.h>
+#include <cstdio>
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -53,6 +55,34 @@ std::string phase = "startup";
 std::ofstream logFile;
 std::string loadedBinary;
 bool dllLoaded = false, passed32 = false, passed64 = false;
+fs::path crashPath;
+// Test-process-only diagnostics. Preserve the fatal exit; never resume a
+// faulting plugin or install a handler in the shipped DLLs.
+LONG WINAPI recordFatalException(EXCEPTION_POINTERS* exception) {
+    FILE* out=nullptr;
+    if(_wfopen_s(&out,crashPath.c_str(),L"wb") || !out)return EXCEPTION_EXECUTE_HANDLER;
+    std::fprintf(out,"phase=%s exception=0x%08lx address=%p thread=%lu\n",phase.c_str(),
+        exception->ExceptionRecord->ExceptionCode,exception->ExceptionRecord->ExceptionAddress,GetCurrentThreadId());
+    const HANDLE process=GetCurrentProcess();
+    SymSetOptions(SYMOPT_DEFERRED_LOADS|SYMOPT_UNDNAME|SYMOPT_FAIL_CRITICAL_ERRORS|SYMOPT_NO_PROMPTS);
+    if(SymInitialize(process,".",TRUE)) {
+        CONTEXT context=*exception->ContextRecord;
+        STACKFRAME64 stack{}; stack.AddrPC={context.Rip,0,AddrModeFlat};
+        stack.AddrStack={context.Rsp,0,AddrModeFlat};stack.AddrFrame={context.Rbp,0,AddrModeFlat};
+        for(unsigned i=0;i<48 && stack.AddrPC.Offset;++i) {
+            const auto address=stack.AddrPC.Offset;
+            const auto base=SymGetModuleBase64(process,address);
+            char module[MAX_PATH]{};if(base)GetModuleFileNameA(reinterpret_cast<HMODULE>(base),module,MAX_PATH);
+            alignas(SYMBOL_INFO) unsigned char storage[sizeof(SYMBOL_INFO)+MAX_SYM_NAME]{};
+            auto* symbol=reinterpret_cast<SYMBOL_INFO*>(storage);symbol->SizeOfStruct=sizeof(SYMBOL_INFO);symbol->MaxNameLen=MAX_SYM_NAME;
+            DWORD64 offset=0;const bool found=SymFromAddr(process,address,&offset,symbol)!=FALSE;
+            std::fprintf(out,"%u %s +0x%llx %s +0x%llx\n",i,module,address-base,found?symbol->Name:"?",offset);
+            if(!StackWalk64(IMAGE_FILE_MACHINE_AMD64,process,GetCurrentThread(),&stack,&context,nullptr,SymFunctionTableAccess64,SymGetModuleBase64,nullptr))break;
+        }
+        SymCleanup(process);
+    }
+    std::fclose(out);return EXCEPTION_EXECUTE_HANDLER;
+}
 void log(const std::string& value) {
     std::cout << value << '\n';
     if (logFile) { logFile << value << '\n'; logFile.flush(); }
@@ -174,6 +204,7 @@ HWND control(HWND parent, int id) {
     return body ? GetDlgItem(body, id) : nullptr;
 }
 void click(HWND parent, int id) {
+    log("ACTION click " + std::to_string(id));
     auto button = control(parent, id);
     check(button != nullptr && IsWindowEnabled(button), "enabled shell control " + std::to_string(id));
     // Synchronous control messages exercise handler code; these are NOT physical input.
@@ -502,6 +533,7 @@ public:
 };
 
 void select(HWND parent, int id, int index) {
+    log("ACTION select " + std::to_string(id) + " index=" + std::to_string(index));
     HWND combo = control(parent, id);
     check(combo && index >= 0 && index < SendMessageW(combo, CB_GETCOUNT, 0, 0), "settings combo choice exists");
     WindowLifetime lifetime(combo);
@@ -513,6 +545,7 @@ void select(HWND parent, int id, int index) {
 }
 
 void keySelect(HWND parent, int id, UINT key, int expectedIndex) {
+    log("ACTION native key " + std::to_string(id) + " expected=" + std::to_string(expectedIndex));
     HWND combo = control(parent, id);
     check(combo != nullptr, "native combo keyboard target exists");
     WindowLifetime lifetime(combo);
@@ -646,6 +679,7 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         while (playing.count() < 4 && GetTickCount64() < deadline) settle(5);
         check(playing.count() >= 4, "audio thread processes real blocks before modal stress");
         for (int cycle = 0; cycle < 8; ++cycle) {
+            log("CYCLE " + suffix + " " + std::to_string(cycle));
             const auto beforeBlocks = playing.count();
             click(s.window.handle, 204); // close, then change underlying view
             click(s.window.handle, 102);
@@ -751,6 +785,31 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     check(bypassQueue && bypassQueue->addPoint(0, 1, point) == kResultOk, "host delivers bypass event to both instances");
     render(false, &bypass); for (unsigned i = 0; i < 48; ++i) render();
     capture("bypass"); render(true);
+    if(!std::strcmp(product.slug,"limiter")) {
+        // Native setters may draw directly. Keep the native state and record
+        // offscreen captures, but require visible-host review of themed paint.
+        HWND mode=nullptr;
+        EnumChildWindows(s.window.handle, [](HWND h,LPARAM data)->BOOL {
+            wchar_t klass[32]{};GetClassNameW(h,klass,32);
+            if(!lstrcmpiW(klass,L"BUTTON") && (GetWindowLongPtrW(h,GWL_STYLE)&BS_TYPEMASK)==BS_AUTOCHECKBOX){*reinterpret_cast<HWND*>(data)=h;return FALSE;}
+            return TRUE;
+        },reinterpret_cast<LPARAM>(&mode));
+        check(mode!=nullptr,"limiter native sample-peak checkbox exists");
+        WindowLifetime lifetime(mode);
+        const auto checked=SendMessageW(mode,BM_GETCHECK,0,0);
+        const auto label=windowText(mode);
+        const auto gestureWrites=s.handler->writes;
+        SendMessageW(mode,BM_SETCHECK,checked,0);
+        SetWindowTextW(mode,label.c_str());
+        check(lifetime.alive() && SendMessageW(mode,BM_GETCHECK,0,0)==checked && windowText(mode)==label,
+            "grayscale repaint preserves native checkbox lifetime, state and text");
+        check(s.handler->writes==gestureWrites,"repainting native state emits no host automation");
+        if constexpr (std::is_same_v<Sample, double>) {
+            ViewRect size; check(s.view->getSize(&size)==kResultOk,"get immediate native setter capture bounds");
+            screenshot(s.window.handle,evidence/"bypass-native-setters.bmp",size.getWidth(),size.getHeight());
+        }
+        settle(); render(); capture("bypass-native-refresh");
+    }
     s.close();
     restoreController(s.controller, localizedChunk, false);
     check(uiState(s.controller).language == 0 && s.controller->getParamNormalized(0) == 1, "UI chunk restores language without overwriting sound bypass");
@@ -805,6 +864,7 @@ int wmain(int argc, wchar_t** argv) {
         check(!fs::exists(evidence), "evidence directory must be new (do not overwrite earlier results)");
         check(fs::create_directories(evidence), "create new isolated evidence directory");
         logFile.open(evidence / "runtime.log"); check(bool(logFile), "create runtime log");
+        crashPath=evidence/"fatal-exception.txt";SetUnhandledExceptionFilter(recordFatalException);
         log("SCOPE Windows x64 DLL runtime + hidden HWND; NOT REAPER or physical-input acceptance");
         phase = "bundle"; const fs::path binary = validateBundle(fs::absolute(argv[1]), *product);
         const auto presetRoot = evidence / "isolated-presets";

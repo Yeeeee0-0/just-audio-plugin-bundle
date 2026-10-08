@@ -29,8 +29,13 @@ jobs:
         shell: pwsh
         run: python scripts/bootstrap-sdk.py
       - name: Build and test ten native Windows x64 plugins
+        id: native
         shell: powershell
         run: ./scripts/windows/Build-And-Test.ps1 -Jobs 2
+      - name: Diagnose failed native editor cases without changing the failed gate
+        if: failure() && steps.native.outcome == 'failure'
+        shell: pwsh
+        run: python scripts/windows/diagnose-editor-failures.py build/windows-x64 build/windows-evidence
       - name: Prove combo regression rejects the previous candidate
         shell: pwsh
         run: python scripts/windows/check-combo-regression.py build/windows-x64 build/windows-evidence

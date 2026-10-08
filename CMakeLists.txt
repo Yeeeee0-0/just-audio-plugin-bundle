@@ -98,7 +98,11 @@ if(WIN32 AND BUILD_TESTING)
     add_executable(just_editor_host_windows tests/windows/EditorHostWindows.cpp
         "${JUST_VST3_SDK}/public.sdk/source/vst/hosting/module_win32.cpp"
         "${JUST_VST3_SDK}/public.sdk/source/common/memorystream.cpp")
-    target_link_libraries(just_editor_host_windows PRIVATE just_common sdk_hosting)
+    target_link_libraries(just_editor_host_windows PRIVATE just_common sdk_hosting dbghelp)
+    if(MSVC)
+        target_compile_options(just_editor_host_windows PRIVATE /Zi)
+        target_link_options(just_editor_host_windows PRIVATE /DEBUG)
+    endif()
     set(JUST_WINDOWS_EVIDENCE_ROOT "${CMAKE_BINARY_DIR}/windows-native-evidence" CACHE PATH "Native Windows test evidence destination")
     foreach(slug eq reverb delay tremolo compressor limiter gate flanger fake_stereo distortion)
         get_target_property(windows_bundle Just_${slug} SMTG_PLUGIN_PACKAGE_PATH)
