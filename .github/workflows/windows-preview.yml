@@ -1,0 +1,48 @@
+name: Windows x64 preview
+
+on:
+  push:
+    branches: [windows-port]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-preview
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'false'
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Fetch the pinned official VST3 SDK
+        shell: pwsh
+        run: python scripts/bootstrap-sdk.py
+      - name: Build and test ten native Windows x64 plugins
+        shell: powershell
+        run: ./scripts/windows/Build-And-Test.ps1 -Jobs 2
+      - name: Retain native test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-preview-evidence-${{ github.run_number }}
+          path: build/windows-evidence/
+          if-no-files-found: warn
+          retention-days: 1
+      - name: Retain unsigned native candidates
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-preview-candidate-${{ github.run_number }}
+          path: build/candidates/*.zip
+          if-no-files-found: error
+          retention-days: 1
