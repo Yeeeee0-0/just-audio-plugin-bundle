@@ -23,17 +23,22 @@
 #include <commctrl.h>
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 using namespace Steinberg;
@@ -41,7 +46,9 @@ using namespace Steinberg::Vst;
 namespace fs = std::filesystem;
 using just_windows_test::Product;
 namespace {
-unsigned checks = 0;
+std::atomic<unsigned> checks{0};
+unsigned comboStressCycles = 0;
+std::uint64_t comboAudioBlocks = 0;
 std::string phase = "startup";
 std::ofstream logFile;
 std::string loadedBinary;
@@ -126,7 +133,11 @@ public:
 class Frame final : public FObject, public IPlugFrame {
 public:
     HWND window = nullptr;
+    bool acceptsResize = true;
+    unsigned resizeRequests = 0;
     tresult PLUGIN_API resizeView(IPlugView* view, ViewRect* size) override {
+        ++resizeRequests;
+        if (!acceptsResize) return kResultFalse;
         if (!view || !size || size->getWidth() <= 0 || size->getHeight() <= 0) return kInvalidArgument;
         SetWindowPos(window, nullptr, 0, 0, size->getWidth(), size->getHeight(), SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
         return view->onSize(size);
@@ -321,7 +332,7 @@ void restoreController(IEditController* object, const std::vector<std::uint8_t>&
     MemoryStream stream(const_cast<std::uint8_t*>(bytes.data()), static_cast<TSize>(bytes.size()));
     check((sound ? object->setComponentState(&stream) : object->setState(&stream)) == kResultOk, "restore controller chunk");
 }
-struct UiState { int32 version = 0, width = 0, height = 0, language = -1, analyzerRange = 0; bool advanced = false; };
+struct UiState { int32 version = 0, width = 0, height = 0, language = -1, analyzerRange = 0; bool advanced = false; double renderScale = 1; };
 UiState uiState(IEditController* controller) {
     MemoryStream stream; check(controller->getState(&stream) == kResultOk, "save UI state");
     stream.seek(0, IBStream::kIBSeekSet, nullptr); IBStreamer reader(&stream, kLittleEndian);
@@ -329,12 +340,14 @@ UiState uiState(IEditController* controller) {
     check(reader.readInt32(result.version) && reader.readInt32(result.width) && reader.readInt32(result.height)
         && reader.readDouble(scale) && reader.readBool(result.advanced) && reader.readInt32(result.language), "read frozen UI v2/v3 prefix");
     check(result.version == 2 || result.version == 3, "preserved UI state version");
+    result.renderScale = result.version == 2 ? scale : 1;
     if (result.version == 3) {
         bool background = false, reduced = false, low = false; int32 fps = 0, tag = 0, version = 0, bytes = 0;
         double renderScale = 0;
         check(reader.readBool(background) && reader.readBool(reduced) && reader.readBool(low) && reader.readInt32(fps)
             && reader.readDouble(renderScale) && reader.readInt32(tag) && reader.readInt32(version)
             && reader.readInt32(bytes) && reader.readInt32(result.analyzerRange), "read frozen analyzer UI suffix");
+        result.renderScale = renderScale;
     }
     return result;
 }
@@ -454,11 +467,61 @@ public:
     }
 };
 
+// An HWND may be reused immediately after destruction. Observe WM_NCDESTROY
+// instead of relying on IsWindow/handle equality alone to detect that bug.
+class WindowLifetime {
+    HWND window;
+    bool destroyed = false;
+    static LRESULT CALLBACK observe(HWND h, UINT message, WPARAM w, LPARAM l, UINT_PTR id, DWORD_PTR data) {
+        auto* self = reinterpret_cast<WindowLifetime*>(data);
+        if (message == WM_NCDESTROY) { self->destroyed = true; RemoveWindowSubclass(h, observe, id); }
+        return DefSubclassProc(h, message, w, l);
+    }
+public:
+    explicit WindowLifetime(HWND value) : window(value) {
+        check(SetWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this), reinterpret_cast<DWORD_PTR>(this)) != FALSE,
+            "observe actual native sender destruction");
+    }
+    ~WindowLifetime() { if (!destroyed) RemoveWindowSubclass(window, observe, reinterpret_cast<UINT_PTR>(this)); }
+    bool alive() const { return !destroyed && IsWindow(window); }
+};
+
+class ConcurrentAudio {
+    std::atomic<bool> stop{false};
+    std::atomic<std::uint64_t> processed{0};
+    std::exception_ptr failure;
+    std::thread worker;
+public:
+    explicit ConcurrentAudio(std::function<void()> block) : worker([this, block = std::move(block)] {
+        try { while (!stop.load()) { block(); ++processed; Sleep(1); } }
+        catch (...) { failure = std::current_exception(); }
+    }) {}
+    ~ConcurrentAudio() { stop = true; if (worker.joinable()) worker.join(); }
+    std::uint64_t count() const { return processed.load(); }
+    void finish() { stop = true; if (worker.joinable()) worker.join(); if (failure) std::rethrow_exception(failure); }
+};
+
 void select(HWND parent, int id, int index) {
     HWND combo = control(parent, id);
     check(combo && index >= 0 && index < SendMessageW(combo, CB_GETCOUNT, 0, 0), "settings combo choice exists");
+    WindowLifetime lifetime(combo);
     check(SendMessageW(combo, CB_SETCURSEL, index, 0) != CB_ERR, "select settings combo choice");
-    SendMessageW(GetParent(combo), WM_COMMAND, MAKEWPARAM(id, CBN_SELCHANGE), reinterpret_cast<LPARAM>(combo)); settle();
+    SendMessageW(GetParent(combo), WM_COMMAND, MAKEWPARAM(id, CBN_SELCHANGE), reinterpret_cast<LPARAM>(combo));
+    check(lifetime.alive() && control(parent, id) == combo, "selection notification preserves native combo lifetime");
+    settle();
+    check(lifetime.alive(), "sender remains alive after notification and queued messages");
+}
+
+void keySelect(HWND parent, int id, UINT key, int expectedIndex) {
+    HWND combo = control(parent, id);
+    check(combo != nullptr, "native combo keyboard target exists");
+    WindowLifetime lifetime(combo);
+    SendMessageW(combo, WM_KEYDOWN, key, 1);
+    check(lifetime.alive() && control(parent, id) == combo, "native key dispatch preserves combo lifetime");
+    SendMessageW(combo, WM_KEYUP, key, LPARAM(0xc0000001));
+    settle();
+    check(lifetime.alive() && SendMessageW(combo, CB_GETCURSEL, 0, 0) == expectedIndex,
+        "native common-control keyboard dispatch changes the selected item");
 }
 
 template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostApplication& host,
@@ -505,7 +568,7 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     data.numInputs = data.numOutputs = 1; data.inputs = &input; data.outputs = &output; data.processContext = &context;
     auto referenceData = data; referenceData.outputs = &refOutput;
     std::uint64_t blocks = 0; double maximumDelta = 0; bool nonzeroOutput = false;
-    auto render = [&](bool silence = false, IParameterChanges* events = nullptr) {
+    auto render = [&](bool silence = false, IParameterChanges* events = nullptr, bool audioThread = false) {
         for (unsigned i = 0; i < 64; ++i) {
             left[i] = silence ? Sample(0) : Sample(.37 * std::sin((blocks * 64 + i) * .071));
             right[i] = silence ? Sample(0) : Sample(-.23 * std::cos((blocks * 64 + i) * .113));
@@ -519,7 +582,8 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         check(std::memcmp(outLeft.data(), refLeft.data(), sizeof(outLeft)) == 0
             && std::memcmp(outRight.data(), refRight.data(), sizeof(outRight)) == 0, "UI activity preserves bit-exact twin audio");
         check(output.silenceFlags == refOutput.silenceFlags, "matching output silence flags");
-        check(state(s.component.get()) == state(s.reference.get()), "complete sound states remain equal");
+        // Keep non-audio host interfaces and message pumping on the UI thread.
+        if (!audioThread) check(state(s.component.get()) == state(s.reference.get()), "complete sound states remain equal");
         for (unsigned i = 0; i < 64; ++i) {
             check(std::isfinite(outLeft[i]) && std::isfinite(outRight[i]), "all output samples written and finite");
             maximumDelta = std::max(maximumDelta, std::abs(double(outLeft[i]) - double(refLeft[i])));
@@ -527,7 +591,7 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
             nonzeroOutput |= outLeft[i] != 0 || outRight[i] != 0;
         }
         ++blocks; context.projectTimeSamples += 64; context.projectTimeMusic += 64 * 137. / (60 * 48000);
-        pump();
+        if (!audioThread) pump();
     };
     auto capture = [&](const char* name) {
         // The analyzer subscribes when the view attaches. Pre-open audio cannot
@@ -573,9 +637,83 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     const auto localizedChunk = state(s.controller.get());
     select(s.window.handle, 211, 1);
     check(uiState(s.controller).language == 1, "English selector restores UI preference");
+    {
+        // Continuous actual DLL processing runs on its own thread while the UI
+        // dispatches native combo keys, switches views and rebuilds/opens/closes
+        // dialogs. No audio device, visible desktop or physical input is used.
+        ConcurrentAudio playing([&] { render(false, nullptr, true); });
+        const auto deadline = GetTickCount64() + 3000;
+        while (playing.count() < 4 && GetTickCount64() < deadline) settle(5);
+        check(playing.count() >= 4, "audio thread processes real blocks before modal stress");
+        for (int cycle = 0; cycle < 8; ++cycle) {
+            const auto beforeBlocks = playing.count();
+            click(s.window.handle, 204); // close, then change underlying view
+            click(s.window.handle, 102);
+            click(s.window.handle, 103);
+            const int index = cycle % 4, target = index == 3 ? 2 : index + 1;
+            select(s.window.handle, 210, index);
+            const auto requests = s.frame->resizeRequests;
+            keySelect(s.window.handle, 210, index == 3 ? VK_UP : VK_DOWN, target);
+            check(s.frame->resizeRequests > requests, "native scale key reaches host resize callback");
+            check(std::abs(uiState(s.controller).renderScale - (.75 + .25 * target)) < 1e-12,
+                "native scale key commits the accepted scale");
+            ViewRect accepted; check(s.view->getSize(&accepted) == kResultOk, "read accepted scale bounds");
+            s.frame->acceptsResize = false;
+            select(s.window.handle, 210, (target + 1) % 4);
+            ViewRect rejected; check(s.view->getSize(&rejected) == kResultOk, "read rejected scale bounds");
+            check(rejected.getWidth() == accepted.getWidth() && rejected.getHeight() == accepted.getHeight()
+                && SendMessageW(control(s.window.handle, 210), CB_GETCURSEL, 0, 0) == target
+                && std::abs(uiState(s.controller).renderScale - (.75 + .25 * target)) < 1e-12,
+                "host rejection preserves bounds, accepted scale and displayed combo selection");
+            s.frame->acceptsResize = true;
+            select(s.window.handle, 211, 0);
+            check(windowText(control(s.window.handle, 201)) == L"设置"
+                && windowText(control(s.window.handle, 202)) == L"关于"
+                && windowText(control(s.window.handle, 203)) == L"预设", "in-place language refresh updates modal tabs");
+            keySelect(s.window.handle, 211, VK_DOWN, 1);
+            check(uiState(s.controller).language == 1 && windowText(control(s.window.handle, 201)) == L"Settings",
+                "native language key updates preference and text without rebuilding sender");
+            click(s.window.handle, 202);
+            click(s.window.handle, 203);
+            const int count = int(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0));
+            select(s.window.handle, 220, 0);
+            if (count > 1) keySelect(s.window.handle, 220, VK_DOWN, 1);
+            check(!IsWindowEnabled(control(s.window.handle, 224)) && !IsWindowEnabled(control(s.window.handle, 225))
+                && windowText(control(s.window.handle, 221)) == L"My preset", "factory selection updates draft and disables user-only actions");
+            click(s.window.handle, 201);
+            check(playing.count() > beforeBlocks, "audio continues while dialogs and combos are operated");
+            ++comboStressCycles;
+        }
+        // Exercise the other selection branch and removal of a pending delete
+        // confirmation using only this fixture's isolated preset directory.
+        click(s.window.handle, 203);
+        const auto factoryCount = SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0);
+        const auto presetName = std::wstring(L"Combo lifetime ") + (format == kSample64 ? L"64" : L"32");
+        SetWindowTextW(control(s.window.handle, 221), presetName.c_str()); click(s.window.handle, 222);
+        const int savedIndex = int(SendMessageW(control(s.window.handle, 220), CB_GETCURSEL, 0, 0));
+        check(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) == factoryCount + 1
+            && IsWindowEnabled(control(s.window.handle, 224)), "save isolated user preset for selection regression");
+        click(s.window.handle, 225);
+        check(control(s.window.handle, 226) && control(s.window.handle, 227), "pending delete controls exist");
+        select(s.window.handle, 220, 0);
+        check(!control(s.window.handle, 226) && !control(s.window.handle, 227)
+            && !IsWindowEnabled(control(s.window.handle, 225)), "changing selection removes obsolete confirmation without destroying combo");
+        select(s.window.handle, 220, savedIndex);
+        check(windowText(control(s.window.handle, 221)) == presetName && IsWindowEnabled(control(s.window.handle, 224))
+            && IsWindowEnabled(control(s.window.handle, 225)), "user selection restores its name and actions");
+        click(s.window.handle, 225); click(s.window.handle, 226);
+        check(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) == factoryCount, "delete only fixture user preset");
+        click(s.window.handle, 201); select(s.window.handle, 210, 1);
+        playing.finish(); comboAudioBlocks += playing.count();
+        log("PASS " + phase + " concurrent_combo_cycles=8 concurrent_audio_blocks=" + std::to_string(playing.count()));
+    }
+    check(uiState(s.controller).advanced, "repeated view and modal changes restore Advanced");
+    render(); // Also compare complete sound states again on the UI thread.
     click(s.window.handle, 202); capture("about");
     click(s.window.handle, 203);
     check(control(s.window.handle, 220) && SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) > 0, "preset manager exposes factory choices");
+    if(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) > 1)select(s.window.handle, 220, 1);
+    select(s.window.handle, 220, 0);
     for (int id : {221, 222, 223, 224, 225}) check(control(s.window.handle, id) != nullptr, "preset manager control exists");
     capture("preset-manager");
     click(s.window.handle, 204);
@@ -625,12 +763,14 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
     std::ofstream out(path);
     out << "{\n  \"schema\": 1,\n  \"product\": " << quoted(slug)
         << ",\n  \"execution_platform\": \"Windows x64 native CLI\",\n  \"status\": " << quoted(passed ? "PASS" : "FAIL")
-        << ",\n  \"checks_completed\": " << checks << ",\n  \"last_phase\": " << quoted(phase)
+        << ",\n  \"checks_completed\": " << checks.load() << ",\n  \"last_phase\": " << quoted(phase)
         << ",\n  \"error\": " << quoted(error)
         << ",\n  \"actual_vst3_dll_loaded\": " << (dllLoaded ? "true" : "false")
         << ",\n  \"loaded_binary\": " << quoted(loadedBinary)
         << ",\n  \"float32_passed\": " << (passed32 ? "true" : "false")
         << ",\n  \"float64_passed\": " << (passed64 ? "true" : "false")
+        << ",\n  \"combo_stress_cycles\": " << comboStressCycles
+        << ",\n  \"concurrent_combo_audio_blocks\": " << comboAudioBlocks
         << ",\n  \"real_reaper_validation\": \"NOT_RUN\",\n  \"physical_mouse_keyboard_input\": \"NOT_RUN\","
         << "\n  \"audio_device_playback\": \"NOT_RUN\",\n  \"mac_vs_windows_audio_comparison\": \"NOT_RUN\","
         << "\n  \"bmp_capture_scope\": \"hidden HWND tree; per-window WM_PRINTCLIENT in bottom-to-top Z order with ancestor clipping; native text/overlay pixel review required\","
@@ -675,7 +815,7 @@ int wmain(int argc, wchar_t** argv) {
         run<double>(module, host, ids, *product, evidence); passed64 = true;
         module->getFactory().setHostContext(nullptr); module.reset();
         phase = "completed"; report(evidence / "result.json", slug, true, "");
-        log("PASS native CLI checks=" + std::to_string(checks) + "; real REAPER/visual/input/audio acceptance remains NOT_RUN");
+        log("PASS native CLI checks=" + std::to_string(checks.load()) + "; real REAPER/visual/input/audio acceptance remains NOT_RUN");
         CoUninitialize(); return 0;
     } catch (const std::exception& error) {
         log(std::string("FAIL ") + error.what());

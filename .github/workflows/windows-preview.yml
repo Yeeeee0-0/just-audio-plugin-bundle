@@ -31,6 +31,9 @@ jobs:
       - name: Build and test ten native Windows x64 plugins
         shell: powershell
         run: ./scripts/windows/Build-And-Test.ps1 -Jobs 2
+      - name: Prove combo regression rejects the previous candidate
+        shell: pwsh
+        run: python scripts/windows/check-combo-regression.py build/windows-x64 build/windows-evidence
       - name: Build and test the selectable preview installer
         shell: powershell
         run: |

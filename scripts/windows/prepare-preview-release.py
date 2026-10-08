@@ -52,6 +52,12 @@ def main():
     validations = read(native/'candidate-validation.json')
     if len(validations) != 10 or any(p['validatorExit'] or p['failed'] or p['machine'] != 'AMD64' for p in validations):
         raise SystemExit('All ten VST3 validators must pass')
+    native_results = [read(p) for p in (native/'native').glob('*/result.json')]
+    if len(native_results) != 10 or any(p['status'] != 'PASS' or p.get('combo_stress_cycles') != 16 or not p.get('concurrent_combo_audio_blocks') for p in native_results):
+        raise SystemExit('Concurrent combo/modal regression evidence required for all ten DLLs')
+    regression = read(ROOT/'build/windows-evidence/combo-regression/negative-control.json')
+    if regression['result'] != 'PASS_OLD_CANDIDATE_REJECTED':
+        raise SystemExit('Previous candidate must fail the new lifetime regression')
     junit = ET.parse(native/'ctest.xml').getroot()
     if int(junit.get('failures', '0')) or int(junit.get('errors', '0')):
         raise SystemExit('Native CTest failures')
@@ -110,22 +116,26 @@ def main():
         'github_runner_image': {'os': os.environ.get('ImageOS'), 'version': os.environ.get('ImageVersion')},
         'stable_mac_release_modified': False,
         'fix_candidate': {
-            'issue': 'Underlying native child windows paint over modal settings at 175% DPI',
-            'base_commit': '57e3aeef3c1a63a406d877bfe92f5ff1dd5de1a9',
-            'received_patch_sha256': 'fc1a4bbf9e83c28e741a14c2d19274fffbb574dfed76b897faec4115605bf7b9',
+            'issue': 'Native combo selection destroys its sender during COMCTL32 input dispatch',
+            'base_commit': 'd0abf4f71c5a4b56e68a1441edf4dfc11dee8d04',
+            'received_patch_sha256': '754f9db0aff3a970424fd0a50689f087341d407810b7bfc78e28137d01fbcffc',
             'product_file': 'common/ui/NativeEditorWindows.cpp',
-            'change': 'Add WS_CLIPSIBLINGS to shared editor, content parent, modal surfaces and child controls',
+            'change': 'Update scale, language and preset selection in place; preserve native combo lifetime; retain preview.13 sibling clipping',
             'reaper_7_41_at_175_percent_dpi_revalidation': 'NOT_RUN_FOR_THIS_CANDIDATE',
+            'concurrent_combo_cycles_per_plugin': 16,
+            'negative_control': regression,
         },
     }
     write(out/'preview-manifest.json', manifest)
     notes = f'''# JUST 0.1.0 Windows x64 preview {args.run_number}
 
-**Unsigned modal-clipping fix candidate; 175% DPI REAPER revalidation remains pending.**
+**Unsigned combo-lifetime fix candidate; real REAPER playback/scale revalidation remains pending.**
 
-This candidate applies the single-file Windows clipping-style fix to preview.12 (`57e3aeef3c1a63a406d877bfe92f5ff1dd5de1a9`). It addresses the report that underlying plugin controls paint over modal settings in REAPER 7.41 at 175% display scaling. DSP, plugin IDs, parameters, state formats and Mac code are unchanged. Native automated checks below do not confirm that this reported visual defect is fixed; the newly installed candidate must be retested on the Windows computer.
+Preview.13 has a reported REAPER 7.41 access violation in COMCTL32.dll while changing EQ overlay scale during playback. This candidate is based on `d0abf4f71c5a4b56e68a1441edf4dfc11dee8d04` and keeps scale/language/preset combo HWNDs alive through selection notifications, updating their UI in place. The earlier sibling-clipping fix is retained. DSP, plugin IDs, parameters, state formats and Mac code are unchanged.
 
-本包为浮层遮挡修复候选。请在 REAPER 7.41、175% 显示缩放下复验十款插件的设置／关于／预设浮层，覆盖 Simple／Advanced、播放中持续刷新、缩放、切换选项和关闭重开；确认底层控件不会穿透或遮挡。实机确认前不作为正式版。
+The native host now observes sender destruction (including handle reuse), verifies real common-control keyboard selection and host resize rejection, exercises user/factory preset selection, and performs 16 modal/view/scale cycles per plugin while actual float32/float64 DLL audio processing continues on a separate thread with unchanged twin output. The same new test host rejects the pinned preview.13 EQ DLL at the intended lifetime assertion. These are hidden-window native tests, not physical input or real REAPER acceptance.
+
+本包修复候选针对 preview.13 播放中切换 EQ 浮层缩放时的 COMCTL32.dll 崩溃：下拉框选择通知改为原位更新，不在其回调尚未返回时销毁控件。请在 REAPER 7.41、175% DPI 下重新检查十款播放中缩放、语言／预设切换、浮层开关和重复操作；保留旧测试证据，单独记录本包结果。实机确认前不作为正式版。
 
 - Download `JUST-{suffix}-Setup.exe` for the selectable installer (all ten selected by default).
 - `Portable.zip` contains the exact ten tested x64 VST3 bundles and installation scripts.
@@ -138,7 +148,7 @@ Source: `{commit}`. Plugin version `0.1.0`; vendor `Yee Huang`; VST3 AMD64 only.
 
 The installer verifies payloads, backs up selected previous JUST bundles, and restores them after an installation failure. Save work and close REAPER normally before installation. No user preset, REAPER configuration, license, or project is edited by the installer.
 
-This candidate has not yet been tested in the user's Windows REAPER session. Earlier preview.12 observations do not constitute acceptance of these rebuilt files. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. Custom rotary controls include a native UI Automation provider and a required native client test; real screen-reader acceptance remains pending. This preview is not a claim of Mac/Windows visual parity or production readiness.
+This candidate has not yet been tested in the user's Windows REAPER session. Earlier preview.12/13 observations do not constitute acceptance of these rebuilt files. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. Custom rotary controls include a native UI Automation provider and a required native client test; real screen-reader acceptance remains pending. This preview is not a claim of Mac/Windows visual parity or production readiness.
 
 The stable macOS `main` branch and `v0.1.0` release are unchanged. This is a prerelease and is not marked latest.
 '''
