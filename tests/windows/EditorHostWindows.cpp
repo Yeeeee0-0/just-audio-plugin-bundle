@@ -19,6 +19,7 @@
 #include "base/source/fobject.h"
 #include "base/source/fstreamer.h"
 #include <windows.h>
+#include <objbase.h>
 #include <commctrl.h>
 #include <algorithm>
 #include <array>

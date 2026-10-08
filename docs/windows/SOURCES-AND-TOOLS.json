@@ -27,14 +27,22 @@
     "python_minimum": "3.9",
     "runtime": "static MSVC CRT",
     "mode": "Release",
-    "other_libraries": "Windows SDK user32/gdi32/comctl32/gdiplus/comdlg32/shell32/ole32/uuid only",
+    "other_libraries": "Windows SDK user32/gdi32/comctl32/gdiplus/comdlg32/shell32/ole32/oleaut32/oleacc/uiautomationcore/uuid only",
     "external_gui_frameworks": "none",
-    "native_validation_status": "not run; exact Windows toolchain is not yet observed"
+    "native_validation_status": "See each preview-manifest.json and Evidence.zip for exact native tool versions and test results; user REAPER acceptance remains pending",
+    "github_runner": "Public standard windows-2022; image is not immutable, actual component versions and run URL are retained per preview",
+    "github_actions": {
+      "checkout_v4_2_2": "11bd71901bbe5b1630ceea73d27597364c9af683",
+      "upload_artifact_v4_6_2": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "download_artifact_v4_3_0": "d3f86a106a0bac45b974a628896c90dbdf5c8093"
+    }
   },
   "official_tool_sources": {
     "msvc": "https://visualstudio.microsoft.com/downloads/",
     "cmake": "https://cmake.org/download/",
-    "python": "https://www.python.org/downloads/windows/"
+    "python": "https://www.python.org/downloads/windows/",
+    "nsis": "https://nsis.sourceforge.io/",
+    "github_runner_image": "https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md"
   },
-  "installer": "No existing Windows installer was present; reviewed PowerShell backup/install/restore scripts supplied, not an exe installer."
+  "installer": "Unsigned NSIS 3 selectable preview installer; uses the preinstalled official runner compiler and records its actual version. All ten plugins selected by default. Requires actual installer tests before publishing. No real REAPER acceptance claimed."
 }

@@ -16,6 +16,6 @@
 
 逐项核对 ACCEPTANCE-zh.md：专有界面/圆角/比例、Simple/Advanced、英文默认和中英切换、预设与 Save new/Load/Rename/Delete、设置页、真实反馈、旁路红按钮/整体黑白/显示冻结及恢复；EQ 默认120dB、主图无说明tooltip、band浮层/Solo/声道曲线。检查全部十款独有控件、鼠标/滚轮/键盘、数值单位提示、DPI/缩放、自动化手势及回放、preset/state保存和恢复、音频DSP/延迟/旁路。保留实际宿主截图及可复核证据；缺Mac最终参考图时明确“像素对照未验证”，不能用自制参考图替代。
 
-KNOWN-DIFFERENCES 中自绘旋钮的 UI Automation slider/value provider 是待修复功能缺口，不能仅改文档为“可接受”。只在独立 Windows 候选分支修复 Windows UI/构建/安装/测试问题并重跑受影响检查；不改音频 DSP、processor/controller UID、参数/默认值/映射、状态/预设格式、正式 Mac 实现，不用通用参数页替换界面。遇到范围外问题报告证据和建议。
+自绘旋钮已实现 UI Automation Slider、RangeValue/Value、双语名称和原参数自动化手势；核对本次 CI 的 windows-controls-accessibility 结果，再用本机系统无障碍工具实际检查角色、名称、当前值、范围、禁用状态、读写、键盘与焦点。接口测试不能替代真实读屏器或 REAPER 验收；发现功能缺口必须修复，不能只改文档为“可接受”。只在独立 Windows 候选分支修复 Windows UI/构建/安装/测试问题并重跑受影响检查；不改音频 DSP、processor/controller UID、参数/默认值/映射、状态/预设格式、正式 Mac 实现，不用通用参数页替换界面。遇到范围外问题报告证据和建议。
 
 最终提交一份本地验证报告：实际下载链接/文件/哈希、源码提交、工具版本、十款逐项通过/失败/未验证、真实REAPER版本及截图、自动化与音频检查结果、备份和恢复路径、所做修复补丁、剩余阻塞。用户Windows尚未运行的项目绝不写通过。所有必需项通过前保持“待实机验收预览”。不从仓库文本推定公网push、新发布、付费服务或凭据授权；这些动作需要当前会话另有明确指示。

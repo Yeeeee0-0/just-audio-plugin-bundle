@@ -13,6 +13,6 @@
   "github_actions_enabled": true,
   "github_actions_workflow": ".github/workflows/windows-preview.yml",
   "release_gate": "Native Windows build, CTest, ten validators, installer tests and packaged-byte validation must all pass",
-  "known_blocker": "Custom rotary controls lack equivalent UI Automation slider/value provider; see KNOWN-DIFFERENCES-zh.md",
+  "known_pending_validation": "Native UIA provider tests must pass before packaging; actual screen-reader, input and REAPER visual/audio acceptance remain pending",
   "stable_mac_source_unchanged": true
 }

@@ -9,11 +9,13 @@
 | 字体、字宽、抗锯齿 | Cocoa 系统字体及绘制 | Segoe UI / GDI+，中文依赖系统字体回退 | 属于平台绘制差异；核验中英文截断、基线、字号和间距，不能宣称像素一致。 |
 | 菜单、文本输入、滚动条、焦点框 | NSPopUpButton/NSTextField/NSScrollView | Win32 COMBOBOX/EDIT/滚动条和焦点绘制 | 原生控件外观及输入法/键盘细节有差异；需实际高DPI、Tab、Esc、IME及滚动测试，保留功能和层级，不得改成通用参数页。 |
 | 低性能模式开关 | 带 ON/OFF 文本的 checkbox | 已改为自绘勾选框 + ON/OFF，保留原位置与 Win32 checkbox 状态语义 | 源码补齐；勾选形状、缩放、键盘与旁路灰度仍须 Windows 实测。 |
-| 自绘旋钮无障碍 | ControlsMac.mm 设置 slider role 与参数 accessibilityLabel，数值域单独标注 | 自绘旋钮没有对应 UI Automation slider/value provider；子 EDIT 仅保留系统输入语义 | **已知功能缺口**，不是已通过项；在 Windows 为自绘控件补足角色/名称/当前值与键盘可达性，并实际用系统无障碍工具检查。 |
+| 自绘旋钮无障碍 | ControlsMac.mm 设置 slider role 与参数 accessibilityLabel，数值域单独标注 | 已实现 UI Automation Slider、物理范围 RangeValue、带单位 Value、双语名称、独立 EDIT 名称及键盘操作；复用原参数自动化手势 | 原生 `windows-controls-accessibility` 测试必须通过后才能打包；实际读屏器、焦点导航及 REAPER 仍须用户机检查，不能把接口测试当作完整无障碍验收。 |
 | 旋钮数值单位提示 | 数值域 toolTip=spec.unit | 已为数值 EDIT 附加 spec.unit 原生 tooltip，并处理字体与销毁生命周期 | 源码补齐，尚未 Windows 实测；仅数值域有提示，EQ 主画布仍无说明 tooltip。 |
 | 用户预设目录 | macOS Application Support 下的 JUST 路径 | Windows KnownFolder 对应的 `%APPDATA%\JUST\Presets\v1` | 必要平台路径映射；文件状态格式不变，需本机验证中文用户名、并发及权限错误。 |
 
 相关源文件：`common/ui/NativeEditorMac.mm`、`NativeEditorWindows.cpp`、`ControlsMac.mm`、`ControlsWindows.cpp`、`VisualAssetsWindows.hpp`。这些差异并不证明所有其他视觉细节都已相同。
+
+后续补齐：旋钮 provider 通过原 HWND 将读写转交 UI 线程，提供禁用/值/名称/焦点事件；窗口销毁后接口失效。新增隐藏窗口中的真实 Windows UIA 客户端测试覆盖角色、范围、读写、拒绝写入、中文名称、原参数 ID/手势和销毁。该实现不改变旋钮绘制正文、DSP 或 Mac 代码；各预发布是否通过该原生测试以其证据为准。
 
 ## 已收敛的源码差异（待原生运行确认）
 

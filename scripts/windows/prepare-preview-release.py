@@ -101,11 +101,12 @@ def main():
         'ctest_count': len(junit.findall('testcase')), 'installer_tests': 'PASSED',
         'installer_check_count': installer_tests['checkCount'],
         'user_machine_reaper': 'NOT_RUN', 'manual_visual_audio_acceptance': 'NOT_RUN',
-        'known_gap': 'Custom rotary controls require UI Automation slider/value provider parity; see KNOWN-DIFFERENCES-zh.md.',
+        'remaining_manual_validation': 'Real REAPER visual/audio/input and assistive-technology acceptance; see KNOWN-DIFFERENCES-zh.md.',
         'installer': asset(setup), 'portable': asset(portable), 'source': asset(source),
         'evidence': asset(evidence), 'plugins': candidate['plugins'],
         'dependencies': read(ROOT/'third_party/dependency-lock.json'),
         'environment': read(native/'environment.json'), 'nsis_version': installer_build['nsisVersion'],
+        'github_runner_image': {'os': os.environ.get('ImageOS'), 'version': os.environ.get('ImageVersion')},
         'stable_mac_release_modified': False,
     }
     write(out/'preview-manifest.json', manifest)
@@ -124,7 +125,7 @@ Source: `{commit}`. Plugin version `0.1.0`; vendor `Yee Huang`; VST3 AMD64 only.
 
 The installer verifies payloads, backs up selected previous JUST bundles, and restores them after an installation failure. Save work and close REAPER normally before installation. No user preset, REAPER configuration, license, or project is edited by the installer.
 
-No user Windows REAPER session has been tested. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. The known custom-rotary accessibility provider gap is still open. This preview is not a claim of Mac/Windows visual parity or production readiness.
+No user Windows REAPER session has been tested. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. Custom rotary controls include a native UI Automation provider and a required native client test; real screen-reader acceptance remains pending. This preview is not a claim of Mac/Windows visual parity or production readiness.
 
 The stable macOS `main` branch and `v0.1.0` release are unchanged. This is a prerelease and is not marked latest.
 '''
