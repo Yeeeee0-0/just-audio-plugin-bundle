@@ -2,6 +2,7 @@
 #include "VisualAssetsWindows.hpp"
 #include <commctrl.h>
 #include <objbase.h>
+#include <objidl.h>
 // oleacc.h supplies these annotation GUIDs via DEFINE_GUID. Instantiate them
 // here, before UIAutomation.h can include oleacc.h with declarations only.
 #include <initguid.h>
@@ -37,6 +38,8 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
     std::atomic<bool> disconnecting{false};
     const HWND identityWindow;
     HMODULE codeModule=nullptr;
+    IGlobalInterfaceTable* hostInterfaces=nullptr;
+    DWORD hostCookie=0;
     HRESULT request(RotaryAccessRequest& r) {
         auto h=window.load(std::memory_order_acquire);if(!h)return UIA_E_ELEMENTNOTAVAILABLE;
         r.provider=this;
@@ -54,6 +57,21 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
             static_cast<void*>(identityWindow),GetCurrentThreadId(),static_cast<unsigned long>(result));
         std::fflush(stderr);
     }
+    HRESULT captureHostProvider() {
+        IRawElementProviderSimple* host=nullptr;
+        auto hr=UiaHostProviderFromHwnd(identityWindow,&host);
+        diagnostic("capture host provider (live HWND)",hr);
+        if(FAILED(hr))return hr;
+        if(!host)return E_UNEXPECTED;
+        hr=CoCreateInstance(CLSID_StdGlobalInterfaceTable,nullptr,CLSCTX_INPROC_SERVER,
+            __uuidof(IGlobalInterfaceTable),reinterpret_cast<void**>(&hostInterfaces));
+        diagnostic("create Global Interface Table",hr);
+        if(SUCCEEDED(hr)){
+            hr=hostInterfaces->RegisterInterfaceInGlobal(host,__uuidof(IRawElementProviderSimple),&hostCookie);
+            diagnostic("register cached host provider",hr);
+        }
+        host->Release();return hr;
+    }
     static void CALLBACK disconnect(PTP_CALLBACK_INSTANCE instance,void* context) {
         auto* p=static_cast<RotaryProvider*>(context);auto module=p->codeModule;
         const auto hr=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
@@ -62,20 +80,24 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
         const auto disconnected=SUCCEEDED(hr)?UiaDisconnectProvider(p):hr;
         p->disconnecting=false;
         p->diagnostic("UiaDisconnectProvider",disconnected);
-        if(SUCCEEDED(hr))CoUninitialize();
         // A failed disconnect must not unmap code while UIA still holds it.
-        if(FAILED(disconnected))return;
+        if(FAILED(disconnected)){if(SUCCEEDED(hr))CoUninitialize();return;}
+        // Revoke/release the cached COM interface while this MTA is still active.
         p->Release();
+        if(SUCCEEDED(hr))CoUninitialize();
         // The VST3 may already have been unloaded by its host. Keep its provider
         // code mapped until this callback has returned, never FreeLibrary in it.
         FreeLibraryWhenCallbackReturns(instance,module);
     }
     RotaryProvider(HWND h,HMODULE module):window(h),identityWindow(h),codeModule(module){}
+    ~RotaryProvider(){if(hostInterfaces){if(hostCookie)diagnostic("revoke cached host provider",hostInterfaces->RevokeInterfaceFromGlobal(hostCookie));hostInterfaces->Release();}}
 public:
     static RotaryProvider* create(HWND h) {
         HMODULE module=nullptr;
         if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,reinterpret_cast<LPCWSTR>(&disconnect),&module))return nullptr;
-        auto* p=new(std::nothrow) RotaryProvider(h,module);if(!p)FreeLibrary(module);return p;
+        auto* p=new(std::nothrow) RotaryProvider(h,module);
+        if(p && FAILED(p->captureHostProvider())){delete p;p=nullptr;}
+        if(!p)FreeLibrary(module);return p;
     }
     void invalidate(){window.store(nullptr,std::memory_order_release);}
     void dispose() {
@@ -123,14 +145,14 @@ public:
     }
     HRESULT STDMETHODCALLTYPE get_HostRawElementProvider(IRawElementProviderSimple** out) override {
         if(!out)return E_POINTER;*out=nullptr;
-        // This identifies the UIA Runtime ID even after native destruction.
-        // Microsoft's UIAutomationCleanShutdown sample explicitly preserves the
-        // original HWND here: checking its validity (or clearing it) prevents
-        // UiaDisconnectProvider from finding the old client proxies. Never use
-        // this identity handle to dispatch a control read/write; request() uses
-        // the separately invalidated live window and verifies provider identity.
-        const auto hr=UiaHostProviderFromHwnd(identityWindow,out);
-        diagnostic(IsWindow(identityWindow)?"get_HostRawElementProvider(live HWND)":"get_HostRawElementProvider(destroyed HWND)",hr);
+        // Preserve the actual host provider, not just its numeric HWND. Windows
+        // rejects UiaHostProviderFromHwnd after native destruction; the captured
+        // provider retains the original Runtime ID needed for disconnection.
+        // GIT resolves a legal interface for each calling apartment instead of
+        // sharing a raw STA pointer with the asynchronous MTA cleanup worker.
+        // Actual control reads/writes still use only request()'s live HWND.
+        const auto hr=hostInterfaces->GetInterfaceFromGlobal(hostCookie,__uuidof(IRawElementProviderSimple),reinterpret_cast<void**>(out));
+        diagnostic(IsWindow(identityWindow)?"resolve cached host provider (live HWND)":"resolve cached host provider (destroyed HWND)",hr);
         return hr;
     }
     HRESULT STDMETHODCALLTYPE SetValue(double value) override {if(!std::isfinite(value))return E_INVALIDARG;RotaryAccessRequest r;r.kind=RotaryAccessRequest::setNumber;r.number=value;return request(r);}
