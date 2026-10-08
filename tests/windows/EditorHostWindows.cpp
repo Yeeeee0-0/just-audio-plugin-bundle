@@ -51,7 +51,7 @@ using just_windows_test::Product;
 namespace {
 std::atomic<unsigned> checks{0};
 unsigned comboStressCycles = 0;
-unsigned buttonDispatchChecks = 0, escapeDispatchChecks = 0;
+unsigned buttonDispatchChecks = 0, escapeDispatchChecks = 0, escapeRoutingQueries = 0;
 std::uint64_t comboAudioBlocks = 0;
 std::string phase = "startup";
 std::ofstream logFile;
@@ -235,14 +235,32 @@ void click(HWND parent, int id) {
     ++buttonDispatchChecks;
     settle();
 }
-void escapeModal(HWND parent) {
-    log("ACTION native Escape on modal button");
-    HWND button=control(parent,204);check(button!=nullptr,"Escape modal target exists");
-    WindowLifetime lifetime(button);
-    SendMessageW(button,WM_KEYDOWN,VK_ESCAPE,1);
+void escapeModal(HWND parent,int targetID=204) {
+    log("ACTION negotiated Escape target="+std::to_string(targetID));
+    HWND editor=GetWindow(parent,GW_CHILD);
+    HWND target=targetID<0?editor:control(parent,targetID);check(target!=nullptr,"Escape modal target exists");
+    for(int id:{204,210,211,220,221})if(HWND target=control(parent,id)){
+        MSG key{};key.hwnd=target;key.message=WM_KEYDOWN;key.wParam=VK_ESCAPE;
+        check((SendMessageW(target,WM_GETDLGCODE,VK_ESCAPE,reinterpret_cast<LPARAM>(&key))&DLGC_WANTMESSAGE)!=0,
+            "modal controls request Escape from the host dialog keyboard router");
+        ++escapeRoutingQueries;
+    }
+    MSG key{};key.hwnd=target;key.message=WM_KEYDOWN;key.wParam=VK_ESCAPE;
+    check((SendMessageW(target,WM_GETDLGCODE,VK_ESCAPE,reinterpret_cast<LPARAM>(&key))&DLGC_WANTMESSAGE)!=0
+        && (SendMessageW(target,WM_GETDLGCODE,VK_ESCAPE,0)&DLGC_WANTMESSAGE)!=0,"Escape routing accepts message and query forms");
+    key.hwnd=control(parent,204);key.wParam=VK_TAB;
+    check((SendMessageW(control(parent,204),WM_GETDLGCODE,VK_TAB,reinterpret_cast<LPARAM>(&key))&DLGC_WANTMESSAGE)==0,
+        "modal button retains normal Tab routing");
+    WindowLifetime lifetime(target);
+    SendMessageW(target,WM_KEYDOWN,VK_ESCAPE,1);
     check(lifetime.alive(),"Escape dispatch preserves modal sender until callback returns");
-    SendMessageW(button,WM_KEYUP,VK_ESCAPE,LPARAM(0xc0000001));
-    settle();check(control(parent,204)==nullptr,"deferred Escape closes the modal");++escapeDispatchChecks;
+    SendMessageW(target,WM_KEYUP,VK_ESCAPE,LPARAM(0xc0000001));
+    settle();check(control(parent,204)==nullptr,"deferred Escape closes the modal");
+    check(IsWindow(parent) && IsWindow(editor) && GetWindow(parent,GW_CHILD)==editor,"Escape leaves host and plugin editor alive");
+    key.hwnd=editor;key.wParam=VK_ESCAPE;
+    check((SendMessageW(editor,WM_GETDLGCODE,VK_ESCAPE,reinterpret_cast<LPARAM>(&key))&DLGC_WANTMESSAGE)==0,
+        "editor stops claiming Escape after the modal closes");
+    ++escapeDispatchChecks;
 }
 std::wstring windowText(HWND window) {
     std::wstring text(static_cast<std::size_t>(GetWindowTextLengthW(window)) + 1, L'\0');
@@ -696,7 +714,7 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         for (int cycle = 0; cycle < 8; ++cycle) {
             log("CYCLE " + suffix + " " + std::to_string(cycle));
             const auto beforeBlocks = playing.count();
-            if(cycle % 2)escapeModal(s.window.handle);else click(s.window.handle, 204);
+            if(cycle % 2){constexpr int targets[]{210,211,204,-1};escapeModal(s.window.handle,targets[cycle/2]);}else click(s.window.handle, 204);
             click(s.window.handle, 102);
             click(s.window.handle, 103);
             const int index = cycle % 4, target = index == 3 ? 2 : index + 1;
@@ -762,6 +780,8 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
             && IsWindowEnabled(control(s.window.handle, 225)), "user selection restores its name and actions");
         click(s.window.handle, 225); click(s.window.handle, 226);
         check(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) == factoryCount, "delete only fixture user preset");
+        escapeModal(s.window.handle,221);click(s.window.handle,103);click(s.window.handle,203);
+        escapeModal(s.window.handle,220);click(s.window.handle,103);
         click(s.window.handle, 201); select(s.window.handle, 210, 1);
         playing.finish(); comboAudioBlocks += playing.count();
         log("PASS " + phase + " concurrent_combo_cycles=8 concurrent_audio_blocks=" + std::to_string(playing.count()));
@@ -856,6 +876,7 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
         << ",\n  \"combo_stress_cycles\": " << comboStressCycles
         << ",\n  \"button_dispatch_checks\": " << buttonDispatchChecks
         << ",\n  \"escape_dispatch_checks\": " << escapeDispatchChecks
+        << ",\n  \"escape_routing_queries\": " << escapeRoutingQueries
         << ",\n  \"concurrent_combo_audio_blocks\": " << comboAudioBlocks
         << ",\n  \"real_reaper_validation\": \"NOT_RUN\",\n  \"physical_mouse_keyboard_input\": \"NOT_RUN\","
         << "\n  \"audio_device_playback\": \"NOT_RUN\",\n  \"mac_vs_windows_audio_comparison\": \"NOT_RUN\","
@@ -868,8 +889,8 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
 
 int wmain(int argc, wchar_t** argv) {
     static_assert(sizeof(void*) == 8, "build the host for Windows x64");
-    if (argc != 4 && !(argc == 5 && !std::wcscmp(argv[4],L"--button-lifetime-only"))) {
-        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory> [--button-lifetime-only]\n"; return 2;
+    if (argc != 4 && !(argc == 5 && (!std::wcscmp(argv[4],L"--button-lifetime-only") || !std::wcscmp(argv[4],L"--escape-routing-only")))) {
+        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory> [--button-lifetime-only|--escape-routing-only]\n"; return 2;
     }
     fs::path evidence; std::string slug; bool comReady = false;
     try {
@@ -898,7 +919,11 @@ int wmain(int argc, wchar_t** argv) {
         check(bool(module), "load actual candidate DLL: " + error); dllLoaded = true; loadedBinary = binary.u8string(); phase = "factory";
         HostApplication host; module->getFactory().setHostContext(&host);
         const auto ids = validateFactory(module, *product);
-        if(argc == 5) {
+        if(argc == 5 && !std::wcscmp(argv[4],L"--escape-routing-only")) {
+            phase="escape-routing-only";
+            Session session;session.initialize(module,host,ids);session.open();
+            click(session.window.handle,103);escapeModal(session.window.handle);
+        } else if(argc == 5) {
             // Deterministic old-build counterexample without traversing a combo.
             phase="button-lifetime-only";
             Session session;session.initialize(module,host,ids);session.open();

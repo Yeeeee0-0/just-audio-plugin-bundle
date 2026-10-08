@@ -36,9 +36,12 @@ jobs:
         if: failure() && steps.native.outcome == 'failure'
         shell: pwsh
         run: python scripts/windows/diagnose-editor-failures.py build/windows-x64 build/windows-evidence
-      - name: Prove combo regression rejects the previous candidate
+      - name: Prove previous candidates fail lifecycle and Escape regressions
         shell: pwsh
-        run: python scripts/windows/check-combo-regression.py build/windows-x64 build/windows-evidence
+        run: |
+          python scripts/windows/check-combo-regression.py build/windows-x64 build/windows-evidence
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/windows/check-escape-regression.py build/windows-x64 build/windows-evidence
       - name: Build and test the selectable preview installer
         shell: powershell
         run: |
@@ -79,6 +82,10 @@ jobs:
       - name: Verify the transferred assets
         run: python3 preview/verify-preview-download.py preview
       - name: Publish only a Windows prerelease
+        # First pass stages and verifies assets while remaining user-machine
+        # findings are collected. Re-run only this completed publish job when
+        # ready; it reuses the exact tested artifact without a second build.
+        if: github.run_attempt > 1
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
