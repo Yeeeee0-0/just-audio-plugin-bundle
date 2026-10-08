@@ -266,8 +266,8 @@ struct EqWindowsEditor final:EditorContent {
         for(int i=0;i<3;++i){text(g,word(zh[i],en[i]),{18+i*cw,double(mainHeight+53),cw-12,18},color(0x19343d),11);const char* const* labels=i==0?dynamic_enabledLabels:i==1?detectorLabels:sourceLabels;const char* translations[3][2]={{"关闭","开启"},{"峰值","均方根"},{"内部","外部侧链"}};drawButton(g,{18+i*cw,double(mainHeight+73),cw-12,30},word(translations[i][int(model.value(fields[i]))],labels[int(model.value(fields[i]))]),1,int(model.value(type))<=2,true);}
     }
     int hit(POINT p) const {
-        auto near=[&](std::size_t b){auto n=node(b);return physical(model.state,index(b,enabled))>.5 && std::hypot(double(p.x)-n.X,double(p.y)-n.Y)<16;};
-        if(near(model.selected))return int(model.selected);for(int b=11;b>=0;--b)if(near(b))return b;return -1;
+        auto hitsNode=[&](std::size_t b){auto n=node(b);return physical(model.state,index(b,enabled))>.5 && std::hypot(double(p.x)-n.X,double(p.y)-n.Y)<16;};
+        if(hitsNode(model.selected))return int(model.selected);for(int b=11;b>=0;--b)if(hitsNode(b))return b;return -1;
     }
     void stopSolo(){soloHeld=false;model.endSolo();presentation.activity(PanelPresentation::Activity::solo,false,now());}
     void finishKnob(){if(knob>=0){model.endValueGesture(knobID);knob=-1;presentation.activity(PanelPresentation::Activity::knobDrag,false,now());}}

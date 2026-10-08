@@ -51,8 +51,8 @@ struct NativeView {
     void paint(HWND h,HDC dc=nullptr){
         win::Paint p(h,true,dc);auto& g=p.graphics();float w=p.width(),height=p.height();
         if(h==window){win::fill(g,{0,0,w,height},0xfbfdfe);win::fill(g,{0,84,w,std::max(1.f,height-124)},0xf5fafb);win::line(g,0,84,w,84,0xd9e5e9);win::line(g,0,height-40,w,height-40,0xd9e5e9);
-            bool narrow=w<900,small=w<700;Gdiplus::RectF iconRect{small?20.f:28.f,small?9.f:19.f,small?30.f:46.f,small?30.f:46.f};if(productIcon){Gdiplus::GraphicsPath clip;win::roundedPath(clip,iconRect,11);auto state=g.Save();g.SetClip(&clip);g.DrawImage(productIcon.get(),iconRect);g.Restore(state);}
-            win::text(g,displayProductName(product->slug,product->name),{small?60.f:90.f,small?10.f:27.f,small?std::max(110.f,w-280):(narrow?200.f:280.f),32},small?17.f:narrow?18.f:22.f,0x17333c,true);
+            bool narrow=w<900,compactHeader=w<700;Gdiplus::RectF iconRect{compactHeader?20.f:28.f,compactHeader?9.f:19.f,compactHeader?30.f:46.f,compactHeader?30.f:46.f};if(productIcon){Gdiplus::GraphicsPath clip;win::roundedPath(clip,iconRect,11);auto state=g.Save();g.SetClip(&clip);g.DrawImage(productIcon.get(),iconRect);g.Restore(state);}
+            win::text(g,displayProductName(product->slug,product->name),{compactHeader?60.f:90.f,compactHeader?10.f:27.f,compactHeader?std::max(110.f,w-280):(narrow?200.f:280.f),32},compactHeader?17.f:narrow?18.f:22.f,0x17333c,true);
             win::text(g,productSubtitle(product->slug),{28,height-27,190,18},10,0x6b959e,true);
             win::text(g,callbacks.view->advanced?tr(L"高级视图",L"Advanced view"):tr(L"简易视图",L"Simple view"),{w/2-70,height-27,140,18},10,0x758b93,false,Gdiplus::StringAlignmentCenter);
             if(!content)win::text(g,tr(L"此模块的原生内容不可用",L"Native content is unavailable for this module"),{28,120,w-56,80},12,0x17333c,false,Gdiplus::StringAlignmentCenter);
