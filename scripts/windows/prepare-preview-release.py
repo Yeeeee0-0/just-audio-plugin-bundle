@@ -109,11 +109,23 @@ def main():
         'environment': read(native/'environment.json'), 'nsis_version': installer_build['nsisVersion'],
         'github_runner_image': {'os': os.environ.get('ImageOS'), 'version': os.environ.get('ImageVersion')},
         'stable_mac_release_modified': False,
+        'fix_candidate': {
+            'issue': 'Underlying native child windows paint over modal settings at 175% DPI',
+            'base_commit': '57e3aeef3c1a63a406d877bfe92f5ff1dd5de1a9',
+            'received_patch_sha256': 'fc1a4bbf9e83c28e741a14c2d19274fffbb574dfed76b897faec4115605bf7b9',
+            'product_file': 'common/ui/NativeEditorWindows.cpp',
+            'change': 'Add WS_CLIPSIBLINGS to shared editor, content parent, modal surfaces and child controls',
+            'reaper_7_41_at_175_percent_dpi_revalidation': 'NOT_RUN_FOR_THIS_CANDIDATE',
+        },
     }
     write(out/'preview-manifest.json', manifest)
     notes = f'''# JUST 0.1.0 Windows x64 preview {args.run_number}
 
-**Unsigned preview; real REAPER visual/audio acceptance remains pending.**
+**Unsigned modal-clipping fix candidate; 175% DPI REAPER revalidation remains pending.**
+
+This candidate applies the single-file Windows clipping-style fix to preview.12 (`57e3aeef3c1a63a406d877bfe92f5ff1dd5de1a9`). It addresses the report that underlying plugin controls paint over modal settings in REAPER 7.41 at 175% display scaling. DSP, plugin IDs, parameters, state formats and Mac code are unchanged. Native automated checks below do not confirm that this reported visual defect is fixed; the newly installed candidate must be retested on the Windows computer.
+
+本包为浮层遮挡修复候选。请在 REAPER 7.41、175% 显示缩放下复验十款插件的设置／关于／预设浮层，覆盖 Simple／Advanced、播放中持续刷新、缩放、切换选项和关闭重开；确认底层控件不会穿透或遮挡。实机确认前不作为正式版。
 
 - Download `JUST-{suffix}-Setup.exe` for the selectable installer (all ten selected by default).
 - `Portable.zip` contains the exact ten tested x64 VST3 bundles and installation scripts.
@@ -126,7 +138,7 @@ Source: `{commit}`. Plugin version `0.1.0`; vendor `Yee Huang`; VST3 AMD64 only.
 
 The installer verifies payloads, backs up selected previous JUST bundles, and restores them after an installation failure. Save work and close REAPER normally before installation. No user preset, REAPER configuration, license, or project is edited by the installer.
 
-No user Windows REAPER session has been tested. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. Custom rotary controls include a native UI Automation provider and a required native client test; real screen-reader acceptance remains pending. This preview is not a claim of Mac/Windows visual parity or production readiness.
+This candidate has not yet been tested in the user's Windows REAPER session. Earlier preview.12 observations do not constitute acceptance of these rebuilt files. GUI/input, high-DPI, presets, automation, and audible DSP acceptance must be checked on the Windows computer. Custom rotary controls include a native UI Automation provider and a required native client test; real screen-reader acceptance remains pending. This preview is not a claim of Mac/Windows visual parity or production readiness.
 
 The stable macOS `main` branch and `v0.1.0` release are unchanged. This is a prerelease and is not marked latest.
 '''
