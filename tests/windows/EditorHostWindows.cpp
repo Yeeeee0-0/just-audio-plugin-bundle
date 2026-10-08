@@ -691,6 +691,11 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         const auto presetName = std::wstring(L"Combo lifetime ") + (format == kSample64 ? L"64" : L"32");
         SetWindowTextW(control(s.window.handle, 221), presetName.c_str()); click(s.window.handle, 222);
         const int savedIndex = int(SendMessageW(control(s.window.handle, 220), CB_GETCURSEL, 0, 0));
+        const auto userTitle = std::wstring(L"User · ") + presetName;
+        const int namedIndex = int(SendMessageW(control(s.window.handle, 220), CB_FINDSTRINGEXACT, WPARAM(-1), reinterpret_cast<LPARAM>(userTitle.c_str())));
+        log("PRESET saved index=" + std::to_string(savedIndex) + " named_index=" + std::to_string(namedIndex)
+            + " factory_count=" + std::to_string(factoryCount) + " name=" + utf8(windowText(control(s.window.handle, 221))));
+        check(namedIndex >= 0 && savedIndex == namedIndex, "saved user preset is the actual selected named combo item");
         check(SendMessageW(control(s.window.handle, 220), CB_GETCOUNT, 0, 0) == factoryCount + 1
             && IsWindowEnabled(control(s.window.handle, 224)), "save isolated user preset for selection regression");
         click(s.window.handle, 225);
@@ -699,6 +704,11 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         check(!control(s.window.handle, 226) && !control(s.window.handle, 227)
             && !IsWindowEnabled(control(s.window.handle, 225)), "changing selection removes obsolete confirmation without destroying combo");
         select(s.window.handle, 220, savedIndex);
+        log("PRESET restored selected_index=" + std::to_string(SendMessageW(control(s.window.handle, 220), CB_GETCURSEL, 0, 0))
+            + " expected_index=" + std::to_string(savedIndex) + " name=" + utf8(windowText(control(s.window.handle, 221)))
+            + " expected_name=" + utf8(presetName) + " rename=" + std::to_string(IsWindowEnabled(control(s.window.handle, 224)))
+            + " delete=" + std::to_string(IsWindowEnabled(control(s.window.handle, 225))));
+        inventory(s.window.handle, evidence / ("preset-return-" + suffix + "-controls.tsv"));
         check(windowText(control(s.window.handle, 221)) == presetName && IsWindowEnabled(control(s.window.handle, 224))
             && IsWindowEnabled(control(s.window.handle, 225)), "user selection restores its name and actions");
         click(s.window.handle, 225); click(s.window.handle, 226);
