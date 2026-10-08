@@ -23,7 +23,12 @@
       "name": "windows-x64",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/windows-x64"
+      "binaryDir": "${sourceDir}/build/windows-x64",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON",
+        "SMTG_USE_STATIC_CRT": "ON",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+      }
     },
     {
       "name": "core-only",

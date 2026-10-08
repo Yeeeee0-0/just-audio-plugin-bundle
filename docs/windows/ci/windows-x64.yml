@@ -1,0 +1,53 @@
+# REVIEW CANDIDATE ONLY. Not active while stored under docs/windows/ci/.
+# Publication owner may copy this to .github/workflows only after authorization.
+# actions pins verified against official release pages; runner/toolchain versions
+# are recorded per run because the windows-2022 image itself can change.
+name: JUST Windows x64 candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      # Hash manifests pin original LF bytes. Process-scoped Git overrides also
+      # cover the official SDK clone/submodules without changing user config.
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.autocrlf
+      GIT_CONFIG_VALUE_0: 'false'
+    steps:
+      - name: Checkout reviewed source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Obtain only pinned official Steinberg source
+        shell: pwsh
+        run: |
+          python scripts/bootstrap-sdk.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/verify-source-copy.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Native AMD64 build and automated validation
+        shell: pwsh
+        run: ./scripts/windows/Build-And-Test.ps1 -Jobs 2
+      - name: Save diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: JUST-Windows-native-evidence-${{ github.sha }}
+          path: build/windows-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Save passing native candidate
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: JUST-0.1.0-Windows-x64-candidate-${{ github.sha }}
+          path: build/candidates/*.zip
+          if-no-files-found: error
+          retention-days: 14
+# CI proves native compilation/automated checks only. It never installs to a
+# user's machine and cannot approve REAPER, DPI, keyboard/mouse or listening QA.

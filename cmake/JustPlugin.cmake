@@ -43,6 +43,15 @@ function(just_add_plugin slug index)
         endif()
     else()
         target_link_libraries(${target} PRIVATE user32 gdi32 comctl32)
+        # Windows version resources are independent of VST3 class IDs/state.
+        set(JUST_WINDOWS_BINARY "${target}.vst3")
+        set(JUST_WINDOWS_PRODUCT "JUST ${slug}")
+        if(slug STREQUAL "fake_stereo")
+            set(JUST_WINDOWS_PRODUCT "JUST Wider")
+        endif()
+        configure_file("${PROJECT_SOURCE_DIR}/cmake/JustVersionWindows.rc.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/${target}-version.rc" @ONLY)
+        target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${target}-version.rc")
     endif()
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${target}>/../Resources/Licenses"

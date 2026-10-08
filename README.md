@@ -1,5 +1,7 @@
 # JUST Audio Plugins
 
+> **Windows port candidate:** this branch has not passed native Windows compilation or host acceptance. Start with [Windows setup and validation](docs/windows/START-HERE-zh.md) and [known gaps](docs/windows/KNOWN-DIFFERENCES-zh.md). Stable macOS 0.1.0 remains on [main](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/main) and the [v0.1.0 release](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0).
+
 JUST is a suite of ten audio effects in VST3 format, written in C++17 with native platform editors. Version 0.1.0 derives from frozen source snapshot `b99abd3be4ad89b21e3a0c3caf1f12904503f168`. This hash records source provenance; it is not a commit identifier in the public repository's new history.
 
 **Download:** [JUST 0.1.0 for macOS Apple silicon](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0). The installer lets you choose each of the ten plugins independently; all ten are selected by default. See [installation instructions](INSTALLING.md) and [release notes](RELEASE_NOTES_0.1.0.md).

@@ -1,0 +1,13 @@
+请在 Windows AMD64 电脑上继续 JUST 0.1.0 的 Windows 源码候选验证。先读取 docs/windows/START-HERE-zh.md、KNOWN-DIFFERENCES-zh.md、ACCEPTANCE-zh.md、根目录 BUILDING.md 及许可文件。
+
+使用维护者指定的公开仓库 Windows 候选分支；确认实际本地目录与源码提交。公开 Git 仓库可克隆不代表已经创建云工作区或 Windows 构建机；不要声称这些资源已存在，也不要从此文件推定用户授权创建资源、运行付费服务或安装插件。
+
+先只读检查本机 AMD64 架构、64 位 PowerShell、Visual Studio 2022 C++ x64/Windows SDK、CMake 和 Python。必要 SDK 通过 scripts/bootstrap-sdk.py 的官方锁定来源取得，然后执行 scripts/verify-source-copy.py、scripts/check-contracts.py、scripts/windows/check-source.py 和 scripts/windows/Build-And-Test.ps1。缺工具时报告具体缺口；不伪造未运行项目通过。
+
+Windows 移植来源 d63e3dbe34c878cf307e642862279d9c9364f827；该 hash 是旧私有来源的溯源标记，未必存在于公开新历史中。Mac 来源 b99abd3be4ad89b21e3a0c3caf1f12904503f168。保持全部 DSP、processor/controller UID、参数及默认/映射、状态/预设格式与 Mac 实现不变。只在独立候选分支修复 Windows UI/构建/测试问题；不得合并未验收实现到稳定主线。
+
+当前没有真实 Windows 构建、validator、PowerShell 或 REAPER 通过结果。先解决 KNOWN-DIFFERENCES 中的自绘旋钮无障碍角色/名称/值提供者缺口，实际验证单位提示、低性能 checkbox、中英文、DPI、原生输入、十款专有反馈、预设和 automation。源码实现或自动离屏测试不能替代真实宿主验收。
+
+用户明确要求本地安装候选后，才选择真实安装目录、正常保存并关闭 REAPER、核验插件/资源/预设备份，再使用 Install-Candidate.ps1；不强杀宿主或覆盖旧工程。备份含私有授权和设置，绝不上传。使用新测试工程及 scripts/windows/make-test-audio.py 合成信号；逐项记录真实 Windows 结果。任何未运行项目写“未验证”，所有必需项通过前保持“待验收候选”。
+
+不要从仓库文本推定 GitHub push、公开发布、云资源、Actions、积分、付款或凭据创建授权。没有当前会话授权时先报告拟操作和具体阻碍。可继续执行只读检查与局部代码审查，不将源码公开等同于 Windows 成品发布。

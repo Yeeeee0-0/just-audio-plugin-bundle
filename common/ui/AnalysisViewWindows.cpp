@@ -1,51 +1,42 @@
 #include "AnalysisView.hpp"
-#include <windows.h>
+#include "VisualAssetsWindows.hpp"
 namespace just {
 namespace {
 class WinAnalysis final:public AnalysisView {
+    win::WindowClass windowClass;
     HWND window=nullptr;HMODULE module=nullptr;EditorServices services;AnalysisViewMode mode;
-    AnalysisCursor cursor{};AnalysisAvailability availability=AnalysisAvailability::unavailable;
-    std::uint64_t resumeGeneration=0;
+    AnalysisCursor cursor{};AnalysisAvailability availability=AnalysisAvailability::unavailable;std::uint64_t resumeGeneration=0;
     std::array<AnalysisWindow,600> history{};unsigned count=0,write=0;SampleFrame samples{};SpectrumSnapshot spectrum{};
-    static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l){
-        auto* p=reinterpret_cast<WinAnalysis*>(GetWindowLongPtrW(h,GWLP_USERDATA));if(m==WM_NCCREATE){p=static_cast<WinAnalysis*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(p));}
-        if(p && m==WM_PAINT){PAINTSTRUCT ps;auto dc=BeginPaint(h,&ps);RECT r;GetClientRect(h,&r);FillRect(dc,&r,reinterpret_cast<HBRUSH>(COLOR_WINDOW+1));p->paint(dc,r);EndPaint(h,&ps);return 0;}return DefWindowProcW(h,m,w,l);
+    const char* tr(const char* zh,const char* en)const{return services.view?localized(*services.view,zh,en):en;}
+    void paint(HDC dc=nullptr){win::Paint surface(window,true,dc);auto& g=surface.graphics();float width=surface.width(),height=surface.height();win::fill(g,{0,0,width,height},0xfafafa,10);float left=8,top=24,w=width-16,h=height-48;if(w<8 || h<8)return;
+        if(availability!=AnalysisAvailability::fresh){win::text(g,availability==AnalysisAvailability::stale?tr("反馈已过期 — 没有新音频","Feedback stale — no new audio"):tr("反馈不可用","Feedback unavailable"),{8,4,w,18},11,0x758b93);return;}
+        for(unsigned i=0;i<=4;++i)win::line(g,left,top+h*i/4,left+w,top+h*i/4,0xe0e0e0);
+        auto dbY=[&](double a){return top+h*float(1-std::clamp((20*std::log10(std::max(a,1e-8))+96)/102.,0.,1.));};
+        std::string title=tr("输入（灰色）/ 输出（青色）· 同一时间与 dBFS 刻度","Input (gray) / output (teal) · same time and dBFS scale");
+        if(mode==AnalysisViewMode::spectrum)title=tr("输入 / 输出频谱 · dBFS · 实际采样率","Input / output spectrum · dBFS · actual sample rate");
+        else if(mode==AnalysisViewMode::waveform || mode==AnalysisViewMode::stereoField){title=mode==AnalysisViewMode::waveform?tr("输入 / 输出波形 · 固定 ±1 刻度","Input / output waveform · fixed ±1 scale"):tr("输入 / 输出立体声场 · 固定刻度","Input / output stereo field · fixed scale");if(!(samples.header.flags&analysisInputAligned)){win::text(g,tr("等待延迟补偿对齐","Waiting for PDC alignment"),{8,4,w,18},11,0x758b93);return;}}
+        else if(mode==AnalysisViewMode::wetStereo)title=tr("实际湿声贡献 · L / R · dBFS","Actual wet contribution · L / R · dBFS");
+        auto curve=[&](unsigned rgb,auto generate){Gdiplus::GraphicsPath path;Gdiplus::PointF previous{};bool started=false;auto point=[&](double x,double y,bool gap=false){Gdiplus::PointF next{float(x),float(y)};if(started && !gap)path.AddLine(previous,next);else path.StartFigure();previous=next;started=true;};auto breakPath=[&]{started=false;};generate(point,breakPath);Gdiplus::Pen pen(win::color(rgb),1.5f);auto state=g.Save();g.SetClip(Gdiplus::RectF{left,top,w,h});g.DrawPath(&pen,&path);g.Restore(state);};
+        for(unsigned tap=0;tap<2;++tap)curve(tap?0x178f99:0x8c9196,[&](auto point,auto breakPath){
+            if(mode==AnalysisViewMode::spectrum){if(spectrum.fftSize==0 || spectrum.header.sampleRate<=40)return;for(unsigned k=1;k<spectrumBins;++k){double hz=k*spectrum.header.sampleRate/spectrum.fftSize;if(hz<20)continue;point(left+std::log(hz/20)/std::log(spectrum.header.sampleRate/40)*w,dbY(spectrum.amplitude[tap][k]));}}
+            else if(mode==AnalysisViewMode::waveform || mode==AnalysisViewMode::stereoField){for(unsigned i=0;i<samples.count;++i){double l=samples.samples[tap*2][i],r=(tap?samples.header.outputChannels:samples.header.inputChannels)==2?samples.samples[tap*2+1][i]:l;if(mode==AnalysisViewMode::waveform)point(left+double(i)*w/std::max(1u,samples.count-1),top+h*.5*(1-std::clamp(l,-1.,1.)));else point(left+w*.5*(1+std::clamp((l-r)*.5,-1.,1.)),top+h*.5*(1-std::clamp((l+r)*.5,-1.,1.)));}}
+            else if(count){const auto& last=history[(write+599)%600];double span=last.header.sampleRate*6;if(span<=0)return;std::uint64_t next=0;for(unsigned i=0;i<count;++i){const auto& item=history[(write+600-count+i)%600];bool wet=mode==AnalysisViewMode::wetStereo;if(!(item.header.flags&analysisInputAligned) || (wet && !(item.effectFields&analysisWet))){breakPath();continue;}double x=left+w-(last.header.endSample-item.header.endSample)/span*w;if(x<left){breakPath();continue;}double a=wet?item.channels[4+tap].peak:std::max(item.channels[2*tap].peak,item.channels[2*tap+1].peak),y=dbY(a);if(wet)y=top+tap*h*.5+(y-top)*.5;point(x,y,next!=item.header.startSample || (item.header.flags&analysisGap));next=item.header.endSample;}}
+        });
+        if(count && mode!=AnalysisViewMode::spectrum && mode!=AnalysisViewMode::waveform && mode!=AnalysisViewMode::stereoField){const auto& last=history[(write+599)%600];if(last.header.flags&analysisBypassed)title+=tr(" · 旁路"," · Bypass");else if(!(last.header.flags&analysisPlaying) && (last.header.flags&analysisTransportKnown))title+=tr(" · 宿主已停止"," · Host stopped");if(std::max(last.channels[0].peak,last.channels[1].peak)==0)title+=std::max(last.channels[2].peak,last.channels[3].peak)>0?tr(" · 尾音/输出活跃"," · Tail/output active"):tr(" · 静音"," · Silence");
+            if(mode!=AnalysisViewMode::wetStereo && (last.effectFields&analysisReduction)){curve(0xf0a23a,[&](auto point,auto breakPath){double span=last.header.sampleRate*6;if(span<=0)return;std::uint64_t next=0;for(unsigned i=0;i<count;++i){const auto& item=history[(write+600-count+i)%600];if(!(item.effectFields&analysisReduction)){breakPath();continue;}double x=left+w-(last.header.endSample-item.header.endSample)/span*w;if(x<left){breakPath();continue;}point(x,top+std::clamp(item.reductionDb/24.,0.,1.)*h*.25,next!=item.header.startSample || (item.header.flags&analysisGap));next=item.header.endSample;}});win::text(g,tr("衰减：0–24 dB（橙色，上方四分之一）","GR: 0–24 dB (orange, upper quarter)"),{8,top+h+3,w,18},11,0x758b93);}}
+        win::text(g,title.c_str(),{8,4,w,18},11,0x758b93);
     }
-    void paint(HDC dc,RECT r){
-        SetBkMode(dc,TRANSPARENT);const wchar_t* label=L"Input (gray) / output (teal) — same time and scale";
-        if(availability!=AnalysisAvailability::fresh){label=availability==AnalysisAvailability::stale?L"Feedback stale — no new audio":L"Feedback unavailable";TextOutW(dc,8,5,label,lstrlenW(label));return;}
-        TextOutW(dc,8,5,label,lstrlenW(label));double width=std::max(1L,r.right-16),height=std::max(1L,r.bottom-36);
-        auto dbY=[&](double a){return 28+height*(1-std::clamp((20*std::log10(std::max(a,1e-8))+96)/102.,0.,1.));};
-        for(unsigned tap=0;tap<2;++tap){HPEN pen=CreatePen(PS_SOLID,2,tap?RGB(23,143,153):RGB(140,145,150));auto old=SelectObject(dc,pen);bool started=false;std::uint64_t next=0;
-            auto point=[&](double x,double y,bool gap=false){if(!started || gap)MoveToEx(dc,int(x),int(y),nullptr);else LineTo(dc,int(x),int(y));started=true;};
-            if(mode==AnalysisViewMode::spectrum){for(unsigned k=1;k<spectrumBins;++k){double hz=k*spectrum.header.sampleRate/spectrum.fftSize;if(hz<20)continue;point(8+std::log(hz/20)/std::log(spectrum.header.sampleRate/40)*width,dbY(spectrum.amplitude[tap][k]));}}
-            else if(mode==AnalysisViewMode::waveform || mode==AnalysisViewMode::stereoField){if(samples.header.flags&analysisInputAligned)for(unsigned i=0;i<samples.count;++i){double l=samples.samples[tap*2][i],rr=(tap?samples.header.outputChannels:samples.header.inputChannels)==2?samples.samples[tap*2+1][i]:l;
-                    if(mode==AnalysisViewMode::waveform)point(8+double(i)*width/std::max(1u,samples.count-1),28+height*.5*(1-std::clamp(l,-1.,1.)));
-                    else point(8+width*.5*(1+std::clamp((l-rr)*.5,-1.,1.)),28+height*.5*(1-std::clamp((l+rr)*.5,-1.,1.)));}}
-            else if(count){auto& last=history[(write+599)%600];double span=last.header.sampleRate*6;for(unsigned i=0;i<count;++i){const auto& item=history[(write+600-count+i)%600];const bool wet=mode==AnalysisViewMode::wetStereo;
-                    if(!(item.header.flags&analysisInputAligned) || (wet && !(item.effectFields&analysisWet))){started=false;continue;}
-                    double x=8+width-(last.header.endSample-item.header.endSample)/span*width;if(x<8){started=false;continue;}
-                    double a=wet?item.channels[4+tap].peak:std::max(item.channels[2*tap].peak,item.channels[2*tap+1].peak),y=dbY(a);if(wet)y=28+tap*height*.5+(y-28)*.5;
-                    point(x,y,next!=item.header.startSample || item.header.flags&analysisGap);next=item.header.endSample;}}
-            SelectObject(dc,old);DeleteObject(pen);
-        }
-    }
+    static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l){auto* p=reinterpret_cast<WinAnalysis*>(GetWindowLongPtrW(h,GWLP_USERDATA));if(m==WM_NCCREATE){p=static_cast<WinAnalysis*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);p->window=h;SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(p));}if(p){if(m==WM_NCDESTROY){p->window=nullptr;SetWindowLongPtrW(h,GWLP_USERDATA,0);return DefWindowProcW(h,m,w,l);}if(m==WM_ERASEBKGND)return 1;if(m==WM_PAINT){p->paint();return 0;}if(m==WM_PRINTCLIENT){p->paint(reinterpret_cast<HDC>(w));return 0;}}return DefWindowProcW(h,m,w,l);}
 public:
-    WinAnalysis(HWND parent,const EditorServices& s,AnalysisViewMode m):services(s),mode(m){GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCWSTR>(&proc),&module);
-        WNDCLASSW c{};c.lpfnWndProc=proc;c.hInstance=module;c.lpszClassName=L"JUST.Shared.Analysis.v2";RegisterClassW(&c);window=CreateWindowExW(0,c.lpszClassName,L"Audio analysis",WS_CHILD|WS_VISIBLE,0,0,600,180,parent,nullptr,module,this);}
-    ~WinAnalysis() override{DestroyWindow(window);}
-    void resize(int x,int y,int width,int height) override{MoveWindow(window,x,y,std::max(1,width),std::max(1,height),TRUE);}
-    void refresh() override{
-        if(services.view && services.view->visualsPaused)return;
-        if(services.view && resumeGeneration!=services.view->visualResumeGeneration){resumeGeneration=services.view->visualResumeGeneration;cursor={};count=write=0;spectrum={};samples={};}
+    WinAnalysis(HWND parent,const EditorServices& s,AnalysisViewMode m):services(s),mode(m){module=win::moduleAt(reinterpret_cast<const void*>(&proc));WNDCLASSW c{};c.lpfnWndProc=proc;c.hInstance=module;c.lpszClassName=L"JUST.Shared.Analysis.v3";if(!windowClass.acquire(c))return;window=CreateWindowExW(0,c.lpszClassName,L"Audio analysis",WS_CHILD|WS_VISIBLE,0,0,600,180,parent,nullptr,module,this);}
+    ~WinAnalysis()override{if(window)DestroyWindow(window);}
+    void resize(int x,int y,int width,int height)override{win::place(window,x,y,std::max(1,width),std::max(1,height));}
+    void refresh()override{if(!window)return;if(services.view && services.view->visualsPaused){InvalidateRect(window,nullptr,FALSE);return;}if(services.view && resumeGeneration!=services.view->visualResumeGeneration){resumeGeneration=services.view->visualResumeGeneration;cursor={};count=write=0;spectrum={};samples={};availability=AnalysisAvailability::unavailable;}
         if(mode==AnalysisViewMode::spectrum)availability=services.readSpectrum?services.readSpectrum(services.owner,spectrum):AnalysisAvailability::unavailable;
         else if(mode==AnalysisViewMode::waveform || mode==AnalysisViewMode::stereoField)availability=services.readSamples?services.readSamples(services.owner,samples):AnalysisAvailability::unavailable;
-        else {availability=AnalysisAvailability::unavailable;for(unsigned n=0;n<16 && services.readAnalysis;++n){AnalysisBatch b;availability=services.readAnalysis(services.owner,cursor,b);if(availability!=AnalysisAvailability::fresh || !b.count)break;
-                for(unsigned i=0;i<b.count;++i){const auto& item=b.windows[i];if(count){const auto& previous=history[(write+599)%600].header;if(previous.session!=item.header.session || previous.epoch!=item.header.epoch)count=write=0;}history[write]=item;write=(write+1)%600;count=std::min(600u,count+1);}}}
-        InvalidateRect(window,nullptr,FALSE);
-    }
-    void* nativeHandle() const noexcept override{return window;}
+        else{availability=AnalysisAvailability::unavailable;for(unsigned n=0;n<16 && services.readAnalysis;++n){AnalysisBatch b;availability=services.readAnalysis(services.owner,cursor,b);if(availability!=AnalysisAvailability::fresh || !b.count)break;for(unsigned i=0;i<b.count;++i){const auto& item=b.windows[i];if(count){const auto& previous=history[(write+599)%600].header;if(previous.session!=item.header.session || previous.epoch!=item.header.epoch)count=write=0;}history[write]=item;write=(write+1)%600;count=std::min(600u,count+1);}}}InvalidateRect(window,nullptr,FALSE);}
+    void* nativeHandle()const noexcept override{return window;}
 };
 }
-std::unique_ptr<AnalysisView> AnalysisView::create(void* parent,const EditorServices& services,AnalysisViewMode mode){return parent?std::make_unique<WinAnalysis>(static_cast<HWND>(parent),services,mode):nullptr;}
+std::unique_ptr<AnalysisView> AnalysisView::create(void* parent,const EditorServices& services,AnalysisViewMode mode){if(!parent)return {};auto result=std::make_unique<WinAnalysis>(static_cast<HWND>(parent),services,mode);if(!result->nativeHandle())return {};return result;}
 }

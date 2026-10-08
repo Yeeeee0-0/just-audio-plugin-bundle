@@ -1,0 +1,40 @@
+{
+  "product_version": "0.1.0",
+  "vendor": "Yee Huang",
+  "frozen_baseline": "b99abd3be4ad89b21e3a0c3caf1f12904503f168",
+  "dependency_lock": {
+    "sdk": {
+      "repository": "https://github.com/steinbergmedia/vst3sdk",
+      "version": "3.8.1",
+      "tag": "v3.8.1_build_84",
+      "commit": "3cdf9ca5d1f5b1b21e0a86832aa4abe55607bd96",
+      "license": "MIT",
+      "submodules": {
+        "base": "fcf9da0bd27a16f7f03773a3a39822f28f5c8477",
+        "cmake": "054c9143cbb8d47fc4694e473f2ee3b4d951a8f5",
+        "pluginterfaces": "4f547e8e102b47de4a8b8aaf343c73b700786372",
+        "public.sdk": "586dc5e6c8012c3e4b01c79389375cbe96bdb1da"
+      }
+    },
+    "ui": "native Cocoa (macOS), Win32 (Windows), original adapters; no VSTGUI/JUCE",
+    "language": "C++17"
+  },
+  "source_sdk_copy_verification": "1005 file SHA256 values in third_party/sdk-source-hashes.json",
+  "original_ui_assets": "common/ui/resources/manifest.json (ten PNG hashes)",
+  "windows_recipe": {
+    "compiler": "Visual Studio 17 2022, x64 C++ and Windows SDK; actual component builds recorded per run",
+    "cmake_minimum": "3.25.0",
+    "python_minimum": "3.9",
+    "runtime": "static MSVC CRT",
+    "mode": "Release",
+    "other_libraries": "Windows SDK user32/gdi32/comctl32/gdiplus/comdlg32/shell32/ole32/uuid only",
+    "external_gui_frameworks": "none",
+    "native_validation_status": "not run; exact Windows toolchain is not yet observed"
+  },
+  "official_tool_sources": {
+    "msvc": "https://visualstudio.microsoft.com/downloads/",
+    "cmake": "https://cmake.org/download/",
+    "python": "https://www.python.org/downloads/windows/"
+  },
+  "installer": "No existing Windows installer was present; reviewed PowerShell backup/install/restore scripts supplied, not an exe installer."
+}

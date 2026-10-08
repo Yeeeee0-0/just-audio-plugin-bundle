@@ -1,58 +1,89 @@
 #include "Controls.hpp"
-#include <windows.h>
-#include <windowsx.h>
+#include "VisualAssetsWindows.hpp"
 #include <commctrl.h>
 namespace just {
 namespace {
-std::wstring controlWide(const char* s){int n=MultiByteToWideChar(CP_UTF8,0,s,-1,nullptr,0);std::wstring w(n,0);MultiByteToWideChar(CP_UTF8,0,s,-1,w.data(),n);return w;}
 class WinRotary final:public RotaryControl {
-    HWND window=nullptr,label=nullptr,value=nullptr;HMODULE module=nullptr;
-    EditorServices services;ParameterSpec spec;DisplayPolicy policy;TextEditSession edit;
-    double normalized=0;RotaryDrag drag;int previousY=0;bool dragging=false,typing=false,enabled=true,cancelled=false;
-    void end(){if(dragging){services.endEdit(services.owner,spec.id);dragging=false;}}
+    win::WindowClass windowClass;
+    HWND window=nullptr,value=nullptr,unitTooltip=nullptr;std::wstring unitHelp;HMODULE module=nullptr;HFONT valueFont=nullptr;HBRUSH background=nullptr;
+    EditorServices services;ParameterSpec spec;DisplayPolicy policy;TextEditSession edit;RotaryDrag drag;
+    int fontPixels=0;double normalized=0;bool ready=false;bool dragging=false,typing=false,enabled=true,cancelled=false;
+    unsigned backgroundColor()const{return policy.dark?0x245566:0xf5fafb;}
+    double coordinate(LPARAM l)const{auto p=win::point(window,l);return policy.style==ControlStyle::horizontal?-p.X:p.Y;}
+    bool hit(LPARAM l)const{auto p=win::point(window,l);auto size=win::size(window);auto g=ControlGeometry::layout(size.Width,size.Height,policy);return policy.style==ControlStyle::horizontal?p.X>=80 && p.X<=size.Width-112:p.Y>=20 && p.Y<(policy.style==ControlStyle::rotary?g.valueTop:size.Height-24);}
+    void clearTooltip(){if(unitTooltip && IsWindow(unitTooltip))DestroyWindow(unitTooltip);unitTooltip=nullptr;}
+    void end(){if(dragging){dragging=false;services.endEdit(services.owner,spec.id);}}
     void apply(double n){n=std::clamp(n,0.,1.);if(spec.stepCount)n=std::round(n*spec.stepCount)/spec.stepCount;
         if(n!=normalized && services.performEdit(services.owner,spec.id,n)){double actual=services.readTarget(services.owner,spec.id);normalized=std::isfinite(actual)?std::clamp(actual,0.,1.):n;if(std::abs(normalized-n)>1e-12)drag.accumulator=normalized;refresh(enabled);}}
     void once(double n){if(dragging){if(enabled)apply(n);return;}if(!enabled || n==normalized || !services.beginEdit(services.owner,spec.id))return;dragging=true;apply(n);end();}
+    void prepare(){if(typing || !enabled)return;end();refresh(enabled);typing=true;cancelled=false;auto s=edit.begin(spec,policy,normalized);SetWindowTextW(value,win::wide(s).c_str());SendMessageW(value,EM_SETSEL,0,-1);layout();}
+    void layout(){if(!window || !value)return;auto s=win::size(window);auto g=ControlGeometry::layout(s.Width,s.Height,policy);double unitWidth=*controlDisplayUnit(spec,normalized,typing,policy)?30:0;
+        if(policy.style==ControlStyle::horizontal)win::place(value,s.Width-105,(s.Height-22)/2,75,22);
+        else win::place(value,0,policy.style==ControlStyle::rotary?g.valueTop:s.Height-24,s.Width-unitWidth,g.valueHeight);
+        int pixels=int(std::lround(ControlGeometry::valuePointSize(g.diameter,policy)*win::scale(window)));if(pixels==fontPixels)return;fontPixels=pixels;auto font=CreateFontW(-pixels,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Segoe UI");SendMessageW(value,WM_SETFONT,reinterpret_cast<WPARAM>(font),TRUE);if(unitTooltip)SendMessageW(unitTooltip,WM_SETFONT,reinterpret_cast<WPARAM>(font),TRUE);if(valueFont)DeleteObject(valueFont);valueFont=font;
+    }
+    void paint(HDC dc=nullptr){win::Paint p(window,true,dc);auto& g=p.graphics();float w=p.width(),h=p.height();win::fill(g,{0,0,w,h},backgroundColor());
+        unsigned ink=policy.dark?0xb9dce4:0x17333c,muted=policy.dark?0x9ec2cd:0x7a939d;float opacity=enabled?1.f:.45f;
+        auto label=services.view && services.view->language==UiLanguage::chinese && policy.labelZh?policy.labelZh:spec.title;
+        auto geo=ControlGeometry::layout(w,h,policy);float labelHeight=float(ControlGeometry::labelFieldHeight(policy));
+        if(policy.style==ControlStyle::horizontal)win::text(g,label,{0,(h-20)/2,76,20},float(ControlGeometry::labelPointSize(policy)),ink,true);
+        else win::text(g,label,{0,0,w,labelHeight},float(ControlGeometry::labelPointSize(policy)),ink,true,Gdiplus::StringAlignmentCenter);
+        const char* unit=controlDisplayUnit(spec,normalized,typing,policy);
+        if(policy.style==ControlStyle::horizontal)win::text(g,unit,{w-27,(h-16)/2,27,16},10,muted);
+        else if(*unit)win::text(g,unit,{w-27,float((policy.style==ControlStyle::rotary?geo.valueTop:h-24)+geo.valueHeight-18),27,18},10,muted);
+        auto c=[&](unsigned rgb){return win::color(rgb,BYTE(255*opacity));};
+        if(policy.style!=ControlStyle::rotary){bool horizontal=policy.style==ControlStyle::horizontal;Gdiplus::PointF a{horizontal?88.f:w/2,horizontal?h/2:h-36},b{horizontal?w-120:w/2,horizontal?h/2:30};Gdiplus::PointF thumb{a.X+(b.X-a.X)*float(normalized),a.Y+(b.Y-a.Y)*float(normalized)};
+            Gdiplus::Pen track(c(0xccdee4),6),active(c(0x3ec5d0),6);track.SetStartCap(Gdiplus::LineCapRound);track.SetEndCap(Gdiplus::LineCapRound);active.SetStartCap(Gdiplus::LineCapRound);active.SetEndCap(Gdiplus::LineCapRound);g.DrawLine(&track,a,b);g.DrawLine(&active,a,thumb);
+            Gdiplus::RectF r{thumb.X-(horizontal?10:18),thumb.Y-(horizontal?16:12),horizontal?20.f:36.f,horizontal?32.f:24.f};win::fill(g,r,0xf6fbfc,5);win::stroke(g,r,0xabcbd3,5);win::line(g,thumb.X-7,thumb.Y,thumb.X+7,thumb.Y,0x18b6c4,2);return;}
+        double d=geo.diameter,cx=w/2,cy=geo.top+d/2;auto arc=[&](double amount,unsigned rgb){std::array<Gdiplus::PointF,101> points{};for(unsigned i=0;i<=100;++i){double a=rotaryAngle(amount*i/100.)*3.141592653589793/180;points[i]={float(cx+std::sin(a)*d*.43),float(cy-std::cos(a)*d*.43)};}Gdiplus::Pen pen(c(rgb),3);pen.SetStartCap(Gdiplus::LineCapRound);pen.SetEndCap(Gdiplus::LineCapRound);g.DrawLines(&pen,points.data(),int(points.size()));};
+        arc(1,policy.dark?0x438392:0xd3e6eb);arc(normalized,enabled?(policy.dark?0x68e5ed:0x18b5c3):0x99adb4);
+        Gdiplus::RectF disc{float(cx-d*.345),float(cy-d*.345),float(d*.69),float(d*.69)};Gdiplus::SolidBrush outer(c(policy.dark?0x245566:0xf6fbfc)),inner(c(policy.dark?0x245566:0xffffff));Gdiplus::Pen edge(c(policy.dark?0x438392:0xc1dbe3),1);g.FillEllipse(&outer,disc);g.DrawEllipse(&edge,disc);disc.Inflate(float(-d*.05),float(-d*.05));g.FillEllipse(&inner,disc);
+        double a=rotaryAngle(normalized)*3.141592653589793/180;win::line(g,float(cx+std::sin(a)*d*.16),float(cy-std::cos(a)*d*.16),float(cx+std::sin(a)*d*.27),float(cy-std::cos(a)*d*.27),policy.dark?0xadf6fc:0x008b9e,3);
+    }
     static LRESULT CALLBACK editProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR data){auto* p=reinterpret_cast<WinRotary*>(data);
-        if(m==WM_KEYDOWN && (w==VK_RETURN || w==VK_ESCAPE)){p->cancelled=w==VK_ESCAPE;SetFocus(p->window);return 0;}return DefSubclassProc(h,m,w,l);}
-    static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l){
-        auto* p=reinterpret_cast<WinRotary*>(GetWindowLongPtrW(h,GWLP_USERDATA));
-        if(m==WM_NCCREATE){p=static_cast<WinRotary*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(p));}
-        if(!p)return DefWindowProcW(h,m,w,l);
-        if(m==WM_LBUTTONDOWN && p->enabled && GET_Y_LPARAM(l)>=22 && GET_Y_LPARAM(l)<108){p->end();SetFocus(h);SetCapture(h);p->previousY=GET_Y_LPARAM(l);p->drag.begin(p->normalized,p->previousY);p->dragging=p->services.beginEdit(p->services.owner,p->spec.id);return 0;}
-        if(m==WM_MOUSEMOVE && p->dragging){int y=GET_Y_LPARAM(l);p->apply(p->drag.move(y,(GetKeyState(VK_SHIFT)&0x8000)!=0));p->previousY=y;return 0;}
-        if(m==WM_LBUTTONUP){p->end();if(GetCapture()==h)ReleaseCapture();return 0;}
-        if(m==WM_CAPTURECHANGED || m==WM_KILLFOCUS || m==WM_CANCELMODE)p->end();
-        if(m==WM_RBUTTONDOWN){p->once(p->spec.toNormalized(p->spec.initial));return 0;}
-        if(m==WM_MOUSEWHEEL && GetFocus()==h){double step=p->spec.stepCount?1./p->spec.stepCount:((GetKeyState(VK_SHIFT)&0x8000)?.001:.01);p->once(std::clamp(p->normalized+GET_WHEEL_DELTA_WPARAM(w)/double(WHEEL_DELTA)*step,0.,1.));return 0;}
-        if(m==WM_KEYDOWN && (w==VK_LEFT || w==VK_RIGHT || w==VK_UP || w==VK_DOWN)){double step=p->spec.stepCount?1./p->spec.stepCount:((GetKeyState(VK_SHIFT)&0x8000)?.001:.01);p->once(std::clamp(p->normalized+((w==VK_RIGHT || w==VK_UP)?step:-step),0.,1.));return 0;}
-        if(m==WM_COMMAND && reinterpret_cast<HWND>(l)==p->value){
-            if(HIWORD(w)==EN_SETFOCUS){p->typing=true;p->cancelled=false;auto text=p->edit.begin(p->spec,p->policy,p->normalized);SetWindowTextW(p->value,controlWide(text.c_str()).c_str());}
-            if(HIWORD(w)==EN_KILLFOCUS){wchar_t wide[128]{};char text[512]{};GetWindowTextW(p->value,wide,128);WideCharToMultiByte(CP_UTF8,0,wide,-1,text,sizeof(text),nullptr,nullptr);double next=0;
-                bool changed=!p->cancelled && p->edit.changed(p->spec,p->policy,text,next);p->typing=false;if(changed)p->once(next);p->refresh(p->enabled);}return 0;
-        }
-        if(m==WM_PAINT){PAINTSTRUCT ps;HDC dc=BeginPaint(h,&ps);RECT rect;GetClientRect(h,&rect);FillRect(dc,&rect,reinterpret_cast<HBRUSH>(COLOR_WINDOW+1));int x=(rect.right-84)/2,y=23;
-            HBRUSH b=CreateSolidBrush(RGB(225,225,225));auto oldB=SelectObject(dc,b);Ellipse(dc,x,y,x+84,y+84);SelectObject(dc,oldB);DeleteObject(b);
-            HPEN pen=CreatePen(PS_SOLID,4,p->enabled?RGB(23,143,153):RGB(160,160,160));auto oldP=SelectObject(dc,pen);double a=rotaryAngle(p->normalized)*3.141592653589793/180.;
-            MoveToEx(dc,x+42+int(std::sin(a)*20),y+42-int(std::cos(a)*20),nullptr);LineTo(dc,x+42+int(std::sin(a)*34),y+42-int(std::cos(a)*34));SelectObject(dc,oldP);DeleteObject(pen);EndPaint(h,&ps);return 0;
+        if(m==WM_NCDESTROY){if(p->value==h)p->value=nullptr;RemoveWindowSubclass(h,editProc,1);return DefSubclassProc(h,m,w,l);}
+        if(m==WM_SETFOCUS)p->prepare();
+        if(m==WM_KEYDOWN && (w==VK_RETURN || w==VK_ESCAPE)){p->cancelled=w==VK_ESCAPE;SetFocus(p->window);return 0;}
+        // Native field remains editable under bypass, including text selection;
+        // grayscale its actual painted pixels without changing its edit buffer.
+        if(m==WM_PAINT && win::paused(h)){win::Paint paint(h);paint.graphics().Flush(Gdiplus::FlushIntentionSync);DefSubclassProc(h,WM_PRINTCLIENT,reinterpret_cast<WPARAM>(paint.dc()),PRF_CLIENT);return 0;}
+        return DefSubclassProc(h,m,w,l);}
+    static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l){auto* p=reinterpret_cast<WinRotary*>(GetWindowLongPtrW(h,GWLP_USERDATA));if(m==WM_NCCREATE){p=static_cast<WinRotary*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);p->window=h;SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(p));}if(!p)return DefWindowProcW(h,m,w,l);
+        switch(m){
+        case WM_DESTROY:p->clearTooltip();break;
+        case WM_NCDESTROY:p->ready=false;p->window=nullptr;SetWindowLongPtrW(h,GWLP_USERDATA,0);return DefWindowProcW(h,m,w,l);
+        case WM_ERASEBKGND:return 1;
+        case WM_PAINT:p->paint();return 0;
+        case WM_PRINTCLIENT:p->paint(reinterpret_cast<HDC>(w));return 0;
+        case WM_SIZE:p->layout();return 0;
+        case WM_GETDLGCODE:return DLGC_WANTARROWS;
+        case WM_LBUTTONDBLCLK:if(p->enabled && p->hit(l)){p->end();p->once(p->spec.toNormalized(p->spec.initial));}return 0;
+        case WM_LBUTTONDOWN:if(p->enabled && p->hit(l)){p->end();SetFocus(h);p->refresh(p->enabled);p->drag.begin(p->normalized,p->coordinate(l));p->dragging=p->services.beginEdit(p->services.owner,p->spec.id);if(p->dragging)SetCapture(h);}return 0;
+        case WM_MOUSEMOVE:if(p->dragging)p->apply(p->drag.move(p->coordinate(l),(GetKeyState(VK_SHIFT)&0x8000)!=0));return 0;
+        case WM_LBUTTONUP:p->end();if(GetCapture()==h)ReleaseCapture();return 0;
+        case WM_CAPTURECHANGED:case WM_KILLFOCUS:case WM_CANCELMODE:p->end();return 0;
+        case WM_RBUTTONDOWN:p->once(p->spec.toNormalized(p->spec.initial));return 0;
+        case WM_MOUSEWHEEL:if(GetFocus()==h){double step=p->spec.stepCount?1./p->spec.stepCount:((GetKeyState(VK_SHIFT)&0x8000)?.001:.01);p->once(std::clamp(p->normalized+GET_WHEEL_DELTA_WPARAM(w)/double(WHEEL_DELTA)*step,0.,1.));return 0;}break;
+        case WM_KEYDOWN:if(w==VK_ESCAPE){p->end();if(GetCapture()==h)ReleaseCapture();return 0;}if(w==VK_LEFT || w==VK_RIGHT || w==VK_UP || w==VK_DOWN){double step=p->spec.stepCount?1./p->spec.stepCount:((GetKeyState(VK_SHIFT)&0x8000)?.001:.01);p->once(std::clamp(p->normalized+((w==VK_RIGHT || w==VK_UP)?step:-step),0.,1.));return 0;}break;
+        case WM_CTLCOLOREDIT:case WM_CTLCOLORSTATIC:if(reinterpret_cast<HWND>(l)==p->value){auto dc=reinterpret_cast<HDC>(w);unsigned fg=p->policy.dark?0xeafcff:0x17333c,bg=p->backgroundColor();auto rgb=[&](unsigned c){if(win::paused(h)){unsigned v=((c>>16)*54+((c>>8)&255)*183+(c&255)*19)/256;return RGB(v,v,v);}return RGB(c>>16,(c>>8)&255,c&255);};SetTextColor(dc,rgb(fg));SetBkColor(dc,rgb(bg));if(p->background)DeleteObject(p->background);p->background=CreateSolidBrush(rgb(bg));return reinterpret_cast<LRESULT>(p->background);}break;
+        case WM_COMMAND:if(reinterpret_cast<HWND>(l)==p->value){if(HIWORD(w)==EN_SETFOCUS)p->prepare();if(HIWORD(w)==EN_KILLFOCUS && p->typing){auto text=win::utf8(win::windowText(p->value));double next=0;bool changed=!p->cancelled && p->edit.changed(p->spec,p->policy,text.c_str(),next);p->typing=false;if(changed)p->once(next);p->refresh(p->enabled);}return 0;}break;
         }return DefWindowProcW(h,m,w,l);
     }
 public:
-    WinRotary(HWND parent,const EditorServices& s,const ParameterSpec& p,DisplayPolicy d):services(s),spec(p),policy(d){
-        GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCWSTR>(&proc),&module);
-        WNDCLASSW c{};c.lpfnWndProc=proc;c.hInstance=module;c.lpszClassName=L"JUST.Shared.Rotary.v2";c.hCursor=LoadCursor(nullptr,IDC_ARROW);RegisterClassW(&c);
-        window=CreateWindowExW(0,c.lpszClassName,controlWide(spec.title).c_str(),WS_CHILD|WS_VISIBLE|WS_TABSTOP,0,0,112,136,parent,nullptr,module,this);
-        label=CreateWindowExW(0,L"STATIC",controlWide(spec.title).c_str(),WS_CHILD|WS_VISIBLE|SS_CENTER,0,0,112,22,window,nullptr,module,nullptr);
-        value=CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",L"",WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_CENTER|ES_AUTOHSCROLL,0,108,112,24,window,nullptr,module,nullptr);
-        SetWindowSubclass(value,editProc,1,reinterpret_cast<DWORD_PTR>(this));SendMessageW(label,WM_SETFONT,reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)),TRUE);SendMessageW(value,WM_SETFONT,reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)),TRUE);refresh(true);
-    }
-    ~WinRotary() override{end();RemoveWindowSubclass(value,editProc,1);DestroyWindow(window);}
-    void resize(int x,int y,int width,int height) override{MoveWindow(window,x,y,std::max(width,112),std::max(height,136),TRUE);MoveWindow(label,0,0,std::max(width,112),22,TRUE);MoveWindow(value,0,108,std::max(width,112),24,TRUE);}
-    void refresh(bool e) override{enabled=e;if(!e){end();if(GetCapture()==window)ReleaseCapture();}if(!dragging)normalized=services.readTarget(services.owner,spec.id);if(!typing){char text[128];formatDisplay(spec,normalized,services.view && services.view->advanced?DisplayContext::advanced:DisplayContext::simple,policy,text,sizeof(text));SetWindowTextW(value,controlWide(text).c_str());}EnableWindow(value,e);InvalidateRect(window,nullptr,FALSE);}
-    void* nativeHandle() const noexcept override{return window;}
+    WinRotary(HWND parent,const EditorServices& s,const ParameterSpec& p,DisplayPolicy d):services(s),spec(p),policy(d){module=win::moduleAt(reinterpret_cast<const void*>(&proc));WNDCLASSW c{};c.style=CS_DBLCLKS;c.lpfnWndProc=proc;c.hInstance=module;c.lpszClassName=L"JUST.Shared.Rotary.v3";c.hCursor=LoadCursor(nullptr,IDC_ARROW);if(!windowClass.acquire(c))return;
+        window=CreateWindowExW(0,c.lpszClassName,win::wide(spec.title).c_str(),WS_CHILD|WS_VISIBLE|WS_TABSTOP|WS_CLIPCHILDREN,0,0,112,148,parent,nullptr,module,this);if(!window)return;
+        value=CreateWindowExW(0,L"EDIT",L"",WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_RIGHT|ES_AUTOHSCROLL,0,108,112,24,window,reinterpret_cast<HMENU>(1),module,nullptr);if(!value || !SetWindowSubclass(value,editProc,1,reinterpret_cast<DWORD_PTR>(this)))return;SendMessageW(value,EM_SETLIMITTEXT,127,0);
+        // Match the Mac value field's unit tooltip; never attach this to the
+        // EQ graph or rotary title. Keep the UTF-16 text alive with the HWND.
+        unitHelp=win::wide(spec.unit);if(!unitHelp.empty()){
+            unitTooltip=CreateWindowExW(WS_EX_TOPMOST,TOOLTIPS_CLASSW,nullptr,WS_POPUP|TTS_ALWAYSTIP|TTS_NOPREFIX,0,0,0,0,window,nullptr,module,nullptr);
+            if(unitTooltip){TOOLINFOW info{};info.cbSize=sizeof(info);info.uFlags=TTF_IDISHWND|TTF_SUBCLASS;info.hwnd=window;info.uId=reinterpret_cast<UINT_PTR>(value);info.lpszText=unitHelp.data();if(!SendMessageW(unitTooltip,TTM_ADDTOOLW,0,reinterpret_cast<LPARAM>(&info)))clearTooltip();}
+        }ready=true;layout();}
+    ~WinRotary() override{cancelled=true;typing=false;end();clearTooltip();if(window)DestroyWindow(window);if(valueFont)DeleteObject(valueFont);if(background)DeleteObject(background);}
+    void resize(int x,int y,int width,int height) override{int minimumHeight=policy.style==ControlStyle::horizontal?32:80;if(ControlGeometry::customTypography(policy))minimumHeight=std::max(minimumHeight,int(ControlGeometry::labelFieldHeight(policy)+28+ControlGeometry::readoutHeight(policy)));win::place(window,x,y,std::max(width,policy.style==ControlStyle::horizontal?240:54),std::max(height,minimumHeight));layout();}
+    void refresh(bool e) override{if(!window || !value)return;enabled=e;if(!e){end();cancelled=true;typing=false;if(GetCapture()==window)ReleaseCapture();}if(!dragging){double n=services.readTarget(services.owner,spec.id);if(std::isfinite(n))normalized=std::clamp(n,0.,1.);}if(!typing){char text[128];formatControlDisplay(spec,normalized,services.view && services.view->advanced?DisplayContext::advanced:DisplayContext::simple,policy,text,sizeof(text));auto s=win::wide(text);if(win::windowText(value)!=s)SetWindowTextW(value,s.c_str());}EnableWindow(value,e);layout();InvalidateRect(window,nullptr,FALSE);InvalidateRect(value,nullptr,FALSE);}
+    void* nativeHandle()const noexcept override{return ready?window:nullptr;}
 };
 }
-std::unique_ptr<RotaryControl> RotaryControl::create(void* parent,const EditorServices& services,const ParameterSpec& spec,DisplayPolicy policy){
-    if(!parent || !services.readTarget || !services.beginEdit || !services.performEdit || !services.endEdit)return {};return std::make_unique<WinRotary>(static_cast<HWND>(parent),services,spec,policy);
-}
+std::unique_ptr<RotaryControl> RotaryControl::create(void* parent,const EditorServices& services,const ParameterSpec& spec,DisplayPolicy policy){if(!parent || !services.readTarget || !services.beginEdit || !services.performEdit || !services.endEdit)return {};auto result=std::make_unique<WinRotary>(static_cast<HWND>(parent),services,spec,policy);if(!result->nativeHandle())return {};result->refresh(true);return result;}
 }

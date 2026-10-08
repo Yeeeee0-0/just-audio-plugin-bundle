@@ -21,6 +21,7 @@ if(APPLE)
     target_link_libraries(just_compressor_host_tests PRIVATE "-framework Cocoa")
     add_dependencies(just_compressor_host_tests Just_compressor)
 else()
+    target_sources(just_compressor_engine_tests PRIVATE ../../common/ui/ControlsWindows.cpp ../../common/ui/AnalysisViewWindows.cpp)
     target_link_libraries(just_compressor_engine_tests PRIVATE user32 gdi32)
 endif()
 
