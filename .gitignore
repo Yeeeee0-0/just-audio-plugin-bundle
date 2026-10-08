@@ -1,0 +1,13 @@
+/build/
+/third_party/vst3sdk/
+.DS_Store
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+*.mobileprovision

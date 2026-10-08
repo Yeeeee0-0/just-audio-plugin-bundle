@@ -1,0 +1,870 @@
+{
+  "status": "approved-for-local-registration-shared-extensions-pending",
+  "baselineCommit": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+  "baselineTree": "4f60dfa5b60e8295670e5bf45473d5ca2a9ddcb6",
+  "plugin": "compressor",
+  "branch": "codex/just-compressor",
+  "preserveProcessorAndControllerUID": true,
+  "registeredHostIDs": [
+    0,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119
+  ],
+  "parameterIDAllocation": "Explicit literal allocation approved by Dot on 2026-10-02; never derived from UI order, names or hashes.",
+  "parameters": [
+    {
+      "paramID": 0,
+      "stableKey": "compressor.bypass",
+      "title": "Bypass",
+      "unit": "",
+      "minimum": 0,
+      "maximum": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "enumOrdinals": [
+        {
+          "label": "Off",
+          "ordinal": 0
+        },
+        {
+          "label": "On",
+          "ordinal": 1
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 0,
+      "smoothingBehavior": "5 ms coefficient in wet/raw crossfade",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core-existing-host-id",
+      "physicalType": "boolean"
+    },
+    {
+      "paramID": 100,
+      "stableKey": "compressor.threshold_db",
+      "title": "Threshold",
+      "unit": "dBFS",
+      "minimum": -60,
+      "maximum": 0,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "dB one pole",
+      "normalizedInit": 1,
+      "golden": [
+        {
+          "physical": -60,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 1
+        },
+        {
+          "physical": 0,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 101,
+      "stableKey": "compressor.ratio",
+      "title": "Ratio",
+      "unit": ":1",
+      "minimum": 1,
+      "maximum": 20,
+      "initial": 2,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "log ratio one pole",
+      "normalizedInit": 0.23137821315975918,
+      "golden": [
+        {
+          "physical": 1,
+          "normalized": 0
+        },
+        {
+          "physical": 2,
+          "normalized": 0.23137821315975918
+        },
+        {
+          "physical": 20,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 102,
+      "stableKey": "compressor.attack_ms",
+      "title": "Attack",
+      "unit": "ms",
+      "minimum": 0.05,
+      "maximum": 200,
+      "initial": 10,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "log ms one pole",
+      "normalizedInit": 0.638809459365963,
+      "golden": [
+        {
+          "physical": 0.05,
+          "normalized": 0
+        },
+        {
+          "physical": 10,
+          "normalized": 0.638809459365963
+        },
+        {
+          "physical": 200,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 103,
+      "stableKey": "compressor.release_ms",
+      "title": "Release",
+      "unit": "ms",
+      "minimum": 10,
+      "maximum": 2000,
+      "initial": 100,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "log ms one pole",
+      "normalizedInit": 0.4345879896760937,
+      "golden": [
+        {
+          "physical": 10,
+          "normalized": 0
+        },
+        {
+          "physical": 100,
+          "normalized": 0.4345879896760937
+        },
+        {
+          "physical": 2000,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 104,
+      "stableKey": "compressor.style",
+      "title": "Style",
+      "unit": "enum",
+      "minimum": 0,
+      "maximum": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "enumOrdinals": [
+        {
+          "label": "Clean",
+          "ordinal": 0
+        },
+        {
+          "label": "Punch",
+          "ordinal": 1
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 5,
+      "smoothingBehavior": "5 ms coefficient crossfade of continuously running envelopes",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 105,
+      "stableKey": "compressor.detector",
+      "title": "Detector",
+      "unit": "enum",
+      "minimum": 0,
+      "maximum": 2,
+      "initial": 1,
+      "mapping": "linear",
+      "stepCount": 2,
+      "enumOrdinals": [
+        {
+          "label": "Peak",
+          "ordinal": 0
+        },
+        {
+          "label": "RMS",
+          "ordinal": 1
+        },
+        {
+          "label": "Blend",
+          "ordinal": 2
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 5,
+      "smoothingBehavior": "energy weight transition, RMS integration remains 10 ms",
+      "normalizedInit": 0.5,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 0.5
+        },
+        {
+          "physical": 2,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 106,
+      "stableKey": "compressor.rms_blend",
+      "title": "Peak/RMS Blend",
+      "unit": "%",
+      "minimum": 0,
+      "maximum": 100,
+      "initial": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "Blend only; retained in other detector modes",
+      "targetTransition": "continuous",
+      "smoothingMs": 5,
+      "smoothingBehavior": "weight in energy domain; UI percent converted to fraction",
+      "normalizedInit": 0.5,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 50,
+          "normalized": 0.5
+        },
+        {
+          "physical": 100,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 107,
+      "stableKey": "compressor.knee_db",
+      "title": "Knee",
+      "unit": "dB",
+      "minimum": 0,
+      "maximum": 24,
+      "initial": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "dB one pole",
+      "normalizedInit": 0.25,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 6,
+          "normalized": 0.25
+        },
+        {
+          "physical": 24,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 108,
+      "stableKey": "compressor.range_db",
+      "title": "Range",
+      "unit": "dB",
+      "minimum": 0,
+      "maximum": 36,
+      "initial": 24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "dB one pole; envelope bounded by effective smoothed Range",
+      "normalizedInit": 0.6666666666666666,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 24,
+          "normalized": 0.6666666666666666
+        },
+        {
+          "physical": 36,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 109,
+      "stableKey": "compressor.input_db",
+      "title": "Input",
+      "unit": "dB",
+      "minimum": -24,
+      "maximum": 24,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "dB one pole before detector/main path",
+      "normalizedInit": 0.5,
+      "golden": [
+        {
+          "physical": -24,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0.5
+        },
+        {
+          "physical": 24,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 110,
+      "stableKey": "compressor.makeup_db",
+      "title": "Makeup",
+      "unit": "dB",
+      "minimum": -12,
+      "maximum": 24,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "dB one pole only on compressed path",
+      "normalizedInit": 0.3333333333333333,
+      "golden": [
+        {
+          "physical": -12,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0.3333333333333333
+        },
+        {
+          "physical": 24,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 111,
+      "stableKey": "compressor.mix",
+      "title": "Mix",
+      "unit": "%",
+      "minimum": 0,
+      "maximum": 100,
+      "initial": 100,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "linear coherent dry/wet weight; percent to fraction",
+      "normalizedInit": 1,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 100,
+          "normalized": 1
+        },
+        {
+          "physical": 100,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 112,
+      "stableKey": "compressor.stereo_link",
+      "title": "Stereo Link",
+      "unit": "%",
+      "minimum": 0,
+      "maximum": 100,
+      "initial": 100,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "stereo only; hidden but retained in mono",
+      "targetTransition": "continuous",
+      "smoothingMs": 10,
+      "smoothingBehavior": "desired per-channel reduction blended toward deepest reduction in dB",
+      "normalizedInit": 1,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 100,
+          "normalized": 1
+        },
+        {
+          "physical": 100,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 113,
+      "stableKey": "compressor.sc_source",
+      "title": "SC Source",
+      "unit": "enum",
+      "minimum": 0,
+      "maximum": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "enumOrdinals": [
+        {
+          "label": "Internal",
+          "ordinal": 0
+        },
+        {
+          "label": "External",
+          "ordinal": 1
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 5,
+      "smoothingBehavior": "detector-input crossfade; no fallback when external bus missing",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 114,
+      "stableKey": "compressor.sc_gain_db",
+      "title": "SC Gain",
+      "unit": "dB",
+      "minimum": -24,
+      "maximum": 24,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "continuous",
+      "smoothingMs": 5,
+      "smoothingBehavior": "dB one pole; independent of main trim",
+      "normalizedInit": 0.5,
+      "golden": [
+        {
+          "physical": -24,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0.5
+        },
+        {
+          "physical": 24,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 115,
+      "stableKey": "compressor.sc_hp_enabled",
+      "title": "SC HP Enabled",
+      "unit": "boolean",
+      "minimum": 0,
+      "maximum": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "enumOrdinals": [
+        {
+          "label": "Off",
+          "ordinal": 0
+        },
+        {
+          "label": "On",
+          "ordinal": 1
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 5,
+      "smoothingBehavior": "filter path crossfade; state keeps updating",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 116,
+      "stableKey": "compressor.sc_hp_hz",
+      "title": "SC HP",
+      "unit": "Hz",
+      "minimum": 20,
+      "maximum": 2000,
+      "initial": 80,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "when HP enabled; saved while Off",
+      "targetTransition": "continuous",
+      "smoothingMs": 5,
+      "smoothingBehavior": "log frequency; effective DSP min(target,0.45Fs)",
+      "normalizedInit": 0.30102999566398114,
+      "golden": [
+        {
+          "physical": 20,
+          "normalized": 0
+        },
+        {
+          "physical": 80,
+          "normalized": 0.30102999566398114
+        },
+        {
+          "physical": 2000,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core-approved-stored-init-frequency"
+    },
+    {
+      "paramID": 117,
+      "stableKey": "compressor.sc_lp_enabled",
+      "title": "SC LP Enabled",
+      "unit": "boolean",
+      "minimum": 0,
+      "maximum": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "enumOrdinals": [
+        {
+          "label": "Off",
+          "ordinal": 0
+        },
+        {
+          "label": "On",
+          "ordinal": 1
+        }
+      ],
+      "automatable": true,
+      "applicableModes": "all",
+      "targetTransition": "discrete",
+      "smoothingMs": 5,
+      "smoothingBehavior": "filter path crossfade; state keeps updating",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 1,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core"
+    },
+    {
+      "paramID": 118,
+      "stableKey": "compressor.sc_lp_hz",
+      "title": "SC LP",
+      "unit": "Hz",
+      "minimum": 1000,
+      "maximum": 20000,
+      "initial": 12000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "when LP enabled; saved while Off",
+      "targetTransition": "continuous",
+      "smoothingMs": 5,
+      "smoothingBehavior": "log frequency; effective DSP min(target,0.45Fs)",
+      "normalizedInit": 0.829482217661603,
+      "golden": [
+        {
+          "physical": 1000,
+          "normalized": 0
+        },
+        {
+          "physical": 12000,
+          "normalized": 0.829482217661603
+        },
+        {
+          "physical": 20000,
+          "normalized": 1
+        }
+      ],
+      "implementation": "implemented-core-approved-stored-init-frequency"
+    },
+    {
+      "paramID": 119,
+      "stableKey": "compressor.lookahead_ms",
+      "title": "Lookahead",
+      "unit": "ms",
+      "minimum": 0,
+      "maximum": 10,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "enumOrdinals": null,
+      "automatable": true,
+      "applicableModes": "effective value bounded by prepared Maximum; retain physical value",
+      "targetTransition": "continuous",
+      "smoothingMs": 5,
+      "smoothingBehavior": "proposed detector tap crossfade with fixed main/dry/bypass PDC; not implemented",
+      "normalizedInit": 0,
+      "golden": [
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 0,
+          "normalized": 0
+        },
+        {
+          "physical": 10,
+          "normalized": 1
+        }
+      ],
+      "implementation": "pending-shared-pdc-protocol"
+    }
+  ],
+  "normalization": {
+    "linear": "n=(clamp(p,min,max)-min)/(max-min); inverse p=min+n*(max-min)",
+    "logarithmic": "n=log(clamp(p,min,max)/min)/log(max/min); inverse p=min*(max/min)^n",
+    "discrete": "physical ordinal=round(clamp(n,0,1)*stepCount); explicit enum label order approved by Dot",
+    "nonfinite": "Use declared physical Init then normalize; invalid physical values are bounded before DSP",
+    "cutoff": "Absolute Hz normalization stays independent of sample rate; only effective DSP cutoff is clamped to 0.45Fs",
+    "percent": "Host units 0..100 percent; Core Settings fractions 0..1"
+  },
+  "configurations": [
+    {
+      "id": 1000,
+      "stableKey": "compressor.maximum_lookahead",
+      "type": "enum",
+      "enumOrdinals": [
+        {
+          "ordinal": 0,
+          "label": "0 ms",
+          "milliseconds": 0
+        },
+        {
+          "ordinal": 1,
+          "label": "5 ms",
+          "milliseconds": 5
+        },
+        {
+          "ordinal": 2,
+          "label": "10 ms",
+          "milliseconds": 10
+        }
+      ],
+      "initial": 0,
+      "automatable": false,
+      "saved": true,
+      "implementation": "pending-shared-pdc-protocol",
+      "transition": "Allocate/prepare off audio thread; wait for host latency-change acknowledgement; do not change PDC from applyTargets; exact PDC ceil(Fs*maximum_ms/1000)"
+    }
+  ],
+  "commands": [
+    {
+      "stableKey": "compressor.sc_listen",
+      "type": "transient monitor command",
+      "paramID": null,
+      "automatable": false,
+      "savedInSoundState": false,
+      "initial": false,
+      "implementation": "pending-shared-command-bridge",
+      "behavior": "Audition detector signal; visible while editor closed; never fabricate a sound parameter for this command"
+    }
+  ],
+  "viewState": {
+    "simple": [
+      "compressor.threshold_db",
+      "compressor.ratio",
+      "compressor.attack_ms",
+      "compressor.release_ms"
+    ],
+    "advancedRetainsAllValues": true,
+    "thresholdLine": "Shares Threshold ID100; no shadow Intensity parameter",
+    "switchingView": "Must not change targets/automation/engine history, apply Init, or reprepare DSP",
+    "GR": "Actual DSP compression-stage gain, negative dB; no simulated display"
+  },
+  "unresolvedSourceChoices": [
+    "V1 leaves cutoff frequencies while HP/LP are Off unspecified. Stored 80 Hz / 12 kHz Init values are implementation choices approved by Dot, not source facts.",
+    "V1 has no published effect integer IDs. Dot approved the explicit compressor.* key/ID table before module registration.",
+    "Fixed maximum-lookahead modes, processor/controller GR and actual SC bus-status delivery, SC Listen, complete presets/A-B/Undo need shared-owner extensions. No support is claimed."
+  ],
+  "requirementsToSharedOwner": {
+    "telemetry": {
+      "payload": "POD versioned module payload, bounded queue/latest snapshot. Must carry inputPeak/outputPeak/detectorPeak/gainReductionDb, connected/missing/silent SC state, bypass, invalid/saturation flags and actual latency.",
+      "routing": "Audio producer -> safe processor/controller bridge -> EditorServices read-only consumer, no DSP pointer to UI; no meter ParamID or host automation",
+      "meterDefinition": "gainReductionDb is minimum actual compression-stage dB gain within the published audio block; excludes Input Trim/Makeup/Mix and is labelled inactive during full bypass.",
+      "notConnected": "No bridge exists in baseline; Core readMeter is only a tested module-local producer/consumer."
+    },
+    "PDC": "Prepared maximum-lookahead configuration + acknowledgement bridge; no live applyTargets allocation or PDC mutation",
+    "commands": "Transient SC Listen routing visible in global status",
+    "presets": "Full sound targets/configuration for Init/presets/A-B/Undo; view state and envelopes excluded"
+  },
+  "approval": {
+    "reviewer": "Dot",
+    "sourceThread": "01a0f155-e216-71aa-9176-66f7b7fc9003",
+    "relayThread": "01a0f862-d309-7129-8d93-d4f6c1ea109a",
+    "dateLocal": "2026-10-02",
+    "scope": "IDs100-119 exact keys/ranges/Init/normalizers/enums and config1000 approved; baseline ID0 unit stays empty; nonzero lookahead and shared bridges remain unapplied"
+  }
+}

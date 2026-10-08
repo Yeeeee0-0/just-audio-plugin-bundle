@@ -1,0 +1,28 @@
+{
+  "slug": "distortion",
+  "status": "effect-development-checkpoint-with-shared-dependencies",
+  "algorithmImplemented": true,
+  "simpleControlLabels": [
+    "Model",
+    "Drive",
+    "High Cut",
+    "Mix"
+  ],
+  "conditionalCrush": [
+    "Model",
+    "Bits",
+    "Hold",
+    "Mix"
+  ],
+  "effectParameterRegistry": "approved-27-first-effect-IDs",
+  "parameterMap": "parameter-map.json",
+  "actualQuality": {
+    "factor": 4,
+    "latencySamples": 32,
+    "scope": "local nonlinear Soft/Hard/Asym/Fold; Crush base rate"
+  },
+  "qualitySwitchImplemented": false,
+  "telemetryUIConnected": false,
+  "standalone": false,
+  "releaseReady": false
+}

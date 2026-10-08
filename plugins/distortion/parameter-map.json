@@ -1,0 +1,1179 @@
+{
+  "status": "approved-first-effect-allocation",
+  "baseline": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+  "scope": "first effect parameter allocation; bypass 0 unchanged",
+  "parameters": [
+    {
+      "stableKey": "distortion.bypass",
+      "paramID": 0,
+      "title": "Bypass",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "all",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "On": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.model",
+      "paramID": 4096,
+      "title": "Model",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "initial": 1,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "modes": "all",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.2,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Clean": 0,
+        "Soft": 1,
+        "Hard": 2,
+        "Asym": 3,
+        "Fold": 4,
+        "Crush": 5
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 3.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 4.0
+        },
+        {
+          "normalized": 1,
+          "physical": 5.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.input_db",
+      "paramID": 4112,
+      "title": "Input",
+      "unit": "dB",
+      "min": -24,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "all",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.6666666666666666,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -24
+        },
+        {
+          "normalized": 0.25,
+          "physical": -15.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 3.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.output_db",
+      "paramID": 4113,
+      "title": "Output",
+      "unit": "dB",
+      "min": -36,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "all",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.75,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -36
+        },
+        {
+          "normalized": 0.25,
+          "physical": -24.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": -12.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 0.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.drive_db",
+      "paramID": 4128,
+      "title": "Drive",
+      "unit": "dB",
+      "min": 0,
+      "max": 36,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Soft/Hard/Asym/Fold",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 9.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 18.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 27.0
+        },
+        {
+          "normalized": 1,
+          "physical": 36
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.boost",
+      "paramID": 4129,
+      "title": "Boost",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "Soft/Hard/Asym/Fold",
+      "transition": "discrete",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "+12 dB": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.bias",
+      "paramID": 4130,
+      "title": "Bias",
+      "unit": "",
+      "min": -0.5,
+      "max": 0.5,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Asym/Fold",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -0.5
+        },
+        {
+          "normalized": 0.25,
+          "physical": -0.25
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 0.25
+        },
+        {
+          "normalized": 1,
+          "physical": 0.5
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.soft_shape",
+      "paramID": 4144,
+      "title": "Soft Shape",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "initial": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Soft",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 25.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 50.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 75.0
+        },
+        {
+          "normalized": 1,
+          "physical": 100
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.hard_softness",
+      "paramID": 4145,
+      "title": "Hard Softness",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "initial": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Hard",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 25.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 50.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 75.0
+        },
+        {
+          "normalized": 1,
+          "physical": 100
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.asym_shape",
+      "paramID": 4146,
+      "title": "Asym Shape",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "initial": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Asym",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 25.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 50.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 75.0
+        },
+        {
+          "normalized": 1,
+          "physical": 100
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.fold_shape",
+      "paramID": 4147,
+      "title": "Fold Shape",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "initial": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Fold",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 25.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 50.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 75.0
+        },
+        {
+          "normalized": 1,
+          "physical": 100
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.pre_hp_enabled",
+      "paramID": 4160,
+      "title": "Pre HP Enable",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "discrete",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "On": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.pre_hp_hz",
+      "paramID": 4161,
+      "title": "Pre HP",
+      "unit": "Hz",
+      "min": 20,
+      "max": 2000,
+      "initial": 80,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.30102999566398114,
+      "toNormalized": "clamp(ln(physical/min)/ln(max/min),0,1)",
+      "toPhysical": "min*exp(n*ln(max/min)); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 20.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 63.24555320336759
+        },
+        {
+          "normalized": 0.5,
+          "physical": 200.00000000000003
+        },
+        {
+          "normalized": 0.75,
+          "physical": 632.455532033676
+        },
+        {
+          "normalized": 1,
+          "physical": 2000.000000000001
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.pre_tilt_db",
+      "paramID": 4162,
+      "title": "Pre Tilt",
+      "unit": "dB",
+      "min": -12,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -12
+        },
+        {
+          "normalized": 0.25,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 6.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.post_bass_db",
+      "paramID": 4176,
+      "title": "Post Bass",
+      "unit": "dB",
+      "min": -12,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -12
+        },
+        {
+          "normalized": 0.25,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 6.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.post_treble_db",
+      "paramID": 4177,
+      "title": "Post Treble",
+      "unit": "dB",
+      "min": -12,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -12
+        },
+        {
+          "normalized": 0.25,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 6.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.post_lp_enabled",
+      "paramID": 4178,
+      "title": "Post LP Enable",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "discrete",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "On": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.post_lp_hz",
+      "paramID": 4179,
+      "title": "Post LP",
+      "unit": "Hz",
+      "min": 1000,
+      "max": 20000,
+      "initial": 16000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.9255128526390367,
+      "toNormalized": "clamp(ln(physical/min)/ln(max/min),0,1)",
+      "toPhysical": "min*exp(n*ln(max/min)); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 1000.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 2114.742526881128
+        },
+        {
+          "normalized": 0.5,
+          "physical": 4472.135954999579
+        },
+        {
+          "normalized": 0.75,
+          "physical": 9457.416090031758
+        },
+        {
+          "normalized": 1,
+          "physical": 19999.999999999996
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.crush_bits",
+      "paramID": 4192,
+      "title": "Bits",
+      "unit": "bit",
+      "min": 4,
+      "max": 24,
+      "initial": 12,
+      "mapping": "linear",
+      "stepCount": 20,
+      "automatable": true,
+      "modes": "Crush",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.4,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 4.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 9.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 14.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 19.0
+        },
+        {
+          "normalized": 1,
+          "physical": 24.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.crush_hold_hz",
+      "paramID": 4193,
+      "title": "Hold Rate",
+      "unit": "Hz",
+      "min": 500,
+      "max": 192000,
+      "initial": 12000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "Crush",
+      "transition": "continuous",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.5340690189777776,
+      "toNormalized": "clamp(ln(physical/min)/ln(max/min),0,1)",
+      "toPhysical": "min*exp(n*ln(max/min)); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 500.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 2213.3638394006434
+        },
+        {
+          "normalized": 0.5,
+          "physical": 9797.958971132713
+        },
+        {
+          "normalized": 0.75,
+          "physical": 43372.89617327255
+        },
+        {
+          "normalized": 1,
+          "physical": 192000.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.crush_aa",
+      "paramID": 4194,
+      "title": "Crush AA",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "Crush",
+      "transition": "discrete",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "On": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.crush_dither",
+      "paramID": 4195,
+      "title": "Dither",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "Crush",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "TPDF": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.makeup_db",
+      "paramID": 4208,
+      "title": "Makeup",
+      "unit": "dB",
+      "min": -24,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.6666666666666666,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -24
+        },
+        {
+          "normalized": 0.25,
+          "physical": -15.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 3.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.drive_comp",
+      "paramID": 4209,
+      "title": "Drive Compensation",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "discrete",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "Off": 0,
+        "On": 1
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1.0
+        },
+        {
+          "normalized": 1,
+          "physical": 1.0
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.match_gain_db",
+      "paramID": 4210,
+      "title": "Match Gain",
+      "unit": "dB",
+      "min": -12,
+      "max": 12,
+      "initial": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "wet non-Clean",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 0.5,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -12
+        },
+        {
+          "normalized": 0.25,
+          "physical": -6.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 6.0
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.mix",
+      "paramID": 4224,
+      "title": "Mix",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "initial": 100,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "modes": "all",
+      "transition": "continuous",
+      "smoothingMs": 10,
+      "normalizedInitial": 1.0,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {},
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 25.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 50.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 75.0
+        },
+        {
+          "normalized": 1,
+          "physical": 100
+        }
+      ]
+    },
+    {
+      "stableKey": "distortion.quality",
+      "paramID": 4240,
+      "title": "Quality",
+      "unit": "",
+      "min": 0,
+      "max": 3,
+      "initial": 2,
+      "mapping": "linear",
+      "stepCount": 3,
+      "automatable": false,
+      "modes": "prepared configuration",
+      "transition": "preparedConfiguration",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.6666666666666666,
+      "toNormalized": "clamp((physical-min)/(max-min),0,1)",
+      "toPhysical": "min+n*(max-min); n=round(clamp(normalized,0,1)*stepCount)/stepCount when stepCount>0",
+      "enumOrdinals": {
+        "1x": 0,
+        "2x": 1,
+        "4x": 2,
+        "8x": 3
+      },
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 1.0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 2.0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 2.0
+        },
+        {
+          "normalized": 1,
+          "physical": 3.0
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Model ordinal Clean0 Soft1 Hard2 Asym3 Fold4 Crush5; Model writes only model.",
+    "Post LP Off uses enable+absolute Hz IDs, no proxy host ID.",
+    "Hold target fixed logarithmic 500..192000 Hz, render clamps to Fs; changing Fs never remaps saved normalized target. Sample rates >192 kHz unsupported pending extension.",
+    "Quality ordinal1x0 2x1 4x2 8x3; nonautomatable, saved target only. First DSP prepared at fixed4x; requested quality retained but never applied until shared PDC bridge exists.",
+    "All model hidden values retained in shared schema1; no module migrations, commands or Mix Lock configuration allocated.",
+    "Shape IDs separate per model; percentages map to documented original formula choices, not extra hidden Drive.",
+    "Bypass ID0/type/mapping/default remain frozen; effective DSP soft bypass transition10ms is proposed, independent of placeholder smoothing metadata0ms.",
+    "Post LP effective=min(savedHz,20000,.45Fs), never written back to saved target.",
+    "Normalized clamp before step round; nonfinite converts to Init.",
+    "Model metadata smoothing0: actual bounded two prepared paths crossfade30ms; latest requested model coalesces.",
+    "Hard4x ADAA+linear correction approved for prototype integration; external fixed4x/PDC32 remains."
+  ],
+  "dependencies": [
+    "Prepared quality target / SoundState to prepare / host restart + PDC bridge; runtime fixed4x until available",
+    "Audio telemetry to controller: RMS/peak/clip/frequency/bus/Fs; no fabricated values",
+    "Capture/Reset command and static Match Gain write with one gesture, silence gate",
+    "Shared complete-state presets, A/B, Undo, Mix Lock; module does not reimplement",
+    "Conditional Simple Custom classification and foundation bypass tooltip"
+  ],
+  "approval": {
+    "authority": "dot",
+    "approvedProposalSHA256": "9518e312de9dfc2ac2efaea700a08563eb9db9d25aed7cfbc13648c9d515f800",
+    "scope": "27 unique IDs/keys,normalizedInit and135golden; registration authorized; not sound/quality/telemetry acceptance"
+  },
+  "v03NewInstanceDefault": {
+    "approvedBy": "user delegation via dot, 2026-10-03",
+    "model": "Soft",
+    "ordinal": 1,
+    "normalized": 0.2,
+    "compatibility": "Saved schema1 model=0 restores Clean without migration. No IDs, enum order or DSP mapping changed."
+  }
+}

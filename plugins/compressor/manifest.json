@@ -1,0 +1,72 @@
+{
+  "slug": "compressor",
+  "status": "development-vst3-registered-engine-shared-extensions-pending",
+  "algorithmImplemented": true,
+  "dspPrototypeImplemented": true,
+  "hostEffectIntegrationImplemented": true,
+  "grEditorTelemetryImplemented": false,
+  "nonzeroLookaheadImplemented": false,
+  "actualLatencySamples": 0,
+  "simpleControlLabels": [
+    "Threshold",
+    "Ratio",
+    "Attack",
+    "Release"
+  ],
+  "effectParameterRegistry": "reviewed-registered-21-literal-ids",
+  "parameterProposal": "parameter-proposal.json",
+  "parameterSpecsSource": "Parameters.hpp",
+  "registeredHostIDs": [
+    0,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119
+  ],
+  "nonautomatedConfiguration": {
+    "id": 1000,
+    "key": "compressor.maximum_lookahead",
+    "enumMilliseconds": [
+      0,
+      5,
+      10
+    ],
+    "initialOrdinal": 0,
+    "requestsRetained": true,
+    "nonzeroApplied": false
+  },
+  "nativeUI": {
+    "macOS": "built-and-loaded-tested",
+    "Windows": "source-only-unvalidated"
+  },
+  "processorUID": "4A555354202610010000000550524F43",
+  "controllerUID": "4A55535420261001000000054354524C",
+  "formats": [
+    "VST3"
+  ],
+  "standalone": false,
+  "pendingSharedInterfaces": [
+    "GR/SC telemetry",
+    "SC Listen",
+    "Maximum Lookahead/PDC acknowledgement",
+    "Complete presets/A-B/Undo",
+    "Real layout/Fs UI",
+    "Bypass tooltip"
+  ]
+}

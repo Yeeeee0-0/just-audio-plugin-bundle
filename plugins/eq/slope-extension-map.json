@@ -1,0 +1,492 @@
+{
+  "status": "APPROVED_2026-10-02",
+  "legacyParameterCount": 183,
+  "newParameterCount": 195,
+  "placement": "Append all 12 after the unchanged 183 existing specs; preserve legacy index(b,field)=3+15*b+field",
+  "mapping": "linear",
+  "min": 0,
+  "max": 3,
+  "stepCount": 3,
+  "default": 0,
+  "unit": "",
+  "smoothing": {
+    "mode": "dualPathCrossfade",
+    "durationMs": 5
+  },
+  "enumValues": [
+    {
+      "ordinal": 0,
+      "normalized": 0,
+      "label": "Legacy",
+      "meaning": "Use existing slope ParamID without reinterpretation"
+    },
+    {
+      "ordinal": 1,
+      "normalized": 0.3333333333333333,
+      "label": "18 dB/oct",
+      "dBPerOctave": 18
+    },
+    {
+      "ordinal": 2,
+      "normalized": 0.6666666666666666,
+      "label": "72 dB/oct",
+      "dBPerOctave": 72
+    },
+    {
+      "ordinal": 3,
+      "normalized": 1,
+      "label": "96 dB/oct",
+      "dBPerOctave": 96
+    }
+  ],
+  "parameters": [
+    {
+      "stableKey": "band01.slope_extension",
+      "paramID": 115,
+      "title": "01 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band02.slope_extension",
+      "paramID": 147,
+      "title": "02 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band03.slope_extension",
+      "paramID": 179,
+      "title": "03 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band04.slope_extension",
+      "paramID": 211,
+      "title": "04 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band05.slope_extension",
+      "paramID": 243,
+      "title": "05 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band06.slope_extension",
+      "paramID": 275,
+      "title": "06 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band07.slope_extension",
+      "paramID": 307,
+      "title": "07 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band08.slope_extension",
+      "paramID": 339,
+      "title": "08 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band09.slope_extension",
+      "paramID": 371,
+      "title": "09 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band10.slope_extension",
+      "paramID": 403,
+      "title": "10 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band11.slope_extension",
+      "paramID": 435,
+      "title": "11 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    },
+    {
+      "stableKey": "band12.slope_extension",
+      "paramID": 467,
+      "title": "12 Slope Extension",
+      "default": 0,
+      "min": 0,
+      "max": 3,
+      "stepCount": 3,
+      "mapping": "linear",
+      "unit": "",
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0,
+          "label": "Legacy",
+          "meaning": "Use existing slope ParamID without reinterpretation"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.3333333333333333,
+          "label": "18 dB/oct",
+          "dBPerOctave": 18
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.6666666666666666,
+          "label": "72 dB/oct",
+          "dBPerOctave": 72
+        },
+        {
+          "ordinal": 3,
+          "normalized": 1,
+          "label": "96 dB/oct",
+          "dBPerOctave": 96
+        }
+      ]
+    }
+  ],
+  "migration": "Schema/engine version unchanged; keyed decoder fills absent new IDs with zero. No writes to existing projects on read. Old frequency/Q/gain/slope/UID/defaults unchanged. Old-reader downgrade cannot reproduce extension and is not promised.",
+  "UI": "Unified sorted 6,12,18,24,36,48,72,96 dB/oct. Old choice edits legacy slope and extension=0; new choice edits extension only. Original legacy slope automation remains authoritative when extension=0.",
+  "DSP": "Preallocate 8 biquads per FilterBank;18=one first-order plus one second-order;72=6 second-order;96=8 second-order. Existing code path untouched for legacy modes. Existing 5ms dual-path crossfade, no audio thread allocations.",
+  "approvalSourceThread": "01a0fe64-f776-7770-bbb8-ebac7e00803c"
+}

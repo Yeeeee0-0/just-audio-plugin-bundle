@@ -1,0 +1,325 @@
+{
+  "slug": "gate",
+  "status": "effect-prototype-shared-dependencies-pending",
+  "algorithmImplemented": true,
+  "featureComplete": false,
+  "simpleControlLabels": [
+    "Threshold",
+    "Range",
+    "Attack",
+    "Release"
+  ],
+  "effectParameterRegistry": "first-allocation-technically-reviewed",
+  "parameterMap": "parameter-map.json",
+  "baseline": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+  "parameterSpecs": [
+    {
+      "stableKey": "gate.bypass",
+      "paramID": 0,
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "enumLabels": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "stableKey": "gate.mode",
+      "paramID": 100,
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "enumLabels": [
+        "Gate",
+        "Expand",
+        "Duck"
+      ]
+    },
+    {
+      "stableKey": "gate.threshold",
+      "paramID": 110,
+      "unit": "dBFS",
+      "min": -90,
+      "max": 0,
+      "default": -80,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.range",
+      "paramID": 111,
+      "unit": "dB",
+      "min": 0,
+      "max": 90,
+      "default": 24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.ratio",
+      "paramID": 112,
+      "unit": ":1",
+      "min": 1,
+      "max": 20,
+      "default": 2,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.knee",
+      "paramID": 113,
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.hysteresis",
+      "paramID": 120,
+      "unit": "dB",
+      "min": 0,
+      "max": 12,
+      "default": 3,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.attack",
+      "paramID": 121,
+      "unit": "ms",
+      "min": 0.05,
+      "max": 200,
+      "default": 1,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.hold",
+      "paramID": 122,
+      "unit": "ms",
+      "min": 0,
+      "max": 1000,
+      "default": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.release",
+      "paramID": 123,
+      "unit": "ms",
+      "min": 5,
+      "max": 2000,
+      "default": 100,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.detector",
+      "paramID": 130,
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "enumLabels": [
+        "Peak",
+        "RMS"
+      ]
+    },
+    {
+      "stableKey": "gate.sc_source",
+      "paramID": 131,
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "enumLabels": [
+        "Internal",
+        "External"
+      ]
+    },
+    {
+      "stableKey": "gate.sc_gain",
+      "paramID": 132,
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.sc_hp_enabled",
+      "paramID": 133,
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "enumLabels": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "stableKey": "gate.sc_hp_hz",
+      "paramID": 134,
+      "unit": "Hz",
+      "min": 20,
+      "max": 2000,
+      "default": 80,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.sc_lp_enabled",
+      "paramID": 135,
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "enumLabels": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "stableKey": "gate.sc_lp_hz",
+      "paramID": 136,
+      "unit": "Hz",
+      "min": 1000,
+      "max": 20000,
+      "default": 12000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.input",
+      "paramID": 140,
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.output",
+      "paramID": 141,
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    },
+    {
+      "stableKey": "gate.lookahead",
+      "paramID": 150,
+      "unit": "ms",
+      "min": 0,
+      "max": 10,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "enumLabels": []
+    }
+  ],
+  "implemented": [
+    "Gate / downward Expand / Duck",
+    "five-phase Gate and Duck triggers with captured Hold",
+    "dB gain envelopes and soft knee",
+    "Peak / fixed5ms RMS / fully linked stereo",
+    "internal or optional external SC with detector-only HP/LP",
+    "sample-offset automation and complete shared state",
+    "raw soft bypass",
+    "module-owned Simple / Advanced native UI"
+  ],
+  "sharedDependencies": [
+    "live GR / gate history / actual bus status to controller",
+    "temporary SC Listen command with reliable close/off",
+    "Maximum0/5/10ms prepared configuration and host PDC protocol",
+    "complete-state Preset / A-B / Undo",
+    "module-specific Bypass tooltip and shared runtime-v1 handoff"
+  ],
+  "runtime": {
+    "maximumLookaheadMs": 0,
+    "effectiveLookaheadMs": 0,
+    "latencySamples": 0,
+    "tail": "none",
+    "oversampling": "off",
+    "stereoLinkPercent": 100,
+    "rmsIntegrationMs": 5
+  },
+  "notValidated": [
+    "Windows build/runtime/UI",
+    "Intel Mac",
+    "macOS11 runtime",
+    "DAW scans/SC/PDC/offline sessions",
+    "real speech/Foley listening acceptance",
+    "final artwork/HiDPI/full accessibility"
+  ],
+  "uiPreview03": {
+    "approvedSource": "JUST-UI-Preview-0.3.html",
+    "simpleIDs": [
+      110,
+      111,
+      121,
+      123
+    ],
+    "iconResourceKey": "just.gate.icon",
+    "backgroundResourceKey": "just.ambient.background",
+    "analysis": "actual raw IO peaks + applied gain + Gate/Expand/Duck state, current threshold setting",
+    "detectorCurve": "unavailable; raw IO is not SC detector",
+    "nativeControls": "common RotaryControl::create/resize/refresh",
+    "audioCompatibility": "unchanged IDs / normalized maps / UIDs / schema-1 / DSP"
+  }
+}

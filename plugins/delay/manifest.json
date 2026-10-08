@@ -1,0 +1,41 @@
+{
+  "slug": "delay",
+  "status": "development-preview",
+  "algorithmImplemented": true,
+  "baseCommit": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+  "pluginIndex": 2,
+  "formats": [
+    "VST3"
+  ],
+  "standalone": false,
+  "buses": [
+    "1-to-1",
+    "1-to-2",
+    "2-to-2"
+  ],
+  "simpleControlLabels": [
+    "Time",
+    "Feedback",
+    "High Cut",
+    "Mix"
+  ],
+  "effectParameterRegistry": "technical-compatibility-reviewed-first-allocation",
+  "parameterGolden": "parameter-golden.json",
+  "parameterCount": 45,
+  "fixedLatencySamples": 15,
+  "routeOrdinals": {
+    "Stereo": 0,
+    "Dual": 1,
+    "Ping-Pong": 2
+  },
+  "sharedBridgePending": [
+    "Preset/A-B/Undo/Mix Lock transactions",
+    "Clear Tail command",
+    "Host Tempo/effective time/protection/duck telemetry to controller"
+  ],
+  "validationPlatforms": {
+    "macOSArm64": "measured",
+    "WindowsX64": "unverified",
+    "macOSIntel": "unverified"
+  }
+}

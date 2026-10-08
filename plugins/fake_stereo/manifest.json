@@ -1,0 +1,219 @@
+{
+  "slug": "fake_stereo",
+  "status": "v03-local-validated-serial-native-QA-pending",
+  "algorithmImplemented": true,
+  "simpleControlLabels": [
+    "Gain",
+    "Width",
+    "Asymmetry",
+    "Rotation"
+  ],
+  "effectParameterRegistry": "user-and-dot-approved-v03-append-only",
+  "parameterSpecs": [
+    {
+      "stableKey": "stereo.bypass",
+      "paramID": 0,
+      "unit": "boolean",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.inputGain",
+      "paramID": 10,
+      "unit": "dB",
+      "mapping": "linear",
+      "min": -24,
+      "max": 12,
+      "default": 0,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.outputGain",
+      "paramID": 11,
+      "unit": "dB",
+      "mapping": "linear",
+      "min": -24,
+      "max": 12,
+      "default": 0,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.generatedWidth",
+      "paramID": 20,
+      "unit": "%",
+      "mapping": "linear",
+      "min": 0,
+      "max": 200,
+      "default": 60,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.existingSide",
+      "paramID": 21,
+      "unit": "%",
+      "mapping": "linear",
+      "min": 0,
+      "max": 200,
+      "default": 100,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.mix",
+      "paramID": 22,
+      "unit": "%",
+      "mapping": "linear",
+      "min": 0,
+      "max": 100,
+      "default": 100,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.lowProtectHz",
+      "paramID": 30,
+      "unit": "Hz",
+      "mapping": "logarithmic",
+      "min": 30,
+      "max": 500,
+      "default": 150,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.highCutHz",
+      "paramID": 31,
+      "unit": "Hz",
+      "mapping": "logarithmic",
+      "min": 1000,
+      "max": 20000,
+      "default": 20000,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.highCutEnabled",
+      "paramID": 32,
+      "unit": "boolean",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.character",
+      "paramID": 40,
+      "unit": "boolean",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.swap",
+      "paramID": 41,
+      "unit": "boolean",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.monoCheck",
+      "paramID": 50,
+      "unit": "boolean",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.fieldWidth",
+      "paramID": 60,
+      "unit": "×",
+      "mapping": "linear",
+      "min": 0,
+      "max": 3,
+      "default": 1,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.asymmetry",
+      "paramID": 61,
+      "unit": "°",
+      "mapping": "linear",
+      "min": -90,
+      "max": 90,
+      "default": 0,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.rotation",
+      "paramID": 62,
+      "unit": "°",
+      "mapping": "linear",
+      "min": -45,
+      "max": 45,
+      "default": 0,
+      "stepCount": 0,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.inputMode",
+      "paramID": 63,
+      "unit": "enum",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.invertLeft",
+      "paramID": 64,
+      "unit": "enum",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    },
+    {
+      "stableKey": "stereo.invertRight",
+      "paramID": 65,
+      "unit": "enum",
+      "mapping": "linear",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "stepCount": 1,
+      "automatable": true
+    }
+  ],
+  "sharedDependencies": [
+    "final common shell/display name/assets/settings freeze",
+    "serial native module input acceptance",
+    "Windows common fader implementation and native validation"
+  ],
+  "displayName": "JUST Wider",
+  "assetKey": "fake_stereo"
+}

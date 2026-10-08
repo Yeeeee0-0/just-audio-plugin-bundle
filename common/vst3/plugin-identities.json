@@ -1,0 +1,268 @@
+[
+  {
+    "slug": "eq",
+    "name": "JUST EQ",
+    "slot": 1,
+    "processorUID": [
+      1247105876,
+      539365377,
+      1,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      1,
+      1129599564
+    ],
+    "bypassKey": "eq.bypass",
+    "bypassParamID": 0,
+    "width": 760,
+    "height": 460,
+    "simpleControls": [
+      "Frequency",
+      "Gain",
+      "Q",
+      "Shape"
+    ]
+  },
+  {
+    "slug": "reverb",
+    "name": "JUST Reverb",
+    "slot": 2,
+    "processorUID": [
+      1247105876,
+      539365377,
+      2,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      2,
+      1129599564
+    ],
+    "bypassKey": "reverb.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Decay",
+      "Pre-delay",
+      "High Cut",
+      "Mix"
+    ]
+  },
+  {
+    "slug": "delay",
+    "name": "JUST Delay",
+    "slot": 3,
+    "processorUID": [
+      1247105876,
+      539365377,
+      3,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      3,
+      1129599564
+    ],
+    "bypassKey": "delay.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Time",
+      "Feedback",
+      "High Cut",
+      "Mix"
+    ]
+  },
+  {
+    "slug": "tremolo",
+    "name": "JUST Tremolo",
+    "slot": 4,
+    "processorUID": [
+      1247105876,
+      539365377,
+      4,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      4,
+      1129599564
+    ],
+    "bypassKey": "trem.bypass",
+    "bypassParamID": 0,
+    "width": 640,
+    "height": 300,
+    "simpleControls": [
+      "Frequency",
+      "Amount",
+      "Stereo Separation"
+    ]
+  },
+  {
+    "slug": "compressor",
+    "name": "JUST Compressor",
+    "slot": 5,
+    "processorUID": [
+      1247105876,
+      539365377,
+      5,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      5,
+      1129599564
+    ],
+    "bypassKey": "compressor.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Threshold",
+      "Ratio",
+      "Attack",
+      "Release"
+    ]
+  },
+  {
+    "slug": "limiter",
+    "name": "JUST Limiter",
+    "slot": 6,
+    "processorUID": [
+      1247105876,
+      539365377,
+      6,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      6,
+      1129599564
+    ],
+    "bypassKey": "limiter.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Input",
+      "Ceiling",
+      "Release"
+    ]
+  },
+  {
+    "slug": "gate",
+    "name": "JUST Gate",
+    "slot": 7,
+    "processorUID": [
+      1247105876,
+      539365377,
+      7,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      7,
+      1129599564
+    ],
+    "bypassKey": "gate.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Threshold",
+      "Range",
+      "Release"
+    ]
+  },
+  {
+    "slug": "flanger",
+    "name": "JUST Flanger",
+    "slot": 8,
+    "processorUID": [
+      1247105876,
+      539365377,
+      8,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      8,
+      1129599564
+    ],
+    "bypassKey": "flan.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Rate",
+      "Depth",
+      "Feedback",
+      "Mix"
+    ]
+  },
+  {
+    "slug": "fake_stereo",
+    "name": "JUST Wider",
+    "slot": 9,
+    "processorUID": [
+      1247105876,
+      539365377,
+      9,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      9,
+      1129599564
+    ],
+    "bypassKey": "stereo.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Generated Width",
+      "Low Protect",
+      "Character"
+    ]
+  },
+  {
+    "slug": "distortion",
+    "name": "JUST Distortion",
+    "slot": 10,
+    "processorUID": [
+      1247105876,
+      539365377,
+      10,
+      1347571523
+    ],
+    "controllerUID": [
+      1247105876,
+      539365377,
+      10,
+      1129599564
+    ],
+    "bypassKey": "distortion.bypass",
+    "bypassParamID": 0,
+    "width": 720,
+    "height": 420,
+    "simpleControls": [
+      "Model",
+      "Drive",
+      "High Cut",
+      "Mix"
+    ]
+  }
+]

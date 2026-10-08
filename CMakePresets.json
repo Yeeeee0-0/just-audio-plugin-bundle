@@ -1,0 +1,121 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "mac-arm64",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/mac-arm64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
+    },
+    {
+      "name": "mac-universal",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/mac-universal",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64;x86_64"
+      }
+    },
+    {
+      "name": "windows-x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/windows-x64"
+    },
+    {
+      "name": "core-only",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/core",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "JUST_BUILD_VST3": "OFF"
+      }
+    },
+    {
+      "name": "mac-arm64-clt",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/mac-arm64-clt",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "XCODE_VERSION": "9.0"
+      },
+      "environment": {
+        "XCODE_VERSION": "CLT-compatibility-gate"
+      },
+      "displayName": "Apple Command Line Tools arm64 (SDK detection compatibility gate only)"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "mac-arm64",
+      "configurePreset": "mac-arm64",
+      "configuration": "Release"
+    },
+    {
+      "name": "mac-universal",
+      "configurePreset": "mac-universal",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "core-only",
+      "configurePreset": "core-only",
+      "configuration": "Release"
+    },
+    {
+      "name": "mac-arm64-clt",
+      "configurePreset": "mac-arm64-clt",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "mac-arm64",
+      "configurePreset": "mac-arm64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "mac-universal",
+      "configurePreset": "mac-universal",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "core-only",
+      "configurePreset": "core-only",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "mac-arm64-clt",
+      "configurePreset": "mac-arm64-clt",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

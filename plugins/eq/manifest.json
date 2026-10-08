@@ -1,0 +1,68 @@
+{
+  "slug": "eq",
+  "status": "implemented-development",
+  "algorithmImplemented": true,
+  "simpleControlLabels": [
+    "Frequency",
+    "Gain",
+    "Q",
+    "Shape"
+  ],
+  "effectParameterRegistry": "parameter-map.json",
+  "parameterSpecs": [
+    {
+      "stableKey": "eq.bypass",
+      "paramID": 0,
+      "title": "Bypass",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 5,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "linearRamp",
+        "durationMs": 5,
+        "domain": "dryWet",
+        "retrigger": "restart from current value only when target changes"
+      }
+    }
+  ],
+  "fieldModes": [
+    "Stereo",
+    "Mid",
+    "Side"
+  ],
+  "releaseReady": false,
+  "registeredParameterCount": 195,
+  "canonicalEffectParameterSpecs": "parameter-map.json",
+  "selectedBandControlLabels": [
+    "Frequency",
+    "Gain",
+    "Q",
+    "Shape",
+    "Sound field"
+  ],
+  "selectedBandControlCount": 5,
+  "selectedBandControlScope": "single floating panel edits the selected fixed band only; Sound field is the user-authorized 2026-10-02 Simple exception",
+  "interactionDefaults": {
+    "newBand": "Bell, 0 dB, Q=1/sqrt(2), Stereo, dynamics off; frequency from click",
+    "panelVisibility": "view-only; blank click hides, node selection shows; drag keeps panel frame stable"
+  },
+  "appendedParameterRegistry": "slope-extension-map.json",
+  "legacyParameterCount": 183
+}

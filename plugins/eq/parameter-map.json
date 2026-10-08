@@ -1,0 +1,4972 @@
+{
+  "schema": 1,
+  "review": {
+    "baseline": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+    "existingMappingPreserved": [
+      "eq.bypass=0"
+    ],
+    "checks": [
+      "unique literal numeric IDs and stable keys",
+      "no UI sorting dependency",
+      "absolute Hz targets, fixed normalization",
+      "all hidden values serialized",
+      "Stereo=0 Mid=1 Side=2",
+      "old schema1 missing fields use declared Init",
+      "complete enum ordinal/label/normalized/semantic values independently checked",
+      "actual 5ms bypass ramp and 10ms dynamic smoothing verified at four rates",
+      "audible offset23 matches per-sample reference and detects one-sample timing errors",
+      "old schema1 ID0=On expands 182 new Init values and renders bypass correctly"
+    ],
+    "status": "shared-owner technical approval recorded; current 183 parameter identities and numeric mappings frozen",
+    "approvalRecord": {
+      "date": "2026-10-02",
+      "reviewer": "Dot / shared integration owner",
+      "sourceThreadId": "01a0f862-d309-7129-8d93-d4f6c1ea109a",
+      "decision": "approved: freeze the current 183 parameter identities and numeric mappings; required technical corrections accepted",
+      "reviewedHead": "199113323de1f824712f9ce5bdb51f60e550b44b",
+      "reviewedTree": "239a9a99a2bb394383f4dc2b161d0a780b66f669",
+      "reviewedParameterMapSHA256": "ea87faa85362054393413bada7290dfb8bca6dde68506d7bed3b4bfac10f1457",
+      "scope": [
+        "current 183 literal IDs, stable keys and numeric mappings",
+        "enum ordinal/label golden coverage",
+        "declared bypass 5 ms linear and dynamic-control 10 ms one-pole corrections",
+        "audible Mid offset23 and legacy ID0=On Init/dry compatibility"
+      ],
+      "excluded": [
+        "Windows and DAW acceptance",
+        "actual host bus/sample-rate bridge and telemetry",
+        "final listening and visual acceptance",
+        "release or main merge"
+      ]
+    },
+    "requiredCorrections": [
+      "all enum ordinal/label mappings and independent golden coverage",
+      "5 ms bypass duration and 10 ms continuous dynamic control smoothing",
+      "audible sample-offset reference and old ID0=On state defaults"
+    ]
+  },
+  "parameters": [
+    {
+      "stableKey": "eq.bypass",
+      "paramID": 0,
+      "title": "Bypass",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 5,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "linearRamp",
+        "durationMs": 5,
+        "domain": "dryWet",
+        "retrigger": "restart from current value only when target changes"
+      }
+    },
+    {
+      "stableKey": "eq.input",
+      "paramID": 1,
+      "title": "Input",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "eq.output",
+      "paramID": 2,
+      "title": "Output",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band01.enabled",
+      "paramID": 100,
+      "title": "01 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band01.type",
+      "paramID": 101,
+      "title": "01 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band01.target",
+      "paramID": 102,
+      "title": "01 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band01.frequency",
+      "paramID": 103,
+      "title": "01 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band01.gain",
+      "paramID": 104,
+      "title": "01 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band01.q",
+      "paramID": 105,
+      "title": "01 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band01.slope",
+      "paramID": 106,
+      "title": "01 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band01.dynamic_enabled",
+      "paramID": 107,
+      "title": "01 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band01.range",
+      "paramID": 108,
+      "title": "01 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band01.threshold",
+      "paramID": 109,
+      "title": "01 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band01.knee",
+      "paramID": 110,
+      "title": "01 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band01.attack",
+      "paramID": 111,
+      "title": "01 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band01.release",
+      "paramID": 112,
+      "title": "01 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band01.detector",
+      "paramID": 113,
+      "title": "01 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band01.source",
+      "paramID": 114,
+      "title": "01 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band02.enabled",
+      "paramID": 132,
+      "title": "02 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band02.type",
+      "paramID": 133,
+      "title": "02 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band02.target",
+      "paramID": 134,
+      "title": "02 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band02.frequency",
+      "paramID": 135,
+      "title": "02 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band02.gain",
+      "paramID": 136,
+      "title": "02 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band02.q",
+      "paramID": 137,
+      "title": "02 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band02.slope",
+      "paramID": 138,
+      "title": "02 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band02.dynamic_enabled",
+      "paramID": 139,
+      "title": "02 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band02.range",
+      "paramID": 140,
+      "title": "02 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band02.threshold",
+      "paramID": 141,
+      "title": "02 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band02.knee",
+      "paramID": 142,
+      "title": "02 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band02.attack",
+      "paramID": 143,
+      "title": "02 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band02.release",
+      "paramID": 144,
+      "title": "02 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band02.detector",
+      "paramID": 145,
+      "title": "02 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band02.source",
+      "paramID": 146,
+      "title": "02 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band03.enabled",
+      "paramID": 164,
+      "title": "03 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band03.type",
+      "paramID": 165,
+      "title": "03 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band03.target",
+      "paramID": 166,
+      "title": "03 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band03.frequency",
+      "paramID": 167,
+      "title": "03 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band03.gain",
+      "paramID": 168,
+      "title": "03 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band03.q",
+      "paramID": 169,
+      "title": "03 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band03.slope",
+      "paramID": 170,
+      "title": "03 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band03.dynamic_enabled",
+      "paramID": 171,
+      "title": "03 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band03.range",
+      "paramID": 172,
+      "title": "03 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band03.threshold",
+      "paramID": 173,
+      "title": "03 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band03.knee",
+      "paramID": 174,
+      "title": "03 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band03.attack",
+      "paramID": 175,
+      "title": "03 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band03.release",
+      "paramID": 176,
+      "title": "03 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band03.detector",
+      "paramID": 177,
+      "title": "03 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band03.source",
+      "paramID": 178,
+      "title": "03 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band04.enabled",
+      "paramID": 196,
+      "title": "04 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band04.type",
+      "paramID": 197,
+      "title": "04 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band04.target",
+      "paramID": 198,
+      "title": "04 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band04.frequency",
+      "paramID": 199,
+      "title": "04 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band04.gain",
+      "paramID": 200,
+      "title": "04 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band04.q",
+      "paramID": 201,
+      "title": "04 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band04.slope",
+      "paramID": 202,
+      "title": "04 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band04.dynamic_enabled",
+      "paramID": 203,
+      "title": "04 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band04.range",
+      "paramID": 204,
+      "title": "04 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band04.threshold",
+      "paramID": 205,
+      "title": "04 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band04.knee",
+      "paramID": 206,
+      "title": "04 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band04.attack",
+      "paramID": 207,
+      "title": "04 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band04.release",
+      "paramID": 208,
+      "title": "04 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band04.detector",
+      "paramID": 209,
+      "title": "04 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band04.source",
+      "paramID": 210,
+      "title": "04 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band05.enabled",
+      "paramID": 228,
+      "title": "05 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band05.type",
+      "paramID": 229,
+      "title": "05 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band05.target",
+      "paramID": 230,
+      "title": "05 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band05.frequency",
+      "paramID": 231,
+      "title": "05 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band05.gain",
+      "paramID": 232,
+      "title": "05 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band05.q",
+      "paramID": 233,
+      "title": "05 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band05.slope",
+      "paramID": 234,
+      "title": "05 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band05.dynamic_enabled",
+      "paramID": 235,
+      "title": "05 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band05.range",
+      "paramID": 236,
+      "title": "05 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band05.threshold",
+      "paramID": 237,
+      "title": "05 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band05.knee",
+      "paramID": 238,
+      "title": "05 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band05.attack",
+      "paramID": 239,
+      "title": "05 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band05.release",
+      "paramID": 240,
+      "title": "05 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band05.detector",
+      "paramID": 241,
+      "title": "05 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band05.source",
+      "paramID": 242,
+      "title": "05 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band06.enabled",
+      "paramID": 260,
+      "title": "06 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band06.type",
+      "paramID": 261,
+      "title": "06 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band06.target",
+      "paramID": 262,
+      "title": "06 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band06.frequency",
+      "paramID": 263,
+      "title": "06 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band06.gain",
+      "paramID": 264,
+      "title": "06 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band06.q",
+      "paramID": 265,
+      "title": "06 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band06.slope",
+      "paramID": 266,
+      "title": "06 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band06.dynamic_enabled",
+      "paramID": 267,
+      "title": "06 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band06.range",
+      "paramID": 268,
+      "title": "06 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band06.threshold",
+      "paramID": 269,
+      "title": "06 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band06.knee",
+      "paramID": 270,
+      "title": "06 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band06.attack",
+      "paramID": 271,
+      "title": "06 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band06.release",
+      "paramID": 272,
+      "title": "06 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band06.detector",
+      "paramID": 273,
+      "title": "06 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band06.source",
+      "paramID": 274,
+      "title": "06 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band07.enabled",
+      "paramID": 292,
+      "title": "07 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band07.type",
+      "paramID": 293,
+      "title": "07 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band07.target",
+      "paramID": 294,
+      "title": "07 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band07.frequency",
+      "paramID": 295,
+      "title": "07 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band07.gain",
+      "paramID": 296,
+      "title": "07 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band07.q",
+      "paramID": 297,
+      "title": "07 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band07.slope",
+      "paramID": 298,
+      "title": "07 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band07.dynamic_enabled",
+      "paramID": 299,
+      "title": "07 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band07.range",
+      "paramID": 300,
+      "title": "07 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band07.threshold",
+      "paramID": 301,
+      "title": "07 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band07.knee",
+      "paramID": 302,
+      "title": "07 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band07.attack",
+      "paramID": 303,
+      "title": "07 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band07.release",
+      "paramID": 304,
+      "title": "07 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band07.detector",
+      "paramID": 305,
+      "title": "07 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band07.source",
+      "paramID": 306,
+      "title": "07 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band08.enabled",
+      "paramID": 324,
+      "title": "08 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band08.type",
+      "paramID": 325,
+      "title": "08 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band08.target",
+      "paramID": 326,
+      "title": "08 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band08.frequency",
+      "paramID": 327,
+      "title": "08 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band08.gain",
+      "paramID": 328,
+      "title": "08 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band08.q",
+      "paramID": 329,
+      "title": "08 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band08.slope",
+      "paramID": 330,
+      "title": "08 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band08.dynamic_enabled",
+      "paramID": 331,
+      "title": "08 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band08.range",
+      "paramID": 332,
+      "title": "08 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band08.threshold",
+      "paramID": 333,
+      "title": "08 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band08.knee",
+      "paramID": 334,
+      "title": "08 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band08.attack",
+      "paramID": 335,
+      "title": "08 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band08.release",
+      "paramID": 336,
+      "title": "08 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band08.detector",
+      "paramID": 337,
+      "title": "08 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band08.source",
+      "paramID": 338,
+      "title": "08 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band09.enabled",
+      "paramID": 356,
+      "title": "09 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band09.type",
+      "paramID": 357,
+      "title": "09 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band09.target",
+      "paramID": 358,
+      "title": "09 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band09.frequency",
+      "paramID": 359,
+      "title": "09 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band09.gain",
+      "paramID": 360,
+      "title": "09 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band09.q",
+      "paramID": 361,
+      "title": "09 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band09.slope",
+      "paramID": 362,
+      "title": "09 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band09.dynamic_enabled",
+      "paramID": 363,
+      "title": "09 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band09.range",
+      "paramID": 364,
+      "title": "09 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band09.threshold",
+      "paramID": 365,
+      "title": "09 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band09.knee",
+      "paramID": 366,
+      "title": "09 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band09.attack",
+      "paramID": 367,
+      "title": "09 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band09.release",
+      "paramID": 368,
+      "title": "09 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band09.detector",
+      "paramID": 369,
+      "title": "09 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band09.source",
+      "paramID": 370,
+      "title": "09 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band10.enabled",
+      "paramID": 388,
+      "title": "10 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band10.type",
+      "paramID": 389,
+      "title": "10 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band10.target",
+      "paramID": 390,
+      "title": "10 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band10.frequency",
+      "paramID": 391,
+      "title": "10 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band10.gain",
+      "paramID": 392,
+      "title": "10 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band10.q",
+      "paramID": 393,
+      "title": "10 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band10.slope",
+      "paramID": 394,
+      "title": "10 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band10.dynamic_enabled",
+      "paramID": 395,
+      "title": "10 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band10.range",
+      "paramID": 396,
+      "title": "10 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band10.threshold",
+      "paramID": 397,
+      "title": "10 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band10.knee",
+      "paramID": 398,
+      "title": "10 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band10.attack",
+      "paramID": 399,
+      "title": "10 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band10.release",
+      "paramID": 400,
+      "title": "10 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band10.detector",
+      "paramID": 401,
+      "title": "10 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band10.source",
+      "paramID": 402,
+      "title": "10 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band11.enabled",
+      "paramID": 420,
+      "title": "11 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band11.type",
+      "paramID": 421,
+      "title": "11 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band11.target",
+      "paramID": 422,
+      "title": "11 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band11.frequency",
+      "paramID": 423,
+      "title": "11 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band11.gain",
+      "paramID": 424,
+      "title": "11 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band11.q",
+      "paramID": 425,
+      "title": "11 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band11.slope",
+      "paramID": 426,
+      "title": "11 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band11.dynamic_enabled",
+      "paramID": 427,
+      "title": "11 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band11.range",
+      "paramID": 428,
+      "title": "11 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band11.threshold",
+      "paramID": 429,
+      "title": "11 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band11.knee",
+      "paramID": 430,
+      "title": "11 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band11.attack",
+      "paramID": 431,
+      "title": "11 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band11.release",
+      "paramID": 432,
+      "title": "11 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band11.detector",
+      "paramID": 433,
+      "title": "11 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band11.source",
+      "paramID": 434,
+      "title": "11 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band12.enabled",
+      "paramID": 452,
+      "title": "12 Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band12.type",
+      "paramID": 453,
+      "title": "12 Shape",
+      "unit": "",
+      "min": 0,
+      "max": 5,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 5,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Bell"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.2,
+          "label": "Low Shelf"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.4,
+          "label": "High Shelf"
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.6,
+          "label": "High Pass"
+        },
+        {
+          "ordinal": 4,
+          "normalized": 0.8,
+          "label": "Low Pass"
+        },
+        {
+          "ordinal": 5,
+          "normalized": 1.0,
+          "label": "Notch"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band12.target",
+      "paramID": 454,
+      "title": "12 Field",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Stereo"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.5,
+          "label": "Mid"
+        },
+        {
+          "ordinal": 2,
+          "normalized": 1.0,
+          "label": "Side"
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band12.frequency",
+      "paramID": 455,
+      "title": "12 Frequency",
+      "unit": "Hz",
+      "min": 20,
+      "max": 20000,
+      "default": 1000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band12.gain",
+      "paramID": 456,
+      "title": "12 Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band12.q",
+      "paramID": 457,
+      "title": "12 Q",
+      "unit": "",
+      "min": 0.1,
+      "max": 20,
+      "default": 0.7071067811865476,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band12.slope",
+      "paramID": 458,
+      "title": "12 Slope",
+      "unit": "dB/oct",
+      "min": 0,
+      "max": 4,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 4,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "6",
+          "dBPerOctave": 6
+        },
+        {
+          "ordinal": 1,
+          "normalized": 0.25,
+          "label": "12",
+          "dBPerOctave": 12
+        },
+        {
+          "ordinal": 2,
+          "normalized": 0.5,
+          "label": "24",
+          "dBPerOctave": 24
+        },
+        {
+          "ordinal": 3,
+          "normalized": 0.75,
+          "label": "36",
+          "dBPerOctave": 36
+        },
+        {
+          "ordinal": 4,
+          "normalized": 1.0,
+          "label": "48",
+          "dBPerOctave": 48
+        }
+      ],
+      "smoothing": {
+        "mode": "dualPathCrossfade",
+        "durationMs": 5,
+        "hostSwitch": "discrete at sample offset",
+        "retrigger": "latest target coalesced until current fade completes"
+      }
+    },
+    {
+      "stableKey": "band12.dynamic_enabled",
+      "paramID": 459,
+      "title": "12 Dynamic",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Off"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "On"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band12.range",
+      "paramID": 460,
+      "title": "12 Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 18,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band12.threshold",
+      "paramID": 461,
+      "title": "12 Threshold",
+      "unit": "dBFS",
+      "min": -80,
+      "max": 0,
+      "default": -24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band12.knee",
+      "paramID": 462,
+      "title": "12 Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "physical"
+      }
+    },
+    {
+      "stableKey": "band12.attack",
+      "paramID": 463,
+      "title": "12 Attack",
+      "unit": "ms",
+      "min": 0.5,
+      "max": 200,
+      "default": 20,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band12.release",
+      "paramID": 464,
+      "title": "12 Release",
+      "unit": "ms",
+      "min": 10,
+      "max": 2000,
+      "default": 200,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "smoothingMs": 10,
+      "smoothing": {
+        "mode": "onePole",
+        "timeConstantMs": 10,
+        "domain": "logPhysical"
+      }
+    },
+    {
+      "stableKey": "band12.detector",
+      "paramID": 465,
+      "title": "12 Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Peak"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "RMS"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    },
+    {
+      "stableKey": "band12.source",
+      "paramID": 466,
+      "title": "12 Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "smoothingMs": 0,
+      "enumValues": [
+        {
+          "ordinal": 0,
+          "normalized": 0.0,
+          "label": "Internal"
+        },
+        {
+          "ordinal": 1,
+          "normalized": 1.0,
+          "label": "External"
+        }
+      ],
+      "smoothing": {
+        "mode": "discrete",
+        "hostSwitch": "at sample offset",
+        "gainEnvelope": "band attack/release smooths the resulting dynamic gain"
+      }
+    }
+  ],
+  "reserved": {
+    "band13": "IDs 484-498 unexposed",
+    "band14": "IDs 516-530 unexposed",
+    "band15": "IDs 548-562 unexposed",
+    "band16": "IDs 580-594 unexposed"
+  },
+  "freezeRules": {
+    "status": "approved and frozen for the current 183 registered parameters",
+    "retain": [
+      "fixed per-band slots and literal IDs",
+      "stableKey",
+      "normalized mapping and absolute physical targets",
+      "enum ordinal and label order",
+      "Init and state restoration meaning",
+      "eq.bypass ID0 and Off/On identity",
+      "processor/controller UIDs"
+    ],
+    "laterChanges": "new IDs/slot exposure, enum/order/ranges/Init or migrations need formal compatibility review; UI sorting/selection never reassign IDs"
+  }
+}

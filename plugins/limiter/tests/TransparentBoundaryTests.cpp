@@ -1,0 +1,23 @@
+#include "plugins/limiter/TransparentDsp.hpp"
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <functional>
+#include <cstdlib>
+using namespace just;using namespace just::limiter;
+using Stereo=std::array<std::vector<double>,2>;
+struct Measurement {double inputPeak=0,samplePeak=0,independentPeak=0,nullPeak=0,gr=0;};
+static unsigned failures=0,cases=0;static bool deep=false;
+static double independentPeak(const Stereo& input){const int radius=deep?64:48,taps=2*radius+1,phases=deep?64:32;double peak=0;for(int p=0;p<phases;++p){std::vector<double> h(taps);double sum=0;for(int k=0;k<taps;++k){double d=k-radius-double(p)/phases;h[k]=std::abs(d)>=radius?0:(std::abs(d)<1e-12?1:std::sin(3.14159265358979323846*d)/(3.14159265358979323846*d))*(.42+.5*std::cos(3.14159265358979323846*d/radius)+.08*std::cos(2*3.14159265358979323846*d/radius));sum+=h[k];}for(auto&v:h)v/=sum;for(unsigned ch=0;ch<2;++ch)for(int n=0;n<int(input[ch].size());++n){double y=0;for(int k=0;k<taps;++k){int at=n-radius+k;if(at>=0&&at<int(input[ch].size()))y+=h[k]*input[ch][at];}peak=std::max(peak,std::abs(y));}}return peak;}
+static Measurement measure(const Stereo& input,double fs,bool tp){TransparentLimiterEngine e;if(!e.prepare({fs,128,2,2}))std::abort();auto s=initialState({},registry);s.targets[mode]=tp?1:0;e.applyTargets(s,0);Stereo output;for(auto&v:output)v.resize(input[0].size()+e.latencySamples()+100);Measurement m;for(std::size_t i=0;i<output[0].size();++i){double l=i<input[0].size()?input[0][i]:0,r=i<input[1].size()?input[1][i]:0;AudioBlock<double>b{{&l,&r},{&output[0][i],&output[1][i]},2,2,1};e.process(b,{});m.inputPeak=std::max({m.inputPeak,std::abs(l),std::abs(r)});m.samplePeak=std::max({m.samplePeak,std::abs(output[0][i]),std::abs(output[1][i])});m.gr=std::max(m.gr,e.appliedReductionDb());if(i>=e.latencySamples()&&i-e.latencySamples()<input[0].size())for(unsigned ch=0;ch<2;++ch)m.nullPeak=std::max(m.nullPeak,std::abs(output[ch][i]-input[ch][i-e.latencySamples()]));}m.independentPeak=independentPeak(output);return m;}
+static Stereo make(unsigned n,const std::function<std::array<double,2>(unsigned)>& f){Stereo s;for(auto&v:s)v.resize(n);for(unsigned i=0;i<n;++i){const auto x=f(i);s[0][i]=x[0];s[1][i]=x[1];}return s;}
+int main(int argc,char**){deep=argc>1;std::cout<<std::setprecision(15)<<"case,rate,tp,input_peak,output_sample_peak,output_independent_peak,null_peak,source_gr_db,pass\n";
+ auto run=[&](const std::string& name,const Stereo& s,double fs,bool tp,bool transparent){auto m=measure(s,fs,tp);bool pass=m.samplePeak<=1+1e-9&&(!tp||m.independentPeak<=1+1e-9)&&(!transparent||(m.nullPeak<3e-15&&m.gr==0));++cases;if(!pass)++failures;std::cout<<name<<','<<fs<<','<<tp<<','<<m.inputPeak<<','<<m.samplePeak<<','<<m.independentPeak<<','<<m.nullPeak<<','<<m.gr<<','<<pass<<'\n';std::cout.flush();};
+ const double fs=48000;
+ for(double f:{997.,12000.,18000.,22000.,23500.})for(unsigned phase=0;phase<4;++phase){if(deep&&f<22000)continue;auto low=make(2048,[=](unsigned n){return std::array<double,2>{.25*std::sin(2*pi*f*n/fs+phase*pi/4),.2*std::cos(2*pi*f*n/fs+.3)};});run("neutral_f"+std::to_string(int(f))+"_p"+std::to_string(phase),low,fs,true,true);auto high=make(2048,[=](unsigned n){return std::array<double,2>{1.2*std::sin(2*pi*f*n/fs+phase*pi/4),.3*std::cos(2*pi*f*n/fs+.3)};});run("limited_f"+std::to_string(int(f))+"_p"+std::to_string(phase),high,fs,true,false);}
+ for(unsigned distance:{1u,2u,8u,31u,32u,63u,64u,240u})for(int sign:{-1,1}){if(deep&&distance!=63&&distance!=64)continue;auto s=make(3072,[=](unsigned n){return std::array<double,2>{n==1024?2.:n==1024+distance?sign*3.:0.,.05*std::sin(n*.19)};});run("double_d"+std::to_string(distance)+"_s"+std::to_string(sign),s,fs,true,false);}
+ for(unsigned seed=1;seed<=4;++seed){auto s=make(4096,[=](unsigned n){return std::array<double,2>{.85*std::sin(n*(.132+seed*.19))+.65*std::cos(n*(1.713+seed*.07))+.55*std::sin(n*n*.0713*seed),.7*std::sin(n*(2.541-seed*.217))};});run("multitone_"+std::to_string(seed),s,fs,true,false);}
+ auto release=make(36000,[](unsigned n){return std::array<double,2>{n>=2048&&n<4096?2.5*std::sin(n*1.7):.1*std::sin(n*.31),.05*std::cos(n*.51)};});run("overload_release",release,fs,true,false);
+ for(double other:{44100.,96000.})for(double ratio:{.375,.49})for(unsigned phase=0;phase<2;++phase){if(deep&&ratio<.49)continue;auto s=make(2048,[=](unsigned n){return std::array<double,2>{1.2*std::sin(2*pi*ratio*n+phase*pi/4),.2*std::cos(n*.33)};});run("rate_edge_r"+std::to_string(ratio)+"_p"+std::to_string(phase),s,other,true,false);}
+ std::cerr<<"BOUNDARY cases="<<cases<<" failures="<<failures<<(deep?"; independent 64x129":"; independent 32x97")<<", finite selected signals only, not universal certification\n";return failures?1:0;
+}

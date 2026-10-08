@@ -1,0 +1,37 @@
+if(APPLE)
+    set(delay_ui EditorMac.mm)
+else()
+    set(delay_ui EditorWindows.cpp)
+    set(delay_ui_lib comctl32)
+endif()
+just_add_plugin(delay 2 SOURCES Module.cpp ${delay_ui} LIBRARIES ${delay_ui_lib})
+just_add_module_test(just_delay_tests SOURCES tests/DelayTests.cpp Module.cpp)
+target_compile_definitions(just_delay_tests PRIVATE JUST_DELAY_NO_NATIVE_UI=1)
+just_add_module_test(just_delay_vst3_tests SOURCES tests/DelayVst3Tests.cpp Module.cpp
+    ${PROJECT_SOURCE_DIR}/common/vst3/Processor.cpp
+    ${JUST_VST3_SDK}/public.sdk/source/common/memorystream.cpp LIBRARIES sdk sdk_hosting)
+target_compile_definitions(just_delay_vst3_tests PRIVATE JUST_DELAY_NO_NATIVE_UI=1 JUST_PLUGIN_INDEX=2 JUST_DELAY_PRESET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources/presets")
+if(APPLE)
+    target_link_libraries(just_delay_vst3_tests PRIVATE "-framework CoreFoundation")
+endif()
+
+if(APPLE)
+    if(JUST_ACTIVATED_UI_TESTS)
+        find_package(Python3 REQUIRED COMPONENTS Interpreter)
+        add_executable(just_delay_appearance_tests AppearanceTestsMac.mm Module.cpp EditorMac.mm
+            ${PROJECT_SOURCE_DIR}/common/ui/NativeEditorMac.mm ${PROJECT_SOURCE_DIR}/common/ui/ControlsMac.mm ${PROJECT_SOURCE_DIR}/common/ui/AnalysisViewMac.mm)
+        target_link_libraries(just_delay_appearance_tests PRIVATE just_common "-framework Cocoa")
+        target_compile_options(just_delay_appearance_tests PRIVATE $<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>)
+        set_target_properties(just_delay_appearance_tests PROPERTIES MACOSX_BUNDLE TRUE MACOSX_BUNDLE_GUI_IDENTIFIER "audio.just.delay-appearance-test")
+        add_test(NAME delay-activated-appearance COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tests/common/run-appearance-test.py" "$<TARGET_BUNDLE_DIR:just_delay_appearance_tests>" "${CMAKE_CURRENT_BINARY_DIR}/ui")
+    endif()
+    just_add_module_test(just_delay_feedback_editor_tests SOURCES tests/FeedbackEditorMac.mm EditorMac.mm Module.cpp ${PROJECT_SOURCE_DIR}/common/ui/ControlsMac.mm LIBRARIES "-framework Cocoa")
+    target_compile_options(just_delay_feedback_editor_tests PRIVATE $<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>)
+    just_add_module_test(just_delay_editor_tests SOURCES tests/EditorHostMac.mm
+        ${JUST_VST3_SDK}/public.sdk/source/vst/hosting/module_mac.mm
+        ${JUST_VST3_SDK}/public.sdk/source/common/memorystream.cpp LIBRARIES sdk_hosting "-framework Cocoa")
+    target_compile_options(just_delay_editor_tests PRIVATE $<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>)
+    get_target_property(delay_bundle Just_delay SMTG_PLUGIN_PACKAGE_PATH)
+    set_tests_properties(just_delay_editor_tests PROPERTIES DISABLED TRUE)
+    add_test(NAME delay-native-editor COMMAND just_delay_editor_tests "${delay_bundle}")
+endif()

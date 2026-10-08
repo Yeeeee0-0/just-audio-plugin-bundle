@@ -1,0 +1,855 @@
+{
+  "plugin": "JUST Gate",
+  "slug": "gate",
+  "baseline": "a8732a4ad86bd7c78d3ef23ea2f6b19f44cbc583",
+  "branch": "codex/just-gate",
+  "scope": "plugins/gate/",
+  "schemaVersion": 1,
+  "engineVersion": 1,
+  "reviewStatus": "first effect allocation technically reviewed; integration owned by dot",
+  "reviewEvidence": {
+    "review": "gate-compatibility-review.txt from shared foundation owner",
+    "sha256": "89e2907b22fd4465cab7cf57be417493ffbb3dc02f8d93c68c11d353ee5bfec3",
+    "reviewedParametersSHA256": "6691e7c8b8b6d68c5b6284d1001d54590ca9f4bffb30aba091be8067bf8c2858",
+    "scope": "IDs, enum ordinals, units, ranges, Init, normalization and zero-cap Lookahead; no independent DSP test rerun claimed"
+  },
+  "normalization": {
+    "linear": "n = clamp((physical-min)/(max-min),0,1)",
+    "logarithmic": "n = clamp(log(physical/min)/log(max/min),0,1)",
+    "toPhysical": "clamp n to [0,1]; discrete n=round(n*stepCount)/stepCount; linear min+(max-min)*n; logarithmic min*pow(max/min,n)",
+    "enum": "ordinal k has normalized k/stepCount; fixed ordered enumLabels; never interpolate host ordinals",
+    "nonfinite": "ParameterSpec uses declared Init; sound-state decoder rejects nonfinite saved values transactionally"
+  },
+  "parameterSpecs": [
+    {
+      "stableKey": "gate.bypass",
+      "paramID": 0,
+      "title": "Bypass",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 0,
+      "enumLabels": [
+        "Off",
+        "On"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1
+        },
+        {
+          "normalized": 1,
+          "physical": 1
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.mode",
+      "paramID": 100,
+      "title": "Mode",
+      "unit": "",
+      "min": 0,
+      "max": 2,
+      "initial": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 2,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 5,
+      "normalizedInitial": 0.5,
+      "enumLabels": [
+        "Gate",
+        "Expand",
+        "Duck"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 1
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 2
+        },
+        {
+          "normalized": 1,
+          "physical": 2
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.threshold",
+      "paramID": 110,
+      "title": "Threshold",
+      "unit": "dBFS",
+      "min": -90,
+      "max": 0,
+      "initial": -80,
+      "default": -80,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.1111111111111111,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -90
+        },
+        {
+          "normalized": 0.25,
+          "physical": -67.5
+        },
+        {
+          "normalized": 0.5,
+          "physical": -45
+        },
+        {
+          "normalized": 0.75,
+          "physical": -22.5
+        },
+        {
+          "normalized": 1,
+          "physical": 0
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.range",
+      "paramID": 111,
+      "title": "Range",
+      "unit": "dB",
+      "min": 0,
+      "max": 90,
+      "initial": 24,
+      "default": 24,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.26666666666666666,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 22.5
+        },
+        {
+          "normalized": 0.5,
+          "physical": 45
+        },
+        {
+          "normalized": 0.75,
+          "physical": 67.5
+        },
+        {
+          "normalized": 1,
+          "physical": 90
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.ratio",
+      "paramID": 112,
+      "title": "Ratio",
+      "unit": ":1",
+      "min": 1,
+      "max": 20,
+      "initial": 2,
+      "default": 2,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "Expand",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.23137821315975918,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 1
+        },
+        {
+          "normalized": 0.25,
+          "physical": 2.114742526881128
+        },
+        {
+          "normalized": 0.5,
+          "physical": 4.47213595499958
+        },
+        {
+          "normalized": 0.75,
+          "physical": 9.457416090031758
+        },
+        {
+          "normalized": 1,
+          "physical": 20
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.knee",
+      "paramID": 113,
+      "title": "Knee",
+      "unit": "dB",
+      "min": 0,
+      "max": 24,
+      "initial": 6,
+      "default": 6,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "Expand",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.25,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 6
+        },
+        {
+          "normalized": 0.5,
+          "physical": 12
+        },
+        {
+          "normalized": 0.75,
+          "physical": 18
+        },
+        {
+          "normalized": 1,
+          "physical": 24
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.hysteresis",
+      "paramID": 120,
+      "title": "Hysteresis",
+      "unit": "dB",
+      "min": 0,
+      "max": 12,
+      "initial": 3,
+      "default": 3,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "Gate,Duck",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.25,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 3
+        },
+        {
+          "normalized": 0.5,
+          "physical": 6
+        },
+        {
+          "normalized": 0.75,
+          "physical": 9
+        },
+        {
+          "normalized": 1,
+          "physical": 12
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.attack",
+      "paramID": 121,
+      "title": "Attack",
+      "unit": "ms",
+      "min": 0.05,
+      "max": 200,
+      "initial": 1,
+      "default": 1,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.36119054063403694,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0.05
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0.3976353643835253
+        },
+        {
+          "normalized": 0.5,
+          "physical": 3.1622776601683795
+        },
+        {
+          "normalized": 0.75,
+          "physical": 25.148668593658712
+        },
+        {
+          "normalized": 1,
+          "physical": 200
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.hold",
+      "paramID": 122,
+      "title": "Hold",
+      "unit": "ms",
+      "min": 0,
+      "max": 1000,
+      "initial": 50,
+      "default": 50,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "Gate,Duck",
+      "transition": "continuous",
+      "smoothingMs": 0,
+      "normalizedInitial": 0.05,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 250
+        },
+        {
+          "normalized": 0.5,
+          "physical": 500
+        },
+        {
+          "normalized": 0.75,
+          "physical": 750
+        },
+        {
+          "normalized": 1,
+          "physical": 1000
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.release",
+      "paramID": 123,
+      "title": "Release",
+      "unit": "ms",
+      "min": 5,
+      "max": 2000,
+      "initial": 100,
+      "default": 100,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.5,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 5
+        },
+        {
+          "normalized": 0.25,
+          "physical": 22.360679774997898
+        },
+        {
+          "normalized": 0.5,
+          "physical": 100
+        },
+        {
+          "normalized": 0.75,
+          "physical": 447.21359549995793
+        },
+        {
+          "normalized": 1,
+          "physical": 2000
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.detector",
+      "paramID": 130,
+      "title": "Detector",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 1,
+      "default": 1,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 0,
+      "normalizedInitial": 1,
+      "enumLabels": [
+        "Peak",
+        "RMS"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1
+        },
+        {
+          "normalized": 1,
+          "physical": 1
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_source",
+      "paramID": 131,
+      "title": "SC Source",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 3,
+      "normalizedInitial": 0,
+      "enumLabels": [
+        "Internal",
+        "External"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1
+        },
+        {
+          "normalized": 1,
+          "physical": 1
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_gain",
+      "paramID": 132,
+      "title": "SC Gain",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "External",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.5,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -24
+        },
+        {
+          "normalized": 0.25,
+          "physical": -12
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 12
+        },
+        {
+          "normalized": 1,
+          "physical": 24
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_hp_enabled",
+      "paramID": 133,
+      "title": "SC HP Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 3,
+      "normalizedInitial": 0,
+      "enumLabels": [
+        "Off",
+        "On"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1
+        },
+        {
+          "normalized": 1,
+          "physical": 1
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_hp_hz",
+      "paramID": 134,
+      "title": "SC HP",
+      "unit": "Hz",
+      "min": 20,
+      "max": 2000,
+      "initial": 80,
+      "default": 80,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.30102999566398114,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 20
+        },
+        {
+          "normalized": 0.25,
+          "physical": 63.24555320336759
+        },
+        {
+          "normalized": 0.5,
+          "physical": 200
+        },
+        {
+          "normalized": 0.75,
+          "physical": 632.4555320336758
+        },
+        {
+          "normalized": 1,
+          "physical": 2000
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_lp_enabled",
+      "paramID": 135,
+      "title": "SC LP Enabled",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 3,
+      "normalizedInitial": 0,
+      "enumLabels": [
+        "Off",
+        "On"
+      ],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 0
+        },
+        {
+          "normalized": 0.5,
+          "physical": 1
+        },
+        {
+          "normalized": 0.75,
+          "physical": 1
+        },
+        {
+          "normalized": 1,
+          "physical": 1
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.sc_lp_hz",
+      "paramID": 136,
+      "title": "SC LP",
+      "unit": "Hz",
+      "min": 1000,
+      "max": 20000,
+      "initial": 12000,
+      "default": 12000,
+      "mapping": "logarithmic",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.829482217661603,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 1000
+        },
+        {
+          "normalized": 0.25,
+          "physical": 2114.742526881128
+        },
+        {
+          "normalized": 0.5,
+          "physical": 4472.13595499958
+        },
+        {
+          "normalized": 0.75,
+          "physical": 9457.416090031758
+        },
+        {
+          "normalized": 1,
+          "physical": 20000
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.input",
+      "paramID": 140,
+      "title": "Input",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.5,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -24
+        },
+        {
+          "normalized": 0.25,
+          "physical": -12
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 12
+        },
+        {
+          "normalized": 1,
+          "physical": 24
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.output",
+      "paramID": 141,
+      "title": "Output",
+      "unit": "dB",
+      "min": -24,
+      "max": 24,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0.5,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": -24
+        },
+        {
+          "normalized": 0.25,
+          "physical": -12
+        },
+        {
+          "normalized": 0.5,
+          "physical": 0
+        },
+        {
+          "normalized": 0.75,
+          "physical": 12
+        },
+        {
+          "normalized": 1,
+          "physical": 24
+        }
+      ]
+    },
+    {
+      "stableKey": "gate.lookahead",
+      "paramID": 150,
+      "title": "Lookahead",
+      "unit": "ms",
+      "min": 0,
+      "max": 10,
+      "initial": 0,
+      "default": 0,
+      "mapping": "linear",
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "pending-maximum-configuration",
+      "transition": "continuous",
+      "smoothingMs": 3,
+      "normalizedInitial": 0,
+      "enumLabels": [],
+      "golden": [
+        {
+          "normalized": 0,
+          "physical": 0
+        },
+        {
+          "normalized": 0.25,
+          "physical": 2.5
+        },
+        {
+          "normalized": 0.5,
+          "physical": 5
+        },
+        {
+          "normalized": 0.75,
+          "physical": 7.5
+        },
+        {
+          "normalized": 1,
+          "physical": 10
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "ID0 bypass identity, key, range, Init, discrete mapping and empty unit are unchanged. Its audio fade is 5 ms; smoothing metadata remains 0.",
+    "Simple controls are literal IDs110,111,123; UI order never generates IDs.",
+    "Mode Gate0/Expand1/Duck2; Mode normalizes 0/.5/1; all other enums use fixed Off/On, Peak/RMS, Internal/External ordinals.",
+    "Continuous smoothing is in physical units over 3 ms; Hold0ms smoothing means capture only on the next fall below Close. Enum transition milliseconds describe audio crossfades, not normalized ordinal interpolation.",
+    "SC HP/LP enable flags preserve absolute-Hz targets while Off. Stored Off-state cutoff Init80Hz/12kHz are implementation choices where V1 specified only Off. Effective cutoff clamps at0.45Fs without changing saved normalization.",
+    "RMS is fixed5ms exponential energy integration and Stereo Link fixed100%; neither has a fictitious adjustable parameter.",
+    "Lookahead150 is a reserved, saved, host-automatable absolute0..10ms target with Init0. This build always uses Maximum0/effective0/PDC0; UI control disabled with reason. Nonzero target never claims implemented lookahead.",
+    "No Maximum Lookahead configuration key, SC Listen host parameter, fake telemetry parameter, legacy migration or public command namespace has been invented.",
+    "Bypass, all hidden/inactive targets and common schema1 seed/config entries save with the full state. UI preferences remain the common separate editor schema."
+  ]
+}

@@ -1,0 +1,3 @@
+# Preserve the original reference text and dependency license byte-for-byte.
+docs/reference/** -whitespace
+third_party/licenses/** -whitespace

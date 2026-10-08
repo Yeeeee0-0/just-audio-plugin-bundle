@@ -1,0 +1,247 @@
+{
+  "plugin": "fake_stereo",
+  "baseCommit": "0be3ed7f65ac84bdb58abf5ed425f3f712efcb8b",
+  "reviewStatus": "approved-by-user-and-dot-v03",
+  "schemaVersion": 1,
+  "allocation": "Explicit per-plugin IDs grouped by function; never derived from layout, names or hashes.",
+  "parameters": [
+    {
+      "id": 0,
+      "key": "stereo.bypass",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "enum": [
+        "Off",
+        "On"
+      ],
+      "smoothingMs": 5
+    },
+    {
+      "id": 10,
+      "key": "stereo.inputGain",
+      "unit": "dB",
+      "min": -24,
+      "max": 12,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 11,
+      "key": "stereo.outputGain",
+      "unit": "dB",
+      "min": -24,
+      "max": 12,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 20,
+      "key": "stereo.generatedWidth",
+      "unit": "%",
+      "min": 0,
+      "max": 200,
+      "init": 60,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 21,
+      "key": "stereo.existingSide",
+      "unit": "%",
+      "min": 0,
+      "max": 200,
+      "init": 100,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 22,
+      "key": "stereo.mix",
+      "unit": "%",
+      "min": 0,
+      "max": 100,
+      "init": 100,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 30,
+      "key": "stereo.lowProtectHz",
+      "unit": "Hz",
+      "min": 30,
+      "max": 500,
+      "init": 150,
+      "mapping": "logarithmic",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 31,
+      "key": "stereo.highCutHz",
+      "unit": "Hz",
+      "min": 1000,
+      "max": 20000,
+      "init": 20000,
+      "mapping": "logarithmic",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 32,
+      "key": "stereo.highCutEnabled",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "enum": [
+        "Off",
+        "On"
+      ],
+      "smoothingMs": 10
+    },
+    {
+      "id": 40,
+      "key": "stereo.character",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "enum": [
+        "Tight",
+        "Diffuse"
+      ],
+      "smoothingMs": 30
+    },
+    {
+      "id": 41,
+      "key": "stereo.swap",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "enum": [
+        "Off",
+        "On"
+      ],
+      "smoothingMs": 5
+    },
+    {
+      "id": 50,
+      "key": "stereo.monoCheck",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "enum": [
+        "Off",
+        "On"
+      ],
+      "smoothingMs": 5
+    },
+    {
+      "id": 60,
+      "key": "stereo.fieldWidth",
+      "unit": "×",
+      "min": 0,
+      "max": 3,
+      "init": 1,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 61,
+      "key": "stereo.asymmetry",
+      "unit": "°",
+      "min": -90,
+      "max": 90,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 62,
+      "key": "stereo.rotation",
+      "unit": "°",
+      "min": -45,
+      "max": 45,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 0,
+      "smoothingMs": 10
+    },
+    {
+      "id": 63,
+      "key": "stereo.inputMode",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "smoothingMs": 10,
+      "enum": [
+        "L/R",
+        "M/S"
+      ]
+    },
+    {
+      "id": 64,
+      "key": "stereo.invertLeft",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "smoothingMs": 5,
+      "enum": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "id": 65,
+      "key": "stereo.invertRight",
+      "unit": "",
+      "min": 0,
+      "max": 1,
+      "init": 0,
+      "mapping": "linear",
+      "steps": 1,
+      "smoothingMs": 5,
+      "enum": [
+        "Off",
+        "On"
+      ]
+    }
+  ],
+  "automatable": "All entries; stepCount controls host discreteness. Crossfades operate after discrete target switches.",
+  "highCutEncoding": "Finite independent enable+Hz targets; Off retains the stored absolute Hz. Effective DSP cutoff clamps to 0.45*Fs without changing saved normalization.",
+  "phase": "0.3 append-only field transform; old twelve entries unchanged",
+  "simple": [
+    10,
+    60,
+    61,
+    62
+  ],
+  "audition": 50,
+  "reviewDate": "2026-10-03",
+  "auditionBinding": "Fourth SimpleControlBinding is Mono Check audition; three primary controls remain.",
+  "signalOrder": "Input polarity / LR-MS decode > legacy generator/mix > asymmetry shear > M/S rotation > overall width > swap/mono/output; bypass raw host LR"
+}

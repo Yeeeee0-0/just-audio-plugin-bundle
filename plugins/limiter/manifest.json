@@ -1,0 +1,260 @@
+{
+  "slug": "limiter",
+  "status": "transparent-candidate-native-qa-pending",
+  "algorithmImplemented": true,
+  "simpleControlLabels": [
+    "Input Gain",
+    "Output Gain"
+  ],
+  "effectParameterRegistry": "approved-algorithm-version-id10",
+  "parameterSpecs": [
+    {
+      "stableKey": "limiter.bypass",
+      "paramID": 0,
+      "title": "Bypass",
+      "unit": "",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.0,
+      "stepCount": 1,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.input_db",
+      "paramID": 1,
+      "title": "Input",
+      "unit": "dB",
+      "min": -24.0,
+      "max": 36.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.4,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.ceiling_db",
+      "paramID": 2,
+      "title": "Ceiling",
+      "unit": "dB",
+      "min": -24.0,
+      "max": 0.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 1.0,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 0.0
+    },
+    {
+      "stableKey": "limiter.release_ms",
+      "paramID": 3,
+      "title": "Release",
+      "unit": "ms",
+      "min": 10.0,
+      "max": 2000.0,
+      "default": 200.0,
+      "mapping": "logarithmic",
+      "defaultNormalized": 0.5654120103239064,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.transient",
+      "paramID": 4,
+      "title": "Transient",
+      "unit": "%",
+      "min": 0.0,
+      "max": 100.0,
+      "default": 50.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.5,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.lookahead_ms",
+      "paramID": 5,
+      "title": "Lookahead",
+      "unit": "ms",
+      "min": 0.0,
+      "max": 5.0,
+      "default": 2.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.4,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "Live effective 0..1; Mix effective 0.1..5",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.comparison_trim_db",
+      "paramID": 6,
+      "title": "Comparison Trim",
+      "unit": "dB",
+      "min": -24.0,
+      "max": 0.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 1.0,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.mode",
+      "paramID": 7,
+      "title": "Processing Mode",
+      "unit": "",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.0,
+      "stepCount": 1,
+      "automatable": false,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 10.0,
+      "enumOrdinals": {
+        "Live Sample Peak": 0,
+        "Mix TP prototype": 1
+      }
+    },
+    {
+      "stableKey": "limiter.loudness_guide_lufs",
+      "paramID": 8,
+      "title": "Loudness Guide",
+      "unit": "LUFS",
+      "min": -30.0,
+      "max": -5.0,
+      "default": -23.0,
+      "mapping": "linear",
+      "defaultNormalized": 0.28,
+      "stepCount": 0,
+      "automatable": false,
+      "applicableModes": "display only",
+      "transition": "continuous",
+      "smoothingMs": 0.0
+    },
+    {
+      "stableKey": "limiter.output_db",
+      "paramID": 9,
+      "title": "Output Gain",
+      "unit": "dB",
+      "min": -36.0,
+      "max": 0.0,
+      "default": 0.0,
+      "mapping": "linear",
+      "defaultNormalized": 1.0,
+      "stepCount": 0,
+      "automatable": true,
+      "applicableModes": "all",
+      "transition": "continuous",
+      "smoothingMs": 5.0
+    },
+    {
+      "stableKey": "limiter.algorithm",
+      "paramID": 10,
+      "title": "Algorithm Version",
+      "unit": "",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 1.0,
+      "mapping": "linear",
+      "defaultNormalized": 1.0,
+      "stepCount": 1,
+      "automatable": false,
+      "applicableModes": "all",
+      "transition": "discrete",
+      "smoothingMs": 10.0,
+      "enumOrdinals": {
+        "Legacy compatibility": 0,
+        "Transparent insurance": 1
+      },
+      "restoreMissingDefault": 0.0
+    }
+  ],
+  "pdc": {
+    "formula": "ceil(sampleRate * 0.005) + 48",
+    "modeChangesPDC": false,
+    "sampleRates": [
+      {
+        "sampleRate": 44100,
+        "samples": 269,
+        "ms": 6.099773242630386
+      },
+      {
+        "sampleRate": 48000,
+        "samples": 288,
+        "ms": 6.0
+      },
+      {
+        "sampleRate": 96000,
+        "samples": 528,
+        "ms": 5.5
+      },
+      {
+        "sampleRate": 192000,
+        "samples": 1008,
+        "ms": 5.25
+      }
+    ],
+    "parts": {
+      "legacy": "unchanged 7d lookahead/alignment/FIR context",
+      "transparent": "fixed delay; TP consumes three detector radii, sample peak uses full requested lookahead"
+    }
+  },
+  "fixedStereoLinkPercent": 100,
+  "fixedMaximumLookaheadMs": 5,
+  "reserveUnregisteredParamIDs": {
+    "P1Sidechain": [
+      32,
+      63
+    ],
+    "P1Quality": [
+      64,
+      95
+    ]
+  },
+  "unimplemented": [
+    "Real native mouse/keyboard, final pixels, shared shell and multi-plugin acceptance pending",
+    "Native host CPU/deadline and user listening acceptance",
+    "LUFS M/S/I and formal TP compliance",
+    "Limiter factory preset catalog",
+    "P1 quality and sidechain",
+    "Windows runtime and Intel macOS validation",
+    "Windows shared vertical-fader drawing absent in current common"
+  ],
+  "algorithmVersions": {
+    "0": "Frozen 7d compatibility; missing ID10 restores0",
+    "1": "Transparent delayed dry path with linked sample/TP gain; new instances use1; SP full0..5ms; TP effective limit shown in UI"
+  },
+  "transparentTp": {
+    "audioPath": "delay and gain only",
+    "reconstructionPhases": 32,
+    "reconstructionTaps": 129,
+    "reserveAfterExcursionDb": 0.2,
+    "lookaheadMaximumFormula": "(ceil(sampleRate*0.005)+48-3*min(64,floor((ceil(sampleRate*0.005)+48)/3)))/sampleRate*1000",
+    "universalTruePeakGuarantee": false
+  }
+}

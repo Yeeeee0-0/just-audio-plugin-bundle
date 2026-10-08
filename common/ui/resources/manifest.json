@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "theme": {
+    "paper": "#edf3f5",
+    "ink": "#17333c",
+    "muted": "#758b93",
+    "accent": "#12b8c6"
+  },
+  "products": {
+    "compressor": {
+      "icon": "just.compressor.icon",
+      "background": "just.ambient.background"
+    },
+    "flanger": {
+      "icon": "just.flanger.icon",
+      "background": "just.ambient.background"
+    },
+    "limiter": {
+      "icon": "just.limiter.icon",
+      "background": "just.ambient.background"
+    },
+    "gate": {
+      "icon": "just.gate.icon",
+      "background": "just.ambient.background"
+    },
+    "eq": {
+      "icon": "just.eq.icon",
+      "background": "just.ambient.background"
+    },
+    "delay": {
+      "icon": "just.delay.icon",
+      "background": "just.ambient.background"
+    },
+    "reverb": {
+      "icon": "just.reverb.icon",
+      "background": "just.ambient.background"
+    },
+    "distortion": {
+      "icon": "just.distortion.icon",
+      "background": "just.ambient.background"
+    },
+    "fake_stereo": {
+      "icon": "just.fake_stereo.icon",
+      "background": "just.ambient.background"
+    },
+    "tremolo": {
+      "icon": "just.tremolo.icon",
+      "background": "just.ambient.background"
+    }
+  },
+  "assets": {
+    "just.compressor.icon": {
+      "kind": "image",
+      "path": "icons/compressor.png",
+      "sha256": "6455fe04bc3824aa63413d3853a63d2e6cf220696776d5dcbbbd9059f5c226fb"
+    },
+    "just.flanger.icon": {
+      "kind": "image",
+      "path": "icons/flanger.png",
+      "sha256": "255b75052f04cf27e0de4d49c2f1d840c34cb567e92087fd3d47a0bb56782dd4"
+    },
+    "just.limiter.icon": {
+      "kind": "image",
+      "path": "icons/limiter.png",
+      "sha256": "5b8d7367327173c54d6c38cd5b66e68274e483856ba0dbeea326dc35f6fb8891"
+    },
+    "just.gate.icon": {
+      "kind": "image",
+      "path": "icons/gate.png",
+      "sha256": "dcc0834f4c0ba84ea20748db65e74df7dd0ae7e46c4594f3c2cf01c894f95b0b"
+    },
+    "just.eq.icon": {
+      "kind": "image",
+      "path": "icons/eq.png",
+      "sha256": "d2b26aa1aa64828798416357e9880d1686bb825d289fa6d4a59f53f6ddbfaedc"
+    },
+    "just.delay.icon": {
+      "kind": "image",
+      "path": "icons/delay.png",
+      "sha256": "633298c6432916df80c1aa9bca841f439f31e4608533a17ca9533703733a132d"
+    },
+    "just.reverb.icon": {
+      "kind": "image",
+      "path": "icons/reverb.png",
+      "sha256": "9f0807dcb80ce4eaa95f493c2febc08a293a2b0ae71702b76d6f16b2439ad3e7"
+    },
+    "just.distortion.icon": {
+      "kind": "image",
+      "path": "icons/distortion.png",
+      "sha256": "955b0b4753cd67b43ba796a650ac18c1d4a9a0c03e88aee50658676cb3af504a"
+    },
+    "just.fake_stereo.icon": {
+      "kind": "image",
+      "path": "icons/fake_stereo.png",
+      "sha256": "b3d6ecc69bc4a21daae10631cac8153a4e101fdd742c8118b34e325dffe0ca1d"
+    },
+    "just.tremolo.icon": {
+      "kind": "image",
+      "path": "icons/tremolo.png",
+      "sha256": "e83238d9dac2448a51e763d15df1fc594a2948210f33ea294e5541eacc00d91b"
+    },
+    "just.ambient.background": {
+      "kind": "ambient",
+      "maxFps": 30
+    }
+  }
+}

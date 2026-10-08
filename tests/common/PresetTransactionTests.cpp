@@ -1,0 +1,71 @@
+#include "common/vst3/Processor.hpp"
+#include "common/vst3/Controller.hpp"
+#include "public.sdk/source/vst/hosting/hostclasses.h"
+#include "public.sdk/source/vst/hosting/parameterchanges.h"
+#include "public.sdk/source/common/memorystream.h"
+#include <iostream>
+#include <functional>
+using namespace Steinberg;using namespace Steinberg::Vst;
+static unsigned checks=0;
+static void check(bool ok,const char* label){++checks;if(!ok){std::cerr<<"FAIL "<<label<<"\n";std::exit(1);}}
+class Handler final:public FObject,public IComponentHandler,public IComponentHandler2 {
+public:
+    unsigned starts=0,ends=0,groups=0,finishes=0,dirty=0;
+    std::vector<std::pair<ParamID,double>> edits;
+    std::function<void(ParamID)> onBegin;
+    std::function<void(ParamID,double)> onPerform;
+    std::array<bool,just::maxParameters> active{};
+    tresult PLUGIN_API beginEdit(ParamID id) override{check(id<active.size() && !active[id],"nonoverlapping host begin");active[id]=true;++starts;if(onBegin)onBegin(id);return kResultOk;}
+    tresult PLUGIN_API performEdit(ParamID id,ParamValue v) override{check(id<active.size() && active[id] && std::isfinite(v),"perform within host gesture");edits.emplace_back(id,v);if(onPerform)onPerform(id,v);return kResultOk;}
+    tresult PLUGIN_API endEdit(ParamID id) override{check(id<active.size() && active[id],"balanced host end");active[id]=false;++ends;return kResultOk;}
+    tresult PLUGIN_API restartComponent(int32) override{return kResultOk;}
+    tresult PLUGIN_API setDirty(TBool value) override{dirty+=value;return kResultOk;}
+    tresult PLUGIN_API requestOpenEditor(FIDString) override{return kResultOk;}
+    tresult PLUGIN_API startGroupEdit() override{++groups;return kResultOk;}
+    tresult PLUGIN_API finishGroupEdit() override{++finishes;return kResultOk;}
+    OBJ_METHODS(Handler,FObject)
+    DEFINE_INTERFACES
+        DEF_INTERFACE(IComponentHandler)
+        DEF_INTERFACE(IComponentHandler2)
+    END_DEFINE_INTERFACES(FObject)
+    REFCOUNT_METHODS(FObject)
+};
+int main(){
+    HostApplication host;auto p=owned(new just::Processor);auto c=owned(new just::Controller);auto handler=owned(new Handler);
+    check(p->initialize(&host)==kResultOk && c->initialize(&host)==kResultOk,"initialize");c->setComponentHandler(handler);
+    check(p->connect(c)==kResultOk && c->connect(p)==kResultOk,"connect");ProcessSetup setup{kRealtime,kSample64,128,48000};check(p->setupProcessing(setup)==kResultOk && p->setActive(true)==kResultOk,"activate");
+    std::array<double,128> input{},output{};input.fill(.5);double* ins[]={input.data(),input.data()},*outs[]={output.data(),output.data()};AudioBusBuffers in{},out{};in.numChannels=out.numChannels=2;in.channelBuffers64=ins;out.channelBuffers64=outs;
+    ProcessData d{};d.numSamples=128;d.symbolicSampleSize=kSample64;d.numInputs=d.numOutputs=1;d.inputs=&in;d.outputs=&out;
+    auto process=[&](IParameterChanges* changes=nullptr){d.inputParameterChanges=changes;check(p->process(d)==kResultOk,"process preset block");d.inputParameterChanges=nullptr;};
+    auto ack=[&](){p->onTimer(nullptr);};auto registry=just::moduleDefinition().parameters;
+    just::SoundState before,desired,actual,captured;
+    check(c->capturePresetState(captured),"capture synchronized initial audio state");
+    c->setParamNormalized(1,.123);check(!c->capturePresetState(captured),"save rejects controller value not yet adopted by audio");c->setParamNormalized(1,captured.targets[1]);check(c->readCompleteSoundState(before),"complete before");just::moduleDefinition().factoryPresets[0].build(before.plugin,desired);
+    check(c->requestApplySoundState(desired),"request full state");check(!c->requestApplySoundState(before),"one request in flight");check(!c->capturePresetState(captured),"save rejects pending preset transaction");ack();check(c->readPresetTransaction()==just::PresetTransactionStatus::pending && handler->edits.empty(),"no host edits before audio applied");
+    process();ack();check(c->readCompleteSoundState(actual) && just::sameSoundState(actual,desired,registry),"complete desired adopted");check(handler->starts==1 && handler->ends==1 && handler->edits.size()==1 && handler->edits[0].second==.25 && handler->groups==1 && handler->finishes==1 && handler->dirty==1,"balanced grouped actual host notification");
+    check(c->capturePresetState(captured) && just::sameSoundState(captured,desired,registry),"save captures audio-confirmed whole preset");
+    check(c->canUndoLastPreset() && c->undoLastPreset(),"undo request");process();ack();check(c->readCompleteSoundState(actual) && just::sameSoundState(actual,before,registry),"full undo restores seed config targets");
+    const double unchanged=c->getParamNormalized(1);check(c->requestApplySoundState(desired),"request before identical host write");process();c->setParamNormalized(1,unchanged);handler->edits.clear();ack();
+    check(c->getParamNormalized(1)==unchanged && handler->edits.empty() && !c->canUndoLastPreset(),"explicit identical old host value still supersedes pending ACK");
+    check(c->requestApplySoundState(before),"request for host echo fixture");process();ack();
+    handler->onPerform=[&](ParamID id,double v){c->setParamNormalized(id,v);};check(c->requestApplySoundState(desired),"request with synchronous host echo");process();ack();
+    check(c->canUndoLastPreset(),"identical echo of own performEdit keeps valid Undo");handler->onPerform={};
+    handler->onBegin=[&](ParamID id){c->setParamNormalized(id,.37);};handler->edits.clear();check(c->requestApplySoundState(before),"request before reentrant host begin");process();ack();handler->onBegin={};
+    check(c->getParamNormalized(1)==.37 && handler->edits.empty() && !c->canUndoLastPreset(),"reentrant begin automation stays newer and gesture closes without stale perform");
+    // A newer controller automation value arriving before an old applied ACK must win.
+    check(c->requestApplySoundState(desired),"request before controller race");process();c->setParamNormalized(1,.61);handler->edits.clear();ack();
+    check(c->getParamNormalized(1)==.61,"late applied ACK preserves newer controller automation");
+    check(handler->edits.empty() && !c->canUndoLastPreset(),"late ACK cannot echo stale preset back into host automation");
+    ParameterChanges automation(2);int32 qi=0,pi=0;auto* q=automation.addParameterData(1,qi);q->addPoint(0,.61,pi);process(&automation);ack();
+    check(c->readCompleteSoundState(actual) && actual.targets[1]==.61 && actual.seed==desired.seed,"automation wins while full nonparameter state persists");
+    // Same-block sample offsets still run after the atomic preset.
+    check(c->requestApplySoundState(before),"request before audio automation race");automation.clearQueue();q=automation.addParameterData(1,qi);q->addPoint(0,.2,pi);q->addPoint(63,.7,pi);q->addPoint(127,.83,pi);process(&automation);ack();
+    check(c->readCompleteSoundState(actual) && actual.targets[1]==.83 && actual.seed==before.seed && actual.configurationCount==before.configurationCount,"same-block automation overrides parameter, never mixes config/seed");
+    check(!c->canUndoLastPreset(),"automation invalidates preset undo");
+    // A host restore supersedes a pending UI preset transaction.
+    check(c->requestApplySoundState(desired),"request before host restore");auto restore=before;restore.targets[1]=.42;restore.seed=1111;auto bytes=just::encodeState(restore,registry);MemoryStream stream;int32 written=0;stream.write(bytes.data(),bytes.size(),&written);stream.seek(0,IBStream::kIBSeekSet,nullptr);
+    check(p->setState(&stream)==kResultOk,"host restore staged");process();ack();check(c->readPresetTransaction()==just::PresetTransactionStatus::rejected && c->readCompleteSoundState(actual) && just::sameSoundState(actual,restore,registry),"restore wins and preset is rejected without mixed state");
+    auto bad=desired;bad.plugin.words[0]^=1;check(!c->requestApplySoundState(bad),"wrong UID rejected");bad=desired;bad.configurationCount=65;check(!c->requestApplySoundState(bad),"configuration bound rejects");
+    check(handler->starts==handler->ends && handler->groups==handler->finishes,"all host notifications balanced");
+    p->setActive(false);p->disconnect(c);c->disconnect(p);c->setComponentHandler(nullptr);c->terminate();p->terminate();std::cout<<"PASS "<<checks<<" complete preset/undo/host/automation conflict checks\n";
+}
