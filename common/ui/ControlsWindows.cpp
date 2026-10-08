@@ -8,6 +8,7 @@
 #include <oleacc.h>
 #include <UIAutomation.h>
 #include <atomic>
+#include <cstdio>
 #include <new>
 namespace just {
 namespace {
@@ -33,6 +34,7 @@ struct RotaryAccessRequest {
 class RotaryProvider final:public IRawElementProviderSimple,public IRangeValueProvider,public IValueProvider {
     std::atomic<ULONG> references{1};
     std::atomic<HWND> window;
+    const HWND identityWindow;
     HMODULE codeModule=nullptr;
     HRESULT request(RotaryAccessRequest& r) {
         auto h=window.load(std::memory_order_acquire);if(!h)return UIA_E_ELEMENTNOTAVAILABLE;
@@ -44,10 +46,19 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
     HRESULT read(RotaryAccessState& state){RotaryAccessRequest r;auto hr=request(r);if(SUCCEEDED(hr))state=std::move(r.state);return hr;}
     HRESULT numeric(double* out,double RotaryAccessState::*member){if(!out)return E_POINTER;*out=0;RotaryAccessState s;auto hr=read(s);if(SUCCEEDED(hr))*out=s.*member;return hr;}
     static HRESULT string(VARIANT* out,const std::wstring& text){out->vt=VT_BSTR;out->bstrVal=SysAllocString(text.c_str());return out->bstrVal?S_OK:E_OUTOFMEMORY;}
+    void diagnostic(const char* operation,HRESULT result)const {
+        wchar_t enabled[2]{};
+        if(GetEnvironmentVariableW(L"JUST_UIA_DIAGNOSTICS",enabled,2)!=1 || enabled[0]!=L'1')return;
+        std::fprintf(stderr,"JUST UIA %s hwnd=%p thread=%lu HRESULT=0x%08lX\n",operation,
+            static_cast<void*>(identityWindow),GetCurrentThreadId(),static_cast<unsigned long>(result));
+        std::fflush(stderr);
+    }
     static void CALLBACK disconnect(PTP_CALLBACK_INSTANCE instance,void* context) {
         auto* p=static_cast<RotaryProvider*>(context);auto module=p->codeModule;
         const auto hr=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
-        const auto disconnected=UiaDisconnectProvider(p);
+        p->diagnostic("CoInitializeEx(MTA)",hr);
+        const auto disconnected=SUCCEEDED(hr)?UiaDisconnectProvider(p):hr;
+        p->diagnostic("UiaDisconnectProvider",disconnected);
         if(SUCCEEDED(hr))CoUninitialize();
         // A failed disconnect must not unmap code while UIA still holds it.
         if(FAILED(disconnected))return;
@@ -56,7 +67,7 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
         // code mapped until this callback has returned, never FreeLibrary in it.
         FreeLibraryWhenCallbackReturns(instance,module);
     }
-    RotaryProvider(HWND h,HMODULE module):window(h),codeModule(module){}
+    RotaryProvider(HWND h,HMODULE module):window(h),identityWindow(h),codeModule(module){}
 public:
     static RotaryProvider* create(HWND h) {
         HMODULE module=nullptr;
@@ -70,6 +81,7 @@ public:
         // SendMessage handler. A module-pinned worker also covers parent-led
         // HWND destruction and a host unloading the VST3 immediately afterward.
         if(!TrySubmitThreadpoolCallback(disconnect,this,nullptr)) {
+            diagnostic("TrySubmitThreadpoolCallback",HRESULT_FROM_WIN32(GetLastError()));
             // On resource exhaustion retain this inert provider/module rather
             // than leave a UIA client pointing into unmapped plugin code.
         }
@@ -105,7 +117,14 @@ public:
         }return S_OK; // VT_EMPTY delegates geometry/native-window properties to the HWND host.
     }
     HRESULT STDMETHODCALLTYPE get_HostRawElementProvider(IRawElementProviderSimple** out) override {
-        if(!out)return E_POINTER;*out=nullptr;auto h=window.load();return h?UiaHostProviderFromHwnd(h,out):UIA_E_ELEMENTNOTAVAILABLE;
+        if(!out)return E_POINTER;*out=nullptr;
+        // This identifies the UIA Runtime ID even after native destruction.
+        // Microsoft's UIAutomationCleanShutdown sample explicitly preserves the
+        // original HWND here: checking its validity (or clearing it) prevents
+        // UiaDisconnectProvider from finding the old client proxies. Never use
+        // this identity handle to dispatch a control read/write; request() uses
+        // the separately invalidated live window and verifies provider identity.
+        return UiaHostProviderFromHwnd(identityWindow,out);
     }
     HRESULT STDMETHODCALLTYPE SetValue(double value) override {if(!std::isfinite(value))return E_INVALIDARG;RotaryAccessRequest r;r.kind=RotaryAccessRequest::setNumber;r.number=value;return request(r);}
     HRESULT STDMETHODCALLTYPE SetValue(LPCWSTR value) override {if(!value)return E_INVALIDARG;std::size_t length=0;while(length<256 && value[length])++length;if(length==256)return E_INVALIDARG;RotaryAccessRequest r;r.kind=RotaryAccessRequest::setText;r.text=value;return request(r);}

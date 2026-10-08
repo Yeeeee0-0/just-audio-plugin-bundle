@@ -122,6 +122,9 @@ void client(HWND host,Fixture& f){
 }
 }
 int main(){
+    // Capture the real COM/disconnect results in CTest logs; production hosts
+    // do not emit these opt-in diagnostics unless explicitly requested.
+    if(!SetEnvironmentVariableW(L"JUST_UIA_DIAGNOSTICS",L"1")){std::cerr<<"FAIL enable UIA lifecycle diagnostics\n";return 2;}
     const HRESULT com=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(com))return 2;
     Fixture fixture;std::string error;HANDLE done=CreateEventW(nullptr,TRUE,FALSE,nullptr);std::thread worker;
     try{

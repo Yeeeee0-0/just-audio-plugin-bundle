@@ -44,7 +44,7 @@ SDK bootstrap 访问官方 Steinberg Git 仓库，锁定 3.8.1 及其子模块�
 
 脚本在原生构建、CTest、PE AMD64 检查、SDK validator 和原生离屏测试通过后才生成 `build/candidates/` 下的未签名候选 ZIP。该 ZIP 不包含本机原始诊断日志；日志留在 `build/windows-evidence/`，对外分享前另做隐私检查。候选仍需真实 Windows REAPER 视觉、输入、音频、预设和自动化验收。
 
-`KNOWN-DIFFERENCES-zh.md` 保留已知自绘旋钮无障碍缺口；`ACCEPTANCE-zh.md` 所有 Windows 验收项初始为未验证。本公开候选未附旧 Mac 截图或运行日志，Mac 源码和共享模型只作实现合同，不能冒充像素对照证据。
+`KNOWN-DIFFERENCES-zh.md` 记录平台绘制、无障碍实测和数值对照边界；`ACCEPTANCE-zh.md` 的用户机验收项初始为未验证。本公开候选未附旧 Mac 截图或运行日志，Mac 源码和共享模型只作实现合同，不能冒充像素对照证据。
 
 安装与恢复脚本属于显式人工选择的本地候选测试流程。只有在当前用户确认安装目标、正常关闭 REAPER、完成并核验备份后使用。备份可能含 REAPER 授权与用户设置，必须留在本地；不可提交 Git 或上传为 Release 资产。
 

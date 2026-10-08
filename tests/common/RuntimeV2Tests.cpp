@@ -30,6 +30,20 @@ static void pump(double seconds=.04){
     auto end=std::chrono::steady_clock::now()+std::chrono::milliseconds(int(seconds*1000));while(std::chrono::steady_clock::now()<end){MSG m;while(PeekMessageW(&m,nullptr,0,0,PM_REMOVE)){TranslateMessage(&m);DispatchMessageW(&m);}std::this_thread::sleep_for(std::chrono::milliseconds(1));}
 #endif
 }
+static void checkAuditionPhase(just::Controller& controller,just::AuditionPhase expected,double rate,const char* label){
+#if defined(_WIN32)
+    // WM_TIMER is dispatched by the host message queue. One fixed 40 ms pump
+    // is not a completion barrier for a 33 ms timer on a loaded Windows runner.
+    // Await the actual publication with a bound shorter than the 250 ms lease;
+    // do not renew the lease, run another audio block, or synthesize the ACK.
+    const auto start=std::chrono::steady_clock::now();
+    const auto deadline=start+std::chrono::milliseconds(150);
+    while(controller.readAuditionStatus().phase!=expected && std::chrono::steady_clock::now()<deadline)pump(.004);
+    const auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-start).count();
+    std::cout<<"Windows audition dispatch rate="<<rate<<" expected="<<int(expected)<<" actual="<<int(controller.readAuditionStatus().phase)<<" wait_ms="<<elapsed<<" label="<<label<<std::endl;
+#endif
+    check(controller.readAuditionStatus().phase==expected,label);
+}
 static std::vector<std::uint8_t> saved(just::Processor& p){MemoryStream s;check(p.getState(&s)==kResultOk,"save complete state");auto* b=reinterpret_cast<std::uint8_t*>(s.getData());return {b,b+s.getSize()};}
 static void formatTest(){
     using namespace just;auto spec=moduleDefinition().parameters.specs[1];spec.minimum=-60;spec.maximum=12;spec.initial=0;spec.unit="dB";spec.title="Gain";
@@ -76,8 +90,8 @@ static void exercise(double rate){
     auto malformed=desired;malformed.targets[1]=std::numeric_limits<double>::quiet_NaN();check(!c->requestApplySoundState(malformed),"bad state rejected transactionally");
     check(c->requestApplySoundState(desired),"second preset accepted");render(false);pump();c->setParamNormalized(1,.45);check(!c->canUndoLastPreset(),"subsequent user edit invalidates last preset undo");
     // A command does not alter sound state and expires even without UI/main timer progress.
-    auto preAudition=saved(*p);auto token=c->beginAudition(1);check(token!=0,"audition begin token");render(false);pump();check(c->readAuditionStatus().phase==just::AuditionPhase::active,"audition audio ACK");
-    check(c->renewAudition(token),"audition renew accepted");for(unsigned i=0;i<unsigned(std::ceil(rate*.3/data.numSamples));++i)render(false);pump();check(c->readAuditionStatus().phase==just::AuditionPhase::ended,"audio lease expires with stalled main thread");check(saved(*p)==preAudition,"audition cannot serialize into sound state");
+    auto preAudition=saved(*p);auto token=c->beginAudition(1);check(token!=0,"audition begin token");render(false);pump();checkAuditionPhase(*c,just::AuditionPhase::active,rate,"audition audio ACK");
+    check(c->renewAudition(token),"audition renew accepted");for(unsigned i=0;i<unsigned(std::ceil(rate*.3/data.numSamples));++i)render(false);pump();checkAuditionPhase(*c,just::AuditionPhase::ended,rate,"audio lease expires with stalled main thread");check(saved(*p)==preAudition,"audition cannot serialize into sound state");
     check(c->beginAudition(999)==0,"unsupported target rejected");token=c->beginAudition(1);render(false);pump();c->endAudition(token);render(false);pump();check(c->readAuditionStatus().phase==just::AuditionPhase::ended,"release disables audition");
     token=c->beginAudition(1);check(token!=0,"queue a fresh begin before total pause");
     std::this_thread::sleep_for(std::chrono::milliseconds(600));render(false);
