@@ -11,7 +11,7 @@ new_checkout = not sdk.exists()
 if not new_checkout:
     if not (sdk/'.git').exists(): raise SystemExit('Existing SDK is a source copy; verify it explicitly or use a fresh checkout. Refusing overwrite.')
 else: run('git','clone','--no-checkout',lock['repository'],str(sdk))
-if sha(sdk)!=lock['commit']:
+if new_checkout or sha(sdk)!=lock['commit']:
     dirty=subprocess.check_output(['git','-C',str(sdk),'status','--porcelain'],text=True)
     # --no-checkout leaves the initial index empty. That is not a user's edit.
     if dirty and not new_checkout: raise SystemExit('SDK contains local changes; refusing checkout')
