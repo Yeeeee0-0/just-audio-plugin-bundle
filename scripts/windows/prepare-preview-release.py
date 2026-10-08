@@ -102,6 +102,7 @@ def main():
         'installer_check_count': installer_tests['checkCount'],
         'user_machine_reaper': 'NOT_RUN', 'manual_visual_audio_acceptance': 'NOT_RUN',
         'remaining_manual_validation': 'Real REAPER visual/audio/input and assistive-technology acceptance; see KNOWN-DIFFERENCES-zh.md.',
+        'cross_platform_limiter_golden': 'Numerical comparison within 8 double epsilons; Mac/Windows bit equality is not claimed. See CTest log and KNOWN-DIFFERENCES-zh.md.',
         'installer': asset(setup), 'portable': asset(portable), 'source': asset(source),
         'evidence': asset(evidence), 'plugins': candidate['plugins'],
         'dependencies': read(ROOT/'third_party/dependency-lock.json'),

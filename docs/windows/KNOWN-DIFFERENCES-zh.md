@@ -17,7 +17,13 @@
 
 后续补齐：旋钮 provider 通过原 HWND 将读写转交 UI 线程，提供禁用/值/名称/焦点事件；窗口销毁后接口失效。新增隐藏窗口中的真实 Windows UIA 客户端测试覆盖角色、范围、读写、拒绝写入、中文名称、原参数 ID/手势和销毁。该实现不改变旋钮绘制正文、DSP 或 Mac 代码；各预发布是否通过该原生测试以其证据为准。
 
-## 已收敛的源码差异（待原生运行确认）
+## 数值与测试适配边界
+
+Mac 捕获的 Limiter 历史音频 fixture 含平台数学库产生的浮点结果。Windows 第 7 轮测试实测 mode 0 最大差值 `4.16334e-17`，因此原 Mac 的 `error == 0` 不能直接作为跨运行库判定。Mac 原测试、原 fixture 和 DSP 全部保留不变；Windows 单独的 `LegacyStateWindows.cpp` 保留旧状态/参数映射断言，逐样本检查有限值、完整样本数，并要求最大归一误差不超过八个 double epsilon（`1.7763568394002505e-15`）。日志记录两个模式的最大误差、RMS 与不相等样本数。它证明的是该阈值内的数值一致，**不证明 Mac/Windows 输出逐位一致**。微软说明数学函数实现可能随架构和运行库版本产生结果差异：[UCRT 浮点支持](https://learn.microsoft.com/en-us/cpp/c-runtime-library/floating-point-support?view=msvc-170)。
+
+冻结的 extended-spectrum 测试在同一主线程栈放置三个约 690 KB 的 AnalysisReader，超过 MSVC 默认的 1 MiB 栈。仅该测试 EXE 的栈保留量设为 8 MiB；插件 DLL、DSP 和真实宿主的栈配置不变。[MSVC /STACK](https://learn.microsoft.com/en-us/cpp/build/reference/stack-stack-allocations?view=msvc-170)。是否通过仍以本预发布 CTest 证据为准。
+
+## 已收敛的源码差异（以原生证据确认）
 
 整合中 Windows 曾额外加入预设导入/导出按钮，冻结 Mac 没有这两个入口。最终交接已撤回扩展，恢复 Save new / Load / Rename / Delete 四个按钮及原删除确认/提示的逻辑位置。运行测试对照当前冻结合同，不要求不存在的 Mac 功能；共享预设格式未变。另已补齐旋钮数值单位提示，低性能按钮改为自绘勾选框与 ON/OFF 文本。这些源码修复不等于 Windows 测试已通过。
 
@@ -26,11 +32,11 @@
 - 十款的实际文本排版、圆角边缘、浮层遮挡、缩放/高DPI、深浅宿主背景、native 子控件旁路灰度及焦点效果。源码坐标对齐不等于可见结果相同。
 - EQ 的浮层时序/命中/消失、Solo 失焦释放、Analyzer、120dB 轴及各声道曲线；其他九款的真实测量、旁路冻结/恢复和专有控件。自动离屏图不能代替 REAPER 中鼠键操作。
 - 多实例/关闭重开/卸载与窗口类和 GDI+ 生命周期、宿主拒绝缩放、自动化手势、预设 pending/拒绝和跨实例更新。
-- Windows/MSVC/SDK 编译、PowerShell 安装与还原、实际 VST3 扫描/UID/文件版本、音频输出与工程保存重载。本包没有这些项目的运行结果。
+- Windows/MSVC/SDK 编译、PowerShell 安装与还原、实际 VST3 扫描/UID/文件版本：查看所下载预发布的 manifest 与 Evidence.zip；用户宿主的音频输出与工程保存重载仍需实机验证。
 - 公开源码不分发旧 Mac QA 对照截图，没有十款全状态最终实机截图。缺失参考图时保留“像素对照未验证”，以冻结 Mac 源码和公共模型辅助判断，不能自行制造 Mac 验收证据。
 
 ## 实际代码、测试代码与证据
 
-`common/ui/*Windows*`、十款 `EditorWindows.cpp` 是候选产品实现；`tests/windows`、EQ 和 Dynamics 的 Windows fixture 是随包正式测试源码，但尚未在 Windows 执行。Mac 上为接口探测建立的临时 WinAPI 声明/探测文件不随包交付、不作为通过依据。旧 Mac CLI 回归及哈希日志不随公开源码提供；新增 Windows 日志必须写到 `build/windows-evidence/` 等独立本地证据目录，分享前检查隐私。
+`common/ui/*Windows*`、十款 `EditorWindows.cpp` 是候选产品实现；`tests/windows`、EQ 和 Dynamics 的 Windows fixture 是随包正式测试源码。对应执行结果必须读取同一预发布的证据，不从源码存在推断通过。Mac 上为接口探测建立的临时 WinAPI 声明/探测文件不随包交付、不作为通过依据。旧 Mac CLI 回归及哈希日志不随公开源码提供；新增 Windows 日志必须写到 `build/windows-evidence/` 等独立本地证据目录，分享前检查隐私。
 
 不能将上述功能缺口仅改为“平台差异可接受”以跳过修复，也不能修改 DSP、参数、ID、保存格式或 Mac 源码来凑测试通过。修复 Windows 范围问题后，更新本清单为真实结果并保留差异补丁。

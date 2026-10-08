@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -33,6 +34,7 @@ struct Fixture {
 };
 void require(bool condition,const char* message){if(!condition)throw std::runtime_error(message);}
 void ok(HRESULT hr,const char* message){require(SUCCEEDED(hr),message);}
+std::string resultText(HRESULT hr){std::ostringstream out;out<<"0x"<<std::hex<<static_cast<unsigned long>(hr);return out.str();}
 LRESULT CALLBACK hostProc(HWND hwnd,UINT message,WPARAM wp,LPARAM lp){
     auto* f=reinterpret_cast<Fixture*>(GetWindowLongPtrW(hwnd,GWLP_USERDATA));
     if(message==WM_NCCREATE){f=static_cast<Fixture*>(reinterpret_cast<CREATESTRUCTW*>(lp)->lpCreateParams);SetWindowLongPtrW(hwnd,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(f));}
@@ -92,9 +94,31 @@ void client(HWND host,Fixture& f){
     MSG enter{};enter.message=WM_KEYDOWN;enter.wParam=VK_RETURN;
     code=SendMessageW(f.knob,WM_GETDLGCODE,VK_RETURN,reinterpret_cast<LPARAM>(&enter));require((code&DLGC_WANTMESSAGE)!=0,"Enter routed to numeric editing instead of a dialog default action");
     require(f.starts==f.ends && f.wrongID==0 && f.wrongThread==0,"all edits balanced, use unchanged ID77 and execute on UI thread");
-    // Keep client references across destruction. They must fail cleanly, never
-    // read a freed WinRotary or accidentally act on a recycled HWND.
-    SendMessageW(host,command,remove,0);double after=0;require(FAILED(range->get_CurrentValue(&after)) && FAILED(value->SetValue(L"0")),"client references become unavailable after native teardown");
+    // Keep real client proxies across destruction. Provider invalidation is
+    // immediate, but UiaDisconnectProvider runs asynchronously: Microsoft forbids
+    // it inside the cross-thread SendMessage that destroys this HWND. Current
+    // properties may remain available from UIA until that disconnect completes.
+    starts=f.starts;writes=f.writes;ends=f.ends;const auto target=f.normalized.load();
+    SendMessageW(host,command,remove,0);
+    require(!IsWindow(f.knob) && !IsWindow(f.field),"native knob and EDIT are destroyed");
+    const auto teardownStart=GetTickCount64(),deadline=teardownStart+10000;
+    unsigned attempts=0;
+    for(;;){
+        ++attempts;double after=0;BSTR afterText=nullptr;
+        const auto rangeResult=range->get_CurrentValue(&after);
+        const auto valueResult=value->get_CurrentValue(&afterText);SysFreeString(afterText);
+        const auto writeResult=value->SetValue(L"0");
+        const auto detail="range="+resultText(rangeResult)+" value="+resultText(valueResult)+" write="+resultText(writeResult);
+        require(FAILED(writeResult),("destroyed provider rejects writes immediately: "+detail).c_str());
+        require(f.starts==starts && f.writes==writes && f.ends==ends && f.normalized==target
+            && f.wrongID==0 && f.wrongThread==0,"no parameter callback or target change after native teardown");
+        if(rangeResult==UIA_E_ELEMENTNOTAVAILABLE && valueResult==UIA_E_ELEMENTNOTAVAILABLE && writeResult==UIA_E_ELEMENTNOTAVAILABLE){
+            std::cout<<"UIA teardown disconnected after "<<(GetTickCount64()-teardownStart)<<" ms / "<<attempts<<" attempts: "<<detail<<'\n';break;
+        }
+        require(GetTickCount64()<deadline,("UIA teardown did not disconnect client references within 10000 ms: "+detail).c_str());
+        // Only the MTA client waits; the UI thread keeps pumping window/COM work.
+        Sleep(10);
+    }
 }
 }
 int main(){

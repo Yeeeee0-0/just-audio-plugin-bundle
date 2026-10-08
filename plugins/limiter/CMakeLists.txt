@@ -26,7 +26,13 @@ if(APPLE)
 endif()
 
 just_add_module_test(just_limiter_measurement_tests SOURCES tests/MeasurementTests.cpp)
-just_add_module_test(just_limiter_legacy_state_tests SOURCES tests/LegacyStateTests.cpp)
+if(WIN32)
+    # The captured Mac libm samples are a numerical oracle across platforms,
+    # not a bit-for-bit oracle for the different Windows math runtime.
+    just_add_module_test(just_limiter_legacy_state_tests SOURCES tests/LegacyStateWindows.cpp)
+else()
+    just_add_module_test(just_limiter_legacy_state_tests SOURCES tests/LegacyStateTests.cpp)
+endif()
 just_add_module_test(just_limiter_transparency_tests SOURCES tests/TransparencyTests.cpp)
 just_add_module_test(just_limiter_output_gain_tests SOURCES tests/OutputGainTests.cpp)
 

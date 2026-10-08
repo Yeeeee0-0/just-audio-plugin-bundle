@@ -54,6 +54,17 @@ void check(bool condition, const std::string& label) {
     if (!condition) throw std::runtime_error(phase + ": " + label);
     ++checks;
 }
+void notifyProcessing(IAudioProcessor* processor, bool enabled, const char* instance) {
+    const auto result = processor->setProcessing(enabled);
+    const auto detail = std::string(instance) + " setProcessing(" + (enabled ? "true" : "false")
+        + ") result=" + std::to_string(result);
+    log(phase + ": " + detail);
+    // AudioEffect's default implementation returns kNotImplemented. JUST inherits
+    // that optional notification; the SDK ProcessTest likewise does not require
+    // it to return kResultOk. Activation/setup and every actual process() call
+    // remain mandatory successes, with sample/state assertions below.
+    check(result == kResultOk || result == kNotImplemented, detail + " (expected kResultOk or kNotImplemented)");
+}
 std::string utf8(const std::wstring& value) {
     if (value.empty()) return {};
     const auto size = WideCharToMultiByte(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0, nullptr, nullptr);
@@ -395,7 +406,8 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     s.active = true; // Also clean up a partially successful activation on failure.
     check(s.component->setActive(true) == kResultOk && s.reference->setActive(true) == kResultOk, "activate processors");
     s.processing = true;
-    check(s.processor->setProcessing(true) == kResultOk && s.twin->setProcessing(true) == kResultOk, "start processors");
+    notifyProcessing(s.processor, true, "tested");
+    notifyProcessing(s.twin, true, "reference");
     std::array<Sample, 64> left{}, right{}, outLeft{}, outRight{}, refLeft{}, refRight{};
     Sample* inputChannels[]{left.data(), right.data()};
     Sample* outputChannels[]{outLeft.data(), outRight.data()};
@@ -505,7 +517,8 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     check(nonzeroOutput && maximumDelta == 0, "nonempty audio stimulus and zero observed twin difference");
     // State restoration is checked after stopping; this does not assume that DSP
     // histories or delay buffers are serialized into a preset.
-    check(s.processor->setProcessing(false) == kResultOk && s.twin->setProcessing(false) == kResultOk, "stop processors"); s.processing = false;
+    notifyProcessing(s.processor, false, "tested");
+    notifyProcessing(s.twin, false, "reference"); s.processing = false;
     check(s.component->setActive(false) == kResultOk && s.reference->setActive(false) == kResultOk, "deactivate processors"); s.active = false;
     const auto saved = state(s.component.get());
     restoreComponent(s.component, initial); restoreComponent(s.reference, initial);
