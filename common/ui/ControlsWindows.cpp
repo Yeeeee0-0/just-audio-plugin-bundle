@@ -34,6 +34,7 @@ struct RotaryAccessRequest {
 class RotaryProvider final:public IRawElementProviderSimple,public IRangeValueProvider,public IValueProvider {
     std::atomic<ULONG> references{1};
     std::atomic<HWND> window;
+    std::atomic<bool> disconnecting{false};
     const HWND identityWindow;
     HMODULE codeModule=nullptr;
     HRESULT request(RotaryAccessRequest& r) {
@@ -57,7 +58,9 @@ class RotaryProvider final:public IRawElementProviderSimple,public IRangeValuePr
         auto* p=static_cast<RotaryProvider*>(context);auto module=p->codeModule;
         const auto hr=CoInitializeEx(nullptr,COINIT_MULTITHREADED);
         p->diagnostic("CoInitializeEx(MTA)",hr);
+        p->disconnecting=true;
         const auto disconnected=SUCCEEDED(hr)?UiaDisconnectProvider(p):hr;
+        p->disconnecting=false;
         p->diagnostic("UiaDisconnectProvider",disconnected);
         if(SUCCEEDED(hr))CoUninitialize();
         // A failed disconnect must not unmap code while UIA still holds it.
@@ -91,11 +94,11 @@ public:
         if(iid==__uuidof(IUnknown) || iid==__uuidof(IRawElementProviderSimple))*out=static_cast<IRawElementProviderSimple*>(this);
         else if(iid==__uuidof(IRangeValueProvider))*out=static_cast<IRangeValueProvider*>(this);
         else if(iid==__uuidof(IValueProvider))*out=static_cast<IValueProvider*>(this);
-        else return E_NOINTERFACE;AddRef();return S_OK;
+        else {if(disconnecting && iid==__uuidof(IRawElementProviderFragment))diagnostic("QI(IRawElementProviderFragment)",E_NOINTERFACE);return E_NOINTERFACE;}AddRef();return S_OK;
     }
     ULONG STDMETHODCALLTYPE AddRef() override{return ++references;}
     ULONG STDMETHODCALLTYPE Release() override{auto n=--references;if(!n)delete this;return n;}
-    HRESULT STDMETHODCALLTYPE get_ProviderOptions(ProviderOptions* out) override{if(!out)return E_POINTER;*out=ProviderOptions_ServerSideProvider;return S_OK;}
+    HRESULT STDMETHODCALLTYPE get_ProviderOptions(ProviderOptions* out) override{if(!out)return E_POINTER;*out=ProviderOptions_ServerSideProvider;if(disconnecting)diagnostic("get_ProviderOptions(ServerSideProvider)",S_OK);return S_OK;}
     HRESULT STDMETHODCALLTYPE GetPatternProvider(PATTERNID id,IUnknown** out) override {
         if(!out)return E_POINTER;*out=nullptr;if(!window.load())return UIA_E_ELEMENTNOTAVAILABLE;
         if(id==UIA_RangeValuePatternId)*out=static_cast<IRangeValueProvider*>(this);
@@ -103,7 +106,9 @@ public:
         if(*out)AddRef();return S_OK;
     }
     HRESULT STDMETHODCALLTYPE GetPropertyValue(PROPERTYID id,VARIANT* out) override {
-        if(!out)return E_POINTER;VariantInit(out);RotaryAccessState s;auto hr=read(s);if(FAILED(hr))return hr;
+        if(!out)return E_POINTER;VariantInit(out);RotaryAccessState s;auto hr=read(s);
+        if(disconnecting){char operation[80];std::snprintf(operation,sizeof(operation),"GetPropertyValue(%ld)",static_cast<long>(id));diagnostic(operation,hr);}
+        if(FAILED(hr))return hr;
         switch(id){
         case UIA_ControlTypePropertyId:out->vt=VT_I4;out->lVal=UIA_SliderControlTypeId;break;
         case UIA_NamePropertyId:return string(out,s.name);
@@ -124,7 +129,9 @@ public:
         // UiaDisconnectProvider from finding the old client proxies. Never use
         // this identity handle to dispatch a control read/write; request() uses
         // the separately invalidated live window and verifies provider identity.
-        return UiaHostProviderFromHwnd(identityWindow,out);
+        const auto hr=UiaHostProviderFromHwnd(identityWindow,out);
+        diagnostic(IsWindow(identityWindow)?"get_HostRawElementProvider(live HWND)":"get_HostRawElementProvider(destroyed HWND)",hr);
+        return hr;
     }
     HRESULT STDMETHODCALLTYPE SetValue(double value) override {if(!std::isfinite(value))return E_INVALIDARG;RotaryAccessRequest r;r.kind=RotaryAccessRequest::setNumber;r.number=value;return request(r);}
     HRESULT STDMETHODCALLTYPE SetValue(LPCWSTR value) override {if(!value)return E_INVALIDARG;std::size_t length=0;while(length<256 && value[length])++length;if(length==256)return E_INVALIDARG;RotaryAccessRequest r;r.kind=RotaryAccessRequest::setText;r.text=value;return request(r);}

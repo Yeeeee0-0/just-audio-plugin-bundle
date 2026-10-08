@@ -18,6 +18,10 @@ try {
     Invoke-Checked $tools.CMake @('-S',$root,'-B',$build,'-G','Visual Studio 17 2022','-A','x64','-DBUILD_TESTING=ON','-DJUST_BUILD_VST3=ON',"-DJUST_VST3_SDK=$root\third_party\vst3sdk", "-DJUST_WINDOWS_EVIDENCE_ROOT=$evidence\native",'-DSMTG_USE_STATIC_CRT=ON','-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>') (Join-Path $evidence 'configure.log')
     Copy-Item -LiteralPath (Join-Path $build 'CMakeCache.txt') -Destination $evidence
     Get-ChildItem -LiteralPath (Join-Path $build 'CMakeFiles') -Recurse -File | Where-Object { $_.Name -in @('CMakeCXXCompiler.cmake','CMakeSystem.cmake') } | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $evidence }
+    # Catch native provider lifecycle failures before compiling all ten DLLs.
+    # The complete CTest report remains a required gate after the full build.
+    Invoke-Checked $tools.CMake @('--build',$build,'--config','Release','--target','just_windows_accessibility_tests','--parallel',"$Jobs") (Join-Path $evidence 'accessibility-preflight-build.log')
+    Invoke-Checked $tools.CTest @('--test-dir',$build,'-C','Release','-R','^windows-controls-accessibility$','--output-on-failure','--no-tests=error') (Join-Path $evidence 'accessibility-preflight-test.log')
     Invoke-Checked $tools.CMake @('--build',$build,'--config','Release','--parallel',"$Jobs") (Join-Path $evidence 'build.log')
     Invoke-Checked $tools.CTest @('--test-dir',$build,'-C','Release','--output-on-failure','--no-tests=error','--output-junit',(Join-Path $evidence 'ctest.xml')) (Join-Path $evidence 'ctest.log')
     $presetTest = Get-ChildItem -LiteralPath $build -Filter just_user_preset_store_tests.exe -Recurse | Where-Object { $_.Directory.Name -eq 'Release' } | Select-Object -First 1

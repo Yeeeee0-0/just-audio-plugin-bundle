@@ -187,6 +187,76 @@ void inventory(HWND parent, const fs::path& path) {
     }, reinterpret_cast<LPARAM>(&out));
 }
 
+class CaptureDCState {
+    HDC dc;
+    int saved;
+public:
+    explicit CaptureDCState(HDC value) : dc(value), saved(SaveDC(value)) {
+        check(saved != 0, "save offscreen capture DC");
+    }
+    ~CaptureDCState() { RestoreDC(dc, saved); }
+    CaptureDCState(const CaptureDCState&) = delete;
+    CaptureDCState& operator=(const CaptureDCState&) = delete;
+};
+
+void printCaptureTree(HWND window, HWND root, HDC dc, const RECT& ancestorClip,
+    std::ofstream& trace, unsigned depth, unsigned& painted) {
+    check(depth < 32 && painted < 2048, "bounded capture window tree");
+    // IsWindowVisible also tests ancestors and therefore rejects this entire
+    // deliberately hidden host. Honor each descendant's own visible style.
+    if (!IsWindow(window) || !(GetWindowLongPtrW(window, GWL_STYLE) & WS_VISIBLE)) return;
+    RECT bounds{}, client{};
+    check(GetWindowRect(window, &bounds) && GetClientRect(window, &client), "capture HWND geometry");
+    MapWindowPoints(nullptr, root, reinterpret_cast<POINT*>(&bounds), 2);
+    MapWindowPoints(window, root, reinterpret_cast<POINT*>(&client), 2);
+    RECT clip{};
+    if (!IntersectRect(&clip, &bounds, &ancestorClip)) return;
+    CaptureDCState windowState(dc);
+    IntersectClipRect(dc, clip.left, clip.top, clip.right, clip.bottom);
+    // GetWindowRgn uses window coordinates, including the nonclient origin.
+    HRGN region = CreateRectRgn(0, 0, 0, 0);
+    check(region != nullptr, "allocate capture window region");
+    if (GetWindowRgn(window, region) != ERROR) {
+        OffsetRgn(region, bounds.left, bounds.top);
+        ExtSelectClipRgn(dc, region, RGN_AND);
+    }
+    DeleteObject(region);
+    wchar_t klass[256]{}; GetClassNameW(window, klass, 256);
+    trace << depth << '\t' << painted++ << '\t' << GetDlgCtrlID(window) << '\t' << utf8(klass)
+        << '\t' << clip.left << ',' << clip.top << ',' << clip.right << ',' << clip.bottom
+        << '\t' << GetWindowTextLengthW(window) << '\n';
+    {
+        CaptureDCState nonclientState(dc);
+        SetViewportOrgEx(dc, bounds.left, bounds.top, nullptr);
+        // No PRF_CHILDREN: DefWindowProc recursion does not give this hidden
+        // fixture reliable visibility, sibling Z ordering or ancestor clipping.
+        SendMessageW(window, WM_PRINT, reinterpret_cast<WPARAM>(dc), PRF_NONCLIENT);
+    }
+    RECT clientClip{};
+    if (!IntersectRect(&clientClip, &client, &clip)) return;
+    IntersectClipRect(dc, clientClip.left, clientClip.top, clientClip.right, clientClip.bottom);
+    {
+        CaptureDCState clientState(dc);
+        SetViewportOrgEx(dc, client.left, client.top, nullptr);
+        SendMessageW(window, WM_ERASEBKGND, reinterpret_cast<WPARAM>(dc), 0);
+        // Ask the actual custom/native control procedure to draw. In particular
+        // do not reconstruct EDIT/COMBOBOX text from GetWindowText. Some native
+        // controls may still decline hidden printing; the BMP is not acceptance.
+        SendMessageW(window, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT | PRF_ERASEBKGND);
+    }
+    std::vector<HWND> siblings;
+    for (HWND child = GetWindow(window, GW_CHILD); child; child = GetWindow(child, GW_HWNDNEXT)) {
+        check(siblings.size() < 512 && std::find(siblings.begin(), siblings.end(), child) == siblings.end(),
+            "bounded capture sibling snapshot");
+        siblings.push_back(child);
+    }
+    // GW_CHILD is the top sibling. Paint bottom-to-top so an overlay and all
+    // of its children are completed after the module beneath it.
+    for (auto it = siblings.rbegin(); it != siblings.rend(); ++it)
+        if (IsWindow(*it) && GetParent(*it) == window)
+            printCaptureTree(*it, root, dc, clientClip, trace, depth + 1, painted);
+}
+
 void screenshot(HWND parent, const fs::path& path, int width, int height) {
     check(width > 0 && height > 0 && width <= 4096 && height <= 4096, "bounded screenshot geometry");
     HWND child = GetWindow(parent, GW_CHILD);
@@ -204,9 +274,22 @@ void screenshot(HWND parent, const fs::path& path, int width, int height) {
     const auto previous = SelectObject(memory, bitmap);
     const std::size_t bytes = static_cast<std::size_t>(width) * height * 4;
     std::memset(pixels, 0x7f, bytes);
-    // WM_PRINT is a request to the plugin to paint into our memory DC. A saved BMP
-    // is supporting evidence only; it does not certify activated-window rendering.
-    SendMessageW(child, WM_PRINT, reinterpret_cast<WPARAM>(memory), PRF_CLIENT | PRF_NONCLIENT | PRF_ERASEBKGND | PRF_CHILDREN);
+    // Never expose/activate the host or change product HWND styles for capture.
+    // Keep a per-image drawing trace to distinguish requested native printing
+    // from pixel/real-host acceptance, including controls with nonempty text.
+    auto tracePath = path; tracePath.replace_extension(L"capture.tsv");
+    std::ofstream trace(tracePath);
+    unsigned painted = 0;
+    try {
+        check(bool(trace), "create capture trace");
+        trace << "# Hidden WM_PRINTCLIENT traversal; no synthetic text; native text rendering requires pixel review.\n"
+            << "depth\tpaint_order\tcontrol_id\tclass\tancestor_clipped_rect\ttext_length\n";
+        const RECT clip{0, 0, width, height};
+        printCaptureTree(child, child, memory, clip, trace, 0, painted);
+    } catch (...) {
+        SelectObject(memory, previous); DeleteObject(bitmap); DeleteDC(memory); ReleaseDC(child, source);
+        throw;
+    }
     GdiFlush();
     BITMAPFILEHEADER file{}; file.bfType = 0x4d42;
     file.bfOffBits = sizeof(file) + sizeof(BITMAPINFOHEADER);
@@ -220,7 +303,8 @@ void screenshot(HWND parent, const fs::path& path, int width, int height) {
     const bool varied = std::any_of(p + 1, p + bytes / 4, [p](std::uint32_t value) { return value != p[0]; });
     SelectObject(memory, previous); DeleteObject(bitmap); DeleteDC(memory); ReleaseDC(child, source);
     check(wrote, "write BMP evidence");
-    log(std::string("CAPTURE ") + path.filename().u8string() + (varied ? " pixels vary; manual review required" : " uniform pixels; capture unsupported/needs investigation"));
+    log(std::string("CAPTURE ") + path.filename().u8string() + " HWNDs=" + std::to_string(painted)
+        + (varied ? " pixels vary; native text/overlay pixel review required" : " uniform pixels; capture unsupported/needs investigation"));
 }
 
 template<class T> std::vector<std::uint8_t> state(T* object) {
@@ -446,6 +530,16 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
         pump();
     };
     auto capture = [&](const char* name) {
+        // The analyzer subscribes when the view attaches. Pre-open audio cannot
+        // supply that subscriber with history. Feed 8192 fresh real samples to
+        // both instances and allow the UI timers to consume them, for each
+        // active-audio capture state and both sample formats. render() retains
+        // all finite-sample, unchanged-input/state and bit-exact twin assertions.
+        for (unsigned i = 0; i < 128; ++i) {
+            render();
+            if ((i + 1) % 16 == 0) settle(4);
+        }
+        settle(40);
         if constexpr (std::is_same_v<Sample, double>) {
             ViewRect size; check(s.view->getSize(&size) == kResultOk, "capture view size");
             screenshot(s.window.handle, evidence / (std::string(name) + ".bmp"), size.getWidth(), size.getHeight());
@@ -539,7 +633,9 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
         << ",\n  \"float64_passed\": " << (passed64 ? "true" : "false")
         << ",\n  \"real_reaper_validation\": \"NOT_RUN\",\n  \"physical_mouse_keyboard_input\": \"NOT_RUN\","
         << "\n  \"audio_device_playback\": \"NOT_RUN\",\n  \"mac_vs_windows_audio_comparison\": \"NOT_RUN\","
-        << "\n  \"bmp_capture_scope\": \"hidden child HWND WM_PRINT; manual pixel review required\","
+        << "\n  \"bmp_capture_scope\": \"hidden HWND tree; per-window WM_PRINTCLIENT in bottom-to-top Z order with ancestor clipping; native text/overlay pixel review required\","
+        << "\n  \"bmp_capture_limitations\": \"Never shown or activated; a control may decline hidden printing; owned popups/tooltips and real-host composition are not captured; no synthesized labels or feedback\","
+        << "\n  \"analysis_capture_stimulus\": \"128 real 64-sample blocks at 48000 Hz after view attachment before each capture; unchanged twin-audio assertions; not a real-time device\","
         << "\n  \"test_baseline\": \"b99abd3be4ad89b21e3a0c3caf1f12904503f168\"\n}\n";
 }
 } // namespace
