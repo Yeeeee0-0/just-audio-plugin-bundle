@@ -100,7 +100,9 @@ def verify(directory):
     archive = directory/manifest['portable']['file_name']
     plugins = []
     with zipfile.ZipFile(archive) as package:
-        names = package.namelist()
+        # ZipInfo.filename normalizes backslashes on Windows. Check the raw
+        # archive spelling too, so the native and Linux release gates agree.
+        names = [entry.orig_filename for entry in package.infolist()]
         if len(names) != len(set(names)):
             raise ValueError('Duplicate ZIP members')
         for name in names:

@@ -32,6 +32,7 @@ foreach ($slug in Get-JustSlugs) {
 Copy-Item -LiteralPath (Join-Path $root 'scripts\windows') -Destination (Join-Path $stage 'scripts') -Recurse
 Copy-Item -LiteralPath (Join-Path $root 'docs\windows\ACCEPTANCE-zh.md') -Destination $stage
 Write-JustJson @{ status='WINDOWS_NATIVE_AUTOMATED_CANDIDATE_NOT_REAPER_ACCEPTED'; baseline='b99abd3be4ad89b21e3a0c3caf1f12904503f168'; version='0.1.0'; vendor='Yee Huang'; architecture='x86_64'; format='VST3'; signed=$false; reaper='NOT_RUN'; manualVisualAudio='NOT_RUN'; plugins=$items; hashes=(Get-JustTreeHashes (Join-Path $stage 'VST3')) } (Join-Path $stage 'candidate-manifest.json')
-Compress-Archive -LiteralPath $stage -DestinationPath ($stage+'.zip')
+$archiveTools = Find-JustTools
+Invoke-Checked $archiveTools.Python ($archiveTools.PythonArgs + @((Join-Path $PSScriptRoot 'zip-candidate.py'), $stage, ($stage+'.zip')))
 Write-Host "Staged unsigned Windows native candidate: $stage.zip"
 Write-Host 'Actual REAPER visual/audio acceptance is still required; this is not a release approval.'
