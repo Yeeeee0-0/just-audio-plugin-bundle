@@ -1,6 +1,6 @@
 # JUST Audio Plugins
 
-> **Windows port candidate:** this branch has not passed native Windows compilation or host acceptance. Start with [Windows setup and validation](docs/windows/START-HERE-zh.md) and [known gaps](docs/windows/KNOWN-DIFFERENCES-zh.md). Stable macOS 0.1.0 remains on [main](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/main) and the [v0.1.0 release](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0).
+> **Windows preview branch:** native Windows CI builds and tests ten x64 VST3 plugins before publishing a prerelease. Check the [workflow result](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/workflows/windows-preview.yml) and the exact asset manifest; a source branch alone is not a usable plugin. Real REAPER visual/audio acceptance is still pending. Start with [Windows setup and validation](docs/windows/START-HERE-zh.md) and [known gaps](docs/windows/KNOWN-DIFFERENCES-zh.md). Stable macOS 0.1.0 remains on [main](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/main) and the [v0.1.0 release](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0).
 
 JUST is a suite of ten audio effects in VST3 format, written in C++17 with native platform editors. Version 0.1.0 derives from frozen source snapshot `b99abd3be4ad89b21e3a0c3caf1f12904503f168`. This hash records source provenance; it is not a commit identifier in the public repository's new history.
 
@@ -27,7 +27,7 @@ The shared framework supplies the VST3 processor/controller, parameter and state
 | --- | --- |
 | macOS on Apple silicon (`arm64`) | Ten Release bundles; selective installer GUI checked. Only Apple silicon binaries are included. |
 | Intel macOS / Universal | Build preset exists; no accepted binary or runtime validation in this release. |
-| Windows x64 | Port and preset exist; the Windows work is not accepted for this release. |
+| Windows x64 | Separate unsigned preview workflow and selectable installer; see each prerelease's actual evidence. User REAPER acceptance remains pending. |
 | Linux | Core tests can be configured without VST3; no plugin release. |
 
 The configured macOS deployment target is 11.0. That setting alone does not establish that the plugins have been tested on macOS 11.0. The frozen build uses development ad-hoc signatures; it does not establish Developer ID signing or notarization. Host compatibility and actual native input checks must be reported separately from offscreen or automated fixture results.

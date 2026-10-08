@@ -31,6 +31,16 @@ jobs:
       - name: Build and test ten native Windows x64 plugins
         shell: powershell
         run: ./scripts/windows/Build-And-Test.ps1 -Jobs 2
+      - name: Build and test the selectable preview installer
+        shell: powershell
+        run: |
+          $candidates = @(Get-ChildItem build/candidates -Directory)
+          if ($candidates.Count -ne 1) { throw 'Exactly one fresh candidate directory required.' }
+          ./scripts/windows/Build-Installer.ps1 -CandidateDir $candidates[0].FullName
+          ./scripts/windows/Test-Installer.ps1 -CandidateDir $candidates[0].FullName
+      - name: Package the tested preview and public runner evidence
+        shell: pwsh
+        run: python scripts/windows/prepare-preview-release.py --run-number ${{ github.run_number }}
       - name: Retain native test evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -39,10 +49,36 @@ jobs:
           path: build/windows-evidence/
           if-no-files-found: warn
           retention-days: 1
-      - name: Retain unsigned native candidates
+      - name: Retain the verified release assets
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: windows-preview-candidate-${{ github.run_number }}
-          path: build/candidates/*.zip
+          name: windows-preview-release-${{ github.run_number }}
+          path: build/preview-release/
           if-no-files-found: error
           retention-days: 1
+
+  publish:
+    needs: windows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: windows-preview-release-${{ github.run_number }}
+          path: preview
+      - name: Verify the transferred assets
+        run: python3 preview/verify-preview-download.py preview
+      - name: Publish only a Windows prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PREVIEW_TAG: v0.1.0-windows-preview.${{ github.run_number }}
+          PREVIEW_SHA: ${{ github.sha }}
+        run: |
+          gh release create "$PREVIEW_TAG" preview/* \
+            --target "$PREVIEW_SHA" \
+            --title "JUST 0.1.0 Windows x64 preview ${{ github.run_number }} — 待实机验证" \
+            --notes-file preview/RELEASE-NOTES.md \
+            --prerelease --latest=false

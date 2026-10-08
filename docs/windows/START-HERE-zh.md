@@ -1,6 +1,17 @@
-# Windows x64 移植候选：从公开源码开始
+# Windows x64 预览：下载与本机验收
 
-这是 JUST 0.1.0 的 **Windows 源码候选，尚未通过 Windows 原生编译或 REAPER 验收**。稳定 macOS 0.1.0 仍以主分支和 Mac 发布资产为准；本移植应在独立候选分支使用，验收前不合并到稳定主线。
+这是 JUST 0.1.0 的独立 **Windows 预览分支，真实 REAPER 验收尚未完成**。CI 只有在原生构建、自动测试和隔离安装器测试全部通过后才发布 prerelease。以所下载版本的 `preview-manifest.json`、工作流结果和 Evidence.zip 为准；不存在对应预发布资产时，源码不能当作可安装插件。稳定 macOS 0.1.0 仍以主分支和 Mac 发布资产为准。
+
+在仓库 [Releases](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases) 中选择标为 **Windows x64 preview / 待实机验证** 的预发布，下载同一版本的以下文件到一个新目录：
+
+- `JUST-0.1.0-Windows-x64-preview.N-Setup.exe`：十款可选安装器，默认全选，未签名。
+- `JUST-0.1.0-Windows-x64-preview.N-Portable.zip`：相同的十款 x64 VST3 完整包。
+- `JUST-0.1.0-Windows-x64-preview.N-Source.zip` 与 `Evidence.zip`：对应公开源码、资产及 CI 证据。
+- `preview-manifest.json`、`SHA256SUMS.txt`、`verify-preview-download.py`、`WINDOWS-CODEX-PROMPT-zh.txt`、验收清单与已知差异。
+
+`N` 是实际预发布编号。不要混用不同预发布的文件，也不要假设同账号会自动同步 Mac 源码。已有 Python 时运行 `python verify-preview-download.py .` 可核对下载摘要、十款 PE AMD64 架构、版本和供应商；此步骤不执行 Windows 插件，不证明 REAPER 可用。把随包中文提示词粘贴到 Windows Codex，让它从真实目录和证据开始完成本机验收。
+
+保存工作并正常关闭 REAPER 后，运行已核验的安装器。组件页可独立选择十款，默认目标是 64 位 Common Files 下的 VST3。安装器只备份及替换选中的 JUST 插件，不修改预设、REAPER 设置、授权或工程。备份与恢复方式见 `installers/windows/README.md`。安装器为未签名预览，宿主视觉和音频通过前不要作为正式版接受。
 
 在 Windows AMD64 电脑上克隆公开的 `windows-port` 候选分支，并用进程级 Git 配置保留 LF：
 
@@ -11,7 +22,7 @@ cd just-audio-plugin-bundle
 
 稳定 Mac 0.1.0 位于 `main` 和 `v0.1.0`；不要把旧私有来源提交当作公开仓库可直接检出的提交。
 
-公开仓库可克隆，只表示源码可获取，**不表示已经创建 Codex 云工作区、Codespace、云构建环境或 Windows 实机**。本次发布准备没有创建这些资源，也没有启用 GitHub Actions。
+`.github/workflows/windows-preview.yml` 使用公开仓库的标准 GitHub 托管 Windows runner，进行原生 MSVC 构建及测试；发布任务只创建 Windows prerelease，不标记为 latest。没有创建 Codespace 或 Codex 云工作区，也没有连接用户的 Windows 电脑。工作流只使用任务期临时 GitHub token 发布资产，不创建用户凭据。
 
 仓库包含项目源码、合成测试夹具和已授权运行图标；不需要旧私有三 ZIP 交接包、Library 文件、测试截图或原始策划文档。先阅读根目录 `README.md`、`BUILDING.md`、`LICENSE`、`ARTWORK.md` 和 `THIRD_PARTY_NOTICES.md`。
 
@@ -37,4 +48,4 @@ SDK bootstrap 访问官方 Steinberg Git 仓库，锁定 3.8.1 及其子模块�
 
 安装与恢复脚本属于显式人工选择的本地候选测试流程。只有在当前用户确认安装目标、正常关闭 REAPER、完成并核验备份后使用。备份可能含 REAPER 授权与用户设置，必须留在本地；不可提交 Git 或上传为 Release 资产。
 
-`docs/windows/ci/windows-x64.yml` 是未启用的手动 CI 示例，不在 `.github/workflows`。其启用、额度和环境创建是独立操作；本候选没有替用户运行或付费。
+`docs/windows/ci/windows-x64.yml` 是早期手动示例；当前实际流程在 `.github/workflows/windows-preview.yml`。预览只使用公开仓库的标准 runner，不使用付费大机型、付费签名服务或积分；不要为本任务购买工具或额度。

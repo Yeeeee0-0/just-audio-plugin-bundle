@@ -1,0 +1,30 @@
+JUST 0.1.0 -- Windows x64 preview
+Yee Huang
+
+This installer and the VST3 plugins are unsigned. Windows may display an
+unknown-publisher warning. Verify the published SHA256 before running.
+
+Windows native automated build/test evidence is separate from real host
+acceptance. These plugins have NOT been visually or audibly accepted in the
+user's REAPER installation. Use a NEW test project and follow the acceptance
+checklist. Do not replace a production project with a test project.
+
+Choose any of the ten components. All ten are selected initially. Only
+selected JUST bundles in the selected destination are replaced. Unselected
+JUST plugins and other vendors' files are left unchanged.
+
+Before replacing files, the installer validates every candidate file and
+creates verified backups of selected existing bundles. An installation error
+triggers rollback where the files still match the known transaction. Keep
+backups until you have completed real host tests.
+
+Close REAPER normally after saving your work. The installer refuses to run
+while REAPER or its plugin host processes are running; it never kills them.
+
+User presets, REAPER settings, licenses and projects are not read or changed.
+No registry uninstall entry is created. Use the recorded backup transaction
+and its included Installer-Engine.ps1 -Action Restore to undo this preview.
+
+The source repository's LICENSE and THIRD_PARTY_NOTICES.md remain applicable.
+No paid services, software downloads or account credentials are required by
+this installer.

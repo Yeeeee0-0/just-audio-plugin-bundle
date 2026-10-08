@@ -1,16 +1,18 @@
 {
-  "kind": "UNVERIFIED_WINDOWS_SOURCE_CANDIDATE",
+  "kind": "WINDOWS_PREVIEW_BRANCH_REQUIRING_PER_RELEASE_EVIDENCE",
   "product_version": "0.1.0",
   "source_provenance_commit_not_public_revision": "d63e3dbe34c878cf307e642862279d9c9364f827",
   "mac_provenance_commit_not_public_revision": "b99abd3be4ad89b21e3a0c3caf1f12904503f168",
   "public_parent": "Clean public macOS source tree; exact parent chosen by publication owner",
   "protected_public_baseline_files": 251,
-  "windows_native_compilation": "NOT_RUN",
-  "windows_ctest_and_validator": "NOT_RUN",
-  "powershell_execution": "NOT_RUN",
+  "windows_native_compilation": "SEE_EXACT_PREVIEW_MANIFEST_AND_WORKFLOW_RUN",
+  "windows_ctest_and_validator": "SEE_EXACT_PREVIEW_MANIFEST_AND_WORKFLOW_RUN",
+  "powershell_execution": "SEE_EXACT_PREVIEW_MANIFEST_AND_WORKFLOW_RUN",
   "windows_reaper_acceptance": "NOT_RUN",
   "cloud_workspace_created": false,
-  "github_actions_enabled": false,
+  "github_actions_enabled": true,
+  "github_actions_workflow": ".github/workflows/windows-preview.yml",
+  "release_gate": "Native Windows build, CTest, ten validators, installer tests and packaged-byte validation must all pass",
   "known_blocker": "Custom rotary controls lack equivalent UI Automation slider/value provider; see KNOWN-DIFFERENCES-zh.md",
   "stable_mac_source_unchanged": true
 }

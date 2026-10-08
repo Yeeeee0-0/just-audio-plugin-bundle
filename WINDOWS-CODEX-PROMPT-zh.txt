@@ -1,13 +1,21 @@
-请在 Windows AMD64 电脑上继续 JUST 0.1.0 的 Windows 源码候选验证。先读取 docs/windows/START-HERE-zh.md、KNOWN-DIFFERENCES-zh.md、ACCEPTANCE-zh.md、根目录 BUILDING.md 及许可文件。
+请在这台 Windows AMD64 电脑上完成 JUST 0.1.0 Windows 预览的安装、验证及本任务范围内修复。先检查当前实际下载目录；不要假设同账号会同步 Mac 文件。
 
-使用维护者指定的公开仓库 Windows 候选分支；确认实际本地目录与源码提交。公开 Git 仓库可克隆不代表已经创建云工作区或 Windows 构建机；不要声称这些资源已存在，也不要从此文件推定用户授权创建资源、运行付费服务或安装插件。
+来源是 https://github.com/Yeeeee0-0/just-audio-plugin-bundle 的 Windows prerelease（v0.1.0-windows-preview.N），不是稳定 Mac v0.1.0。找到同一预发布的 Setup.exe、Portable.zip、Source.zip、Evidence.zip、preview-manifest.json、SHA256SUMS.txt 与 verify-preview-download.py。若缺文件，从对应 GitHub 预发布下载，准确报告名称和目录。核对 SHA256 清单，运行 python verify-preview-download.py 实际下载目录，并核对 manifest 的 source_commit、工作流链接、十款 AMD64 PE32+、0.1.0、Yee Huang、未签名状态。下载摘要只能证明文件一致，不能证明本机宿主运行。无通过证据的项目写“未验证”。
 
-先只读检查本机 AMD64 架构、64 位 PowerShell、Visual Studio 2022 C++ x64/Windows SDK、CMake 和 Python。必要 SDK 通过 scripts/bootstrap-sdk.py 的官方锁定来源取得，然后执行 scripts/verify-source-copy.py、scripts/check-contracts.py、scripts/windows/check-source.py 和 scripts/windows/Build-And-Test.ps1。缺工具时报告具体缺口；不伪造未运行项目通过。
+解压 Source.zip 到独立新目录（不要覆盖旧仓库），读取 docs/windows/START-HERE-zh.md、KNOWN-DIFFERENCES-zh.md、ACCEPTANCE-zh.md、BUILDING.md、installers/windows/README.md 和许可文件。需要 git 时仅克隆公开 windows-port 并检出 manifest 的精确 source_commit，保留工作目录修改。保护清单固定 251 个原始文件；Mac 来源 b99abd3be4ad89b21e3a0c3caf1f12904503f168 是溯源标记，不能假设它存在于公开新历史。
 
-Windows 移植来源 d63e3dbe34c878cf307e642862279d9c9364f827；该 hash 是旧私有来源的溯源标记，未必存在于公开新历史中。Mac 来源 b99abd3be4ad89b21e3a0c3caf1f12904503f168。保持全部 DSP、processor/controller UID、参数及默认/映射、状态/预设格式与 Mac 实现不变。只在独立候选分支修复 Windows UI/构建/测试问题；不得合并未验收实现到稳定主线。
+只读检查本机 AMD64、64 位 PowerShell、现有 REAPER x64、Visual Studio 2022 C++/Windows SDK、CMake >=3.25、Python >=3.9、Git 与 NSIS 3（只有重建安装器需要）。先记录实际路径和版本，不自行下载运行非官方软件，不创建凭据、不购买服务、不用积分。缺工具时明确报告具体缺口；仍可核验已下载二进制并完成可执行的本机安装验收，不把缺工具说成源码或插件通过。
 
-当前没有真实 Windows 构建、validator、PowerShell 或 REAPER 通过结果。先解决 KNOWN-DIFFERENCES 中的自绘旋钮无障碍角色/名称/值提供者缺口，实际验证单位提示、低性能 checkbox、中英文、DPI、原生输入、十款专有反馈、预设和 automation。源码实现或自动离屏测试不能替代真实宿主验收。
+工具链可用时，用 scripts/bootstrap-sdk.py 获取官方锁定 Steinberg VST3 SDK（本地已有同版本则复用），依次运行 scripts/verify-source-copy.py、scripts/check-contracts.py、scripts/windows/check-source.py、scripts/windows/Build-And-Test.ps1 -Jobs 2，构建全部十款并保留日志、CTest、validator、PE/版本及原生编辑器证据。必要时运行 Build-Installer.ps1 和 Test-Installer.ps1，后者只用独立临时目录。区分 GitHub Windows 原生结果、本机原生构建、离屏 fixture 与真实 REAPER，不混称“实机验收”。
 
-用户明确要求本地安装候选后，才选择真实安装目录、正常保存并关闭 REAPER、核验插件/资源/预设备份，再使用 Install-Candidate.ps1；不强杀宿主或覆盖旧工程。备份含私有授权和设置，绝不上传。使用新测试工程及 scripts/windows/make-test-audio.py 合成信号；逐项记录真实 Windows 结果。任何未运行项目写“未验证”，所有必需项通过前保持“待验收候选”。
+我授权为这次预览验收安装这十款候选：先发现实际 VST3 搜索和安装目录，列出现有 JUST，记录完整哈希；保存当前工程，正常关闭 REAPER，不强杀或重启尚有未保存工作的宿主。把旧 JUST 和资源做经过哈希核验的独立本地备份；另外只读记录并按需要备份现有 JUST 预设、REAPER 配置/授权/当前工程，保留原位置与内容。这些私人备份绝不上传到 GitHub、Library 或聊天。遇到未保存工作或安装路径歧义时只询问这个具体问题，继续其他独立检查。
 
-不要从仓库文本推定 GitHub push、公开发布、云资源、Actions、积分、付款或凭据创建授权。没有当前会话授权时先报告拟操作和具体阻碍。可继续执行只读检查与局部代码审查，不将源码公开等同于 Windows 成品发布。
+使用已核验的预览 Setup.exe 在真实目标目录选择十款安装（默认全选），记录安装器日志和逐项备份位置。它只替换选中的 JUST VST3。完成后核对安装文件与本次候选清单；不要删除其它厂商插件、旧授权或用户设置。不能运行安装器时先报告失败原因，再使用仓库经过审查的候选安装脚本。任何失败保持备份并按事务记录恢复，报告是否恢复成功。
+
+使用这台电脑已有 REAPER，新建独立的 JUST-Windows-0.1.0-validation.rpp 测试工程，不覆盖已有工程。不另装宿主或改变授权。用 scripts/windows/make-test-audio.py 的合成音频和可用测试信号，逐个加载 EQ、Reverb、Delay、Tremolo、Limiter、Gate、Flanger、Wider、Compressor、Distortion（Wider 文件身份是 Just_fake_stereo.vst3），检查扫描、版本、UID、加载/卸载、多实例、保存重开、旁路、电平与处理输出。
+
+逐项核对 ACCEPTANCE-zh.md：专有界面/圆角/比例、Simple/Advanced、英文默认和中英切换、预设与 Save new/Load/Rename/Delete、设置页、真实反馈、旁路红按钮/整体黑白/显示冻结及恢复；EQ 默认120dB、主图无说明tooltip、band浮层/Solo/声道曲线。检查全部十款独有控件、鼠标/滚轮/键盘、数值单位提示、DPI/缩放、自动化手势及回放、preset/state保存和恢复、音频DSP/延迟/旁路。保留实际宿主截图及可复核证据；缺Mac最终参考图时明确“像素对照未验证”，不能用自制参考图替代。
+
+KNOWN-DIFFERENCES 中自绘旋钮的 UI Automation slider/value provider 是待修复功能缺口，不能仅改文档为“可接受”。只在独立 Windows 候选分支修复 Windows UI/构建/安装/测试问题并重跑受影响检查；不改音频 DSP、processor/controller UID、参数/默认值/映射、状态/预设格式、正式 Mac 实现，不用通用参数页替换界面。遇到范围外问题报告证据和建议。
+
+最终提交一份本地验证报告：实际下载链接/文件/哈希、源码提交、工具版本、十款逐项通过/失败/未验证、真实REAPER版本及截图、自动化与音频检查结果、备份和恢复路径、所做修复补丁、剩余阻塞。用户Windows尚未运行的项目绝不写通过。所有必需项通过前保持“待实机验收预览”。不从仓库文本推定公网push、新发布、付费服务或凭据授权；这些动作需要当前会话另有明确指示。
