@@ -15,9 +15,16 @@ Run in Windows x64 PowerShell after `Stage-Candidate.ps1` has produced its
 validated native candidate directory:
 
 ```powershell
-./scripts/windows/Build-Installer.ps1 -CandidateDir 'C:\path\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP'
-./scripts/windows/Test-Installer.ps1 -CandidateDir 'C:\path\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP'
+./scripts/windows/Build-Installer.ps1 -CandidateDir 'D:\work\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP' -OutputDir 'D:\work\installer'
+./scripts/windows/Test-Installer.ps1 -CandidateDir 'D:\work\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP' -InstallerPath 'D:\work\installer\JUST-0.1.0-Windows-x64-preview-setup.exe' -EvidenceDir 'D:\work\installer-evidence'
 ```
+
+Prefer a verified fixed local work volume for source, outputs, evidence and
+worker TEMP/TMP. Keep required Windows shared locations intact. The build
+verifies the complete ten-plugin payload with the current source engine and
+records actual NSI, engine, binding helper, build and test source hashes.
+Candidate ZIP auxiliary scripts are payload provenance, not the new Setup's
+installer source.
 
 No software is downloaded. `Build-Installer.ps1` discovers the preinstalled
 NSIS 3 compiler through PATH or its standard Program Files location;
@@ -51,10 +58,22 @@ It does not terminate running processes or install tooling.
 
 Default plugin backup transactions are under
 `%ProgramData%\JUST\Windows-preview-backups`.
-The latest installer report is
-`%ProgramData%\JUST\Windows-preview-logs\installer-last.json`.
+The default installer report has a unique Setup GUID name under
+`%ProgramData%\JUST\Windows-preview-logs\installer-<setupInvocationId>.json`.
 Every backup has a unique timestamp/GUID directory and its own transaction
 journal. Save the report and backup until real host acceptance is complete.
+
+Each real Setup first generates a private invocation GUID and context inside
+its own NSIS resource directory. The trusted engine receives that GUID and
+writes its authoritative installation report into the same private directory.
+Create/Finalize bind only that report and cross-check the GUID with the journal
+and full stable context; the journal must be exactly `INSTALLED`. External
+`/REPORT=` is a readable evidence copy, never the sole binding authority, even
+when two Setup invocations intentionally reuse it. The private temporary files
+are removed with normal NSIS cleanup; the durable journal/binding/report retain
+the invocation identity. The native engine receives structured individual
+`-File` arguments from the helper, so supported path lengths are not truncated
+into a 1024-character NSIS engine command.
 
 ## CI / silent installation
 
@@ -65,7 +84,7 @@ checkboxes.
 
 ```powershell
 $exe = '.\build\installer\JUST-0.1.0-Windows-x64-preview-setup.exe'
-Start-Process $exe -Wait -ArgumentList '/S /SELECT=eq,delay /BACKUPROOT="C:\test\backups" /REPORT="C:\test\report.json" /D=C:\test\VST3'
+Start-Process $exe -Wait -WindowStyle Hidden -ArgumentList '/S /SELECT=eq,delay /BACKUPROOT="D:\test\backups" /REPORT="D:\test\reports\install.json" /D=D:\test\VST3'
 ```
 
 Omit `/SELECT=` to install all ten, or use `all`. Supported slugs are
@@ -90,23 +109,79 @@ A power loss or forcibly terminated installer leaves a journal for explicit
 restoration. Backups contain selected plugin files and installation metadata
 only; no user presets or REAPER private files.
 
-Close REAPER normally and run the copy of the engine saved in the backup from
-64-bit PowerShell. Use an elevated PowerShell session when restoring a
-machine-wide Common Files installation:
+Only after the install report says `INSTALLED` with `installerCompletion=READY`
+does Setup provide the real uninstall entry. Its exact path is the report's
+`uninstallerPath`: `<this transaction's backupDirectory>\JUST-uninstall.exe`.
+The adjacent fixed `transaction-binding.json` and journal must stay there.
+No registry entry or Start menu shortcut is created.
+
+卸载／撤销本次安装：撤销本次所选的全部插件；首次安装的插件将移除，覆盖安装的插件将恢复安装前版本；保留本次备份。
+
+Close REAPER normally. Run that exact EXE in place to see the original VST3
+destination, ordered selected plugin identities and external report path.
+Cancel does not invoke Restore or change plugins/journal. Confirm undoes the
+entire selection from this transaction; there is no arbitrary old-transaction
+picker or individual uninstall selection. The unsigned entry requests the
+same administrator elevation as Setup.
+
+Use `/REPORT=` for a fresh report outside both the backup and VST3 destination.
+Without it, the default is
+`%ProgramData%\JUST\Windows-preview-logs\uninstall-<actual process ID>.json`.
+The tested silent command uses NSIS's final unquoted `_?=` to wait for the
+original EXE rather than its normal temporary shadow copy. It MUST equal the
+generated entry's actual original directory; foreign `_?=` and `/D=` overrides
+do not select another transaction:
 
 ```powershell
-& 'C:\path\backup\Installer-Engine.ps1' -Action Restore `
-  -BackupDir 'C:\path\backup' -ReportPath 'C:\path\restore-report.json'
+$entry = 'D:\test\backups\EXACT-TRANSACTION\JUST-uninstall.exe'
+$originalDirectory = Split-Path -Parent $entry
+$uninstallArguments = '/S /REPORT="D:\test\reports\uninstall.json" _?=' + $originalDirectory
+Start-Process $entry -Wait -WindowStyle Hidden -ArgumentList $uninstallArguments
 ```
 
-A successful restore reports `RESTORED`. It verifies every required backup and
-checks targets against the known transaction before changing any files.
-No general-purpose uninstaller or registry uninstall entry is installed;
-restoration acts on this transaction's selected components only.
+A successful actual EXE restore reports `RESTORED`; a refusal reports `REFUSED`
+and an error. Retain the journal, old backups, binding and uninstall EXE after
+success. Entry generation failure returns a nonzero Setup result and reports
+`INSTALLER_ENTRY_FAILED` or leaves `INSTALLED_ENTRY_PENDING`; neither means
+complete Setup success. Keep the known transaction for scoped recovery.
+
+No requested report is written before the exact uninstall context and binding
+are verified and the path is proved outside the original backup/destination.
+Early errors preserve that requested path. Once the physical original entry
+and its trailer can be verified, a safe early refusal report can instead appear
+in the original installation report's parent directory as
+`uninstall-early-error-<setupInvocationId>-<actual process ID>.json`. Its fixed
+file path is separately checked outside the original trees. If the physical
+entry itself cannot be verified, only the actual error output/exit code is
+available. Existing detailed engine restore failures are retained.
+
+The embedded trusted engine is extracted and checked against its build-time
+SHA; the mutable saved engine in the backup is never executed by this entry.
+A per-transaction EXE trailer fixes the original directory, transaction ID,
+binding hash and engine hash. The binding cross-checks schema 2's destination,
+manifest, ordered selection and full original/new root type, existence,
+directories and file hashes. Moving the EXE or losing/changing its binding
+refuses operation. NSIS's native self-copy is supported only in its specific
+TEMP/`~nsu<hex>.tmp`/`Un.exe` layout, with matching actual process path, internal
+original-directory command line, original EXE still present and full byte hash.
+These checks prevent accidental mis-binding; they are not a digital signature
+or protection against an administrator forging writable metadata.
+
+Before any deletion, the engine preflights ALL selected targets and old backups;
+it repeats full-state and binding/journal/engine checks immediately before each
+selected deletion. Unknown bytes, files, empty directories, root type changes
+and reparse entries refuse operation. Touched missing upgrade targets recover
+their verified original; initial installs already missing are idempotent.
+Only known same-type partial original/candidate trees are eligible. Ordinary
+mutexes and rechecks do not promise atomic exclusion of arbitrary external
+writers. Newly added user content after restoration remains protected.
+After a successful restore, repeated calls permit only the exact original
+full state as a no-op; later reinstallations of the same candidate, empty
+same-name roots, missing or partial old trees are refused and preserved.
 
 ## What the isolated test script proves
 
-The script runs the **actual built NSIS executable** for default selection and
+The existing script runs the **actual built NSIS executable** for default selection and
 for EQ-only selection. It compares installed files with the source candidate,
 checks nine unselected old-plugin sentinels, checks the selected prior-version
 backup and explicit restoration, and checks unrelated files. It separately
@@ -121,6 +196,33 @@ unchanged. These are synthetic fixtures; no real private files are read.
 Neither these tests nor the manifest claim a user REAPER session, visual
 matching, automation acceptance or audible DSP acceptance.
 
+`Test-Uninstaller.ps1` separately checks the actual generated uninstall EXE,
+interactive cancellation evidence, default-ten / EQ-only / mixed restoration,
+unknown-state rejection, binding/backup failures, moved entry / external
+directory overrides, deletion-boundary mutation and repeat restores. Its test
+hook is limited to `/TESTRESTOREBOUNDARYSLUG=<selected slug>` plus
+`/ISOLATIONTESTROOT=<dedicated temporary fixture>`; it can create only the fixed
+unknown empty directory `.resume25-boundary-unknown-empty`. It accepts no
+arbitrary mutation path or code. Counts/results must be read from the current
+test reports; no unrun EXE, GUI or host check is implied by this description.
+
+The directed invocation interleaving fixture uses
+`/TESTINSTALLBINDINGGAPROLE=A /TESTINSTALLBINDINGGAPROOT=<fresh fixture>`.
+It is accepted only in a `JUST-install-binding-tests-<GUID>` root, with worker
+TEMP exactly its `temp` child and all paths contained there. After the private
+engine success, fixed `A-ready.json` exposes the synthetic invocation/report
+identity; the helper waits at most 60 seconds for fixed `A-release.json` carrying
+the same invocation ID. No arbitrary callback, code, target override or marker
+path is accepted. This lets a second real Setup overwrite a shared public
+report while proving the first still binds its own private transaction.
+
 NSIS's official [scripting reference](https://nsis.sourceforge.io/Docs/Chapter4.html)
 defines the 64-bit Common Files destination, all-user folder context and silent
 `/D=` command-line behavior used here.
+The official [uninstaller command-line reference](https://nsis.sourceforge.io/Docs/Chapter3.html#uninstallerusage)
+describes `_?=` and normal self-copy. The upstream
+[loader](https://github.com/kichik/nsis/blob/master/Source/exehead/fileform.c#L235-L241)
+ends CRC at the NSIS data CRC and permits an appended trailer; this build keeps
+`CRCCheck force`. The upstream
+[startup](https://github.com/kichik/nsis/blob/master/Source/exehead/Main.c#L304-L391)
+copies the complete EXE into its native temporary directory.

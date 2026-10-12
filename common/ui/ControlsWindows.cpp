@@ -247,6 +247,7 @@ class WinRotary final:public RotaryControl {
     static LRESULT CALLBACK editProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR data){auto* p=reinterpret_cast<WinRotary*>(data);
         if(m==WM_NCDESTROY){p->clearValueAnnotation(h);if(p->value==h)p->value=nullptr;RemoveWindowSubclass(h,editProc,1);return DefSubclassProc(h,m,w,l);}
         if(m==WM_SETFOCUS)p->prepare();
+        if(m==WM_GETDLGCODE){auto* message=reinterpret_cast<MSG*>(l);auto key=message?message->wParam:w;if(key==VK_RETURN || key==VK_ESCAPE)return DefSubclassProc(h,m,w,l)|DLGC_WANTMESSAGE;}
         if(m==WM_KEYDOWN && (w==VK_RETURN || w==VK_ESCAPE)){p->cancelled=w==VK_ESCAPE;SetFocus(p->window);return 0;}
         // Native field remains editable under bypass, including text selection;
         // grayscale its actual painted pixels without changing its edit buffer.

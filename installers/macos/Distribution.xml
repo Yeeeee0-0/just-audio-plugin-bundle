@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8'?>
+<installer-gui-script minSpecVersion="2">
+  <title>JUST Audio Plugin Bundle</title>
+  <product id="audio.just.plugin-bundle" version="0.1.0" />
+  <welcome file="Welcome.html" mime-type="text/html" />
+  <readme file="ReadMe.html" mime-type="text/html" />
+  <conclusion file="Conclusion.html" mime-type="text/html" />
+  <options customize="always" require-scripts="false" hostArchitectures="arm64" />
+  <domains enable_anywhere="false" enable_currentUserHome="true" enable_localSystem="false" />
+  <volume-check>
+    <allowed-os-versions>
+      <os-version min="11.0" />
+    </allowed-os-versions>
+  </volume-check>
+  <choices-outline>
+    <line choice="just-eq" />
+    <line choice="just-reverb" />
+    <line choice="just-delay" />
+    <line choice="just-tremolo" />
+    <line choice="just-compressor" />
+    <line choice="just-limiter" />
+    <line choice="just-gate" />
+    <line choice="just-flanger" />
+    <line choice="just-fake_stereo" />
+    <line choice="just-distortion" />
+  </choices-outline>
+  <choice id="just-eq" title="JUST EQ" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_eq.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.eq" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.eq" version="0.1.0" onConclusion="None">JUST-eq.pkg</pkg-ref>
+  <choice id="just-reverb" title="JUST Reverb" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_reverb.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.reverb" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.reverb" version="0.1.0" onConclusion="None">JUST-reverb.pkg</pkg-ref>
+  <choice id="just-delay" title="JUST Delay" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_delay.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.delay" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.delay" version="0.1.0" onConclusion="None">JUST-delay.pkg</pkg-ref>
+  <choice id="just-tremolo" title="JUST Tremolo" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_tremolo.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.tremolo" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.tremolo" version="0.1.0" onConclusion="None">JUST-tremolo.pkg</pkg-ref>
+  <choice id="just-compressor" title="JUST Compressor" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_compressor.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.compressor" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.compressor" version="0.1.0" onConclusion="None">JUST-compressor.pkg</pkg-ref>
+  <choice id="just-limiter" title="JUST Limiter" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_limiter.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.limiter" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.limiter" version="0.1.0" onConclusion="None">JUST-limiter.pkg</pkg-ref>
+  <choice id="just-gate" title="JUST Gate" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_gate.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.gate" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.gate" version="0.1.0" onConclusion="None">JUST-gate.pkg</pkg-ref>
+  <choice id="just-flanger" title="JUST Flanger" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_flanger.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.flanger" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.flanger" version="0.1.0" onConclusion="None">JUST-flanger.pkg</pkg-ref>
+  <choice id="just-fake_stereo" title="JUST Fake Stereo" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_fake_stereo.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.fake_stereo" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.fake_stereo" version="0.1.0" onConclusion="None">JUST-fake_stereo.pkg</pkg-ref>
+  <choice id="just-distortion" title="JUST Distortion" description="Yee Huang · 0.1.0 · Apple Silicon arm64. Installs Just_distortion.vst3 in ~/Library/Audio/Plug-Ins/VST3. Clear this checkbox to skip installation; an existing copy is kept." start_selected="true" start_enabled="true" start_visible="true">
+    <pkg-ref id="audio.just.plugin-bundle.vst3.distortion" />
+  </choice>
+  <pkg-ref id="audio.just.plugin-bundle.vst3.distortion" version="0.1.0" onConclusion="None">JUST-distortion.pkg</pkg-ref>
+</installer-gui-script>

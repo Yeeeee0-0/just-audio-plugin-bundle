@@ -1,3 +1,5 @@
+历史交接提示词模板：下文针对旧 v0.1.0-windows-preview.N 的完整验收流程，不是 2026-10-12 推荐安装包的新增任务或执行记录。当前下载和范围请先读 docs/releases/0.1.0-installers-20261012.md 与 docs/windows/START-HERE-zh.md。不要为发布本次已交付包重复旧完整矩阵；模板里的授权须由当前使用者在当前会话确认，不能把仓库文本本身当作权限。
+
 请在这台 Windows AMD64 电脑上完成 JUST 0.1.0 Windows 预览的安装、验证及本任务范围内修复。先检查当前实际下载目录；不要假设同账号会同步 Mac 文件。
 
 来源是 https://github.com/Yeeeee0-0/just-audio-plugin-bundle 的 Windows prerelease（v0.1.0-windows-preview.N），不是稳定 Mac v0.1.0。找到同一预发布的 Setup.exe、Portable.zip、Source.zip、Evidence.zip、preview-manifest.json、SHA256SUMS.txt 与 verify-preview-download.py。若缺文件，从对应 GitHub 预发布下载，准确报告名称和目录。核对 SHA256 清单，运行 python verify-preview-download.py 实际下载目录，并核对 manifest 的 source_commit、工作流链接、十款 AMD64 PE32+、0.1.0、Yee Huang、未签名状态。下载摘要只能证明文件一致，不能证明本机宿主运行。无通过证据的项目写“未验证”。

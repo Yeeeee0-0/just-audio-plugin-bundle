@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{font:13px -apple-system,Helvetica,Arial,sans-serif;color:#202020}h1{font-size:22px}h2{font-size:16px}p{line-height:1.4}code{font-size:12px}</style></head><body>
+<h1>Installation details</h1>
+<p><b>Product:</b> JUST Audio Plugin Bundle 0.1.0<br><b>Vendor:</b> Yee Huang<br><b>Format:</b> VST3 · Apple Silicon arm64</p>
+<h2>Choose your plugins</h2><p>The Installation Type / Customize page has ten independent checkboxes, all selected by default. Keep the plugins you want and clear the others. Clearing a checkbox skips that plugin; it does not uninstall or change an existing copy.</p>
+<h2>Location</h2><p>Install for me only. Selected plugins use the standard current-user folder:<br><code>~/Library/Audio/Plug-Ins/VST3</code><br>The tilde (~) means your home folder. The destination is fixed to avoid duplicate installations.</p>
+<h2>Upgrading</h2><p>Only selected JUST bundles at this location are replaced using macOS Installer. Bundle identity and version checks are enabled. Newer installed bundles are not downgraded. Close your audio hosts first, then reopen and rescan VST3 plugins after installation.</p>
+<p>User presets in <code>~/Library/Application Support/JUST/Presets/v1/</code>, host projects and other plugins are outside the package. Custom files manually stored inside the ten .vst3 bundles should be moved out before replacement. Copies installed at other locations are not moved or removed.</p>
+<h2>Compatibility and signing</h2><p>macOS 11.0 is the binaries' build minimum; older macOS releases have not been runtime tested for this delivery. This package has no Developer ID signature or Apple notarization. If macOS blocks the package or plugins, request a Developer ID signed and notarized build. Keep macOS security protections enabled.</p>
+</body></html>

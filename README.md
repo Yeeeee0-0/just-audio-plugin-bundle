@@ -1,10 +1,19 @@
 # JUST Audio Plugins
 
-> **Windows preview branch:** native Windows CI builds and tests ten x64 VST3 plugins before publishing a prerelease. Check the [workflow result](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/workflows/windows-preview.yml) and the exact asset manifest; a source branch alone is not a usable plugin. Real REAPER visual/audio acceptance is still pending. Start with [Windows setup and validation](docs/windows/START-HERE-zh.md) and [known gaps](docs/windows/KNOWN-DIFFERENCES-zh.md). Stable macOS 0.1.0 remains on [main](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/main) and the [v0.1.0 release](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0).
+JUST is a suite of ten audio effects in VST3 format, written in C++17 with native platform editors. Both installers report version **0.1.0** and offer ten independent choices, selected by default.
 
-JUST is a suite of ten audio effects in VST3 format, written in C++17 with native platform editors. Version 0.1.0 derives from frozen source snapshot `b99abd3be4ad89b21e3a0c3caf1f12904503f168`. This hash records source provenance; it is not a commit identifier in the public repository's new history.
+**Recommended downloads:** [Windows x64 preview and macOS Apple silicon installers](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261012). This prerelease pairs the updated Windows UI installer with the unchanged macOS arm64 package from [v0.1.0](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0). Older releases and assets remain available.
 
-**Download:** [JUST 0.1.0 for macOS Apple silicon](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0). The installer lets you choose each of the ten plugins independently; all ten are selected by default. See [installation instructions](INSTALLING.md) and [release notes](RELEASE_NOTES_0.1.0.md).
+- [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe) — unsigned preview; see [Windows installation and removal](docs/windows/START-HERE-zh.md).
+- [macOS arm64 PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) — Apple silicon only, unsigned and not notarized; see [macOS installation and removal](INSTALLING.md).
+
+See the [release record and SHA-256 values](docs/releases/0.1.0-installers-20261012.md) for exact bytes, source provenance and verification limits. The current tag contains the final Windows source; the macOS package retains the original source at [`f2a7105`](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/f2a710510415395e13e548400143604c455df8fe). The two packages were not rebuilt together.
+
+## 中文
+
+JUST 包含十款独立 VST3 音频效果器，版本均为 **0.1.0**。上方是本次推荐下载：Windows x64 预览安装器修复了菜单关闭、选项回退和按钮闪烁，并使用已批准的安装器图标及欢迎/完成页；macOS 安装包沿用原已交付文件，仅包含 Apple silicon **arm64**，不包含 Intel 或 Universal 二进制。两个安装器默认十款全选，可分别取消勾选。
+
+Windows 安装器和插件未签名；macOS PKG 未签名、未公证，插件使用开发 ad-hoc 签名。下载后请核对[发布记录中的 SHA-256](docs/releases/0.1.0-installers-20261012.md)，保存工程并正常关闭音频宿主，再按 [Windows 说明](docs/windows/START-HERE-zh.md)或 [macOS 说明](INSTALLING.md)安装、扫描和移除。Windows 本次通过十款有限范围原生 UI 检查及 REAPER 8 项定向检查；macOS Installer GUI 检查停在实际安装前确认页。上述结果不代表所有 DAW、系统或完整音频矩阵均已验证。
 
 | Effect | What it does | Source module |
 | --- | --- | --- |
@@ -27,14 +36,14 @@ The shared framework supplies the VST3 processor/controller, parameter and state
 | --- | --- |
 | macOS on Apple silicon (`arm64`) | Ten Release bundles; selective installer GUI checked. Only Apple silicon binaries are included. |
 | Intel macOS / Universal | Build preset exists; no accepted binary or runtime validation in this release. |
-| Windows x64 | Separate unsigned preview workflow and selectable installer; see each prerelease's actual evidence. User REAPER acceptance remains pending. |
+| Windows x64 | Unsigned selectable preview installer; ten bounded native UI scopes and eight directed REAPER checks passed for this package. Full host/audio acceptance is outside those checks. |
 | Linux | Core tests can be configured without VST3; no plugin release. |
 
-The configured macOS deployment target is 11.0. That setting alone does not establish that the plugins have been tested on macOS 11.0. The frozen build uses development ad-hoc signatures; it does not establish Developer ID signing or notarization. Host compatibility and actual native input checks must be reported separately from offscreen or automated fixture results.
+The configured macOS deployment target is 11.0. That setting alone does not establish that the plugins have been tested on macOS 11.0. The frozen build uses development ad-hoc signatures; it does not establish Developer ID signing or notarization. Windows and macOS have distinct verification records; see the [current release record](docs/releases/0.1.0-installers-20261012.md).
 
 ## Build and use
 
-See [BUILDING.md](BUILDING.md) for pinned dependencies, macOS build commands and tests that do not start a GUI. Build outputs stay in the build directory; automatic links into plugin installation folders are disabled.
+See [BUILDING.md](BUILDING.md) for pinned dependencies and platform build commands. Build outputs stay in the build directory; automatic links into plugin installation folders are disabled.
 
 Use an arm64-capable VST3 host with the macOS arm64 build. The selectable installer installs for the current user at `~/Library/Audio/Plug-Ins/VST3`. The source tree does not include third-party commercial plugins or user audio projects.
 

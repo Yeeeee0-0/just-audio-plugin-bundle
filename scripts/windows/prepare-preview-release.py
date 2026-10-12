@@ -61,6 +61,9 @@ def main():
     escape_regression = read(ROOT/'build/windows-evidence/escape-routing-regression/negative-control.json')
     if escape_regression['result'] != 'PASS_OLD_CANDIDATE_REJECTED':
         raise SystemExit('Previous candidate must fail modal Escape routing negotiation')
+    gray_regression = read(ROOT/'build/windows-evidence/combo-gray-regression/negative-control.json')
+    if gray_regression['result'] != 'PASS_CURRENT_AND_OLD_CANDIDATE_REJECTED' or gray_regression['current_gray_checks'] != 12 or gray_regression['current_reopen_cycles'] != 3:
+        raise SystemExit('Current combo pixels must pass and old candidate must fail native grayscale regression')
     junit = ET.parse(native/'ctest.xml').getroot()
     if int(junit.get('failures', '0')) or int(junit.get('errors', '0')):
         raise SystemExit('Native CTest failures')
@@ -119,13 +122,16 @@ def main():
         'github_runner_image': {'os': os.environ.get('ImageOS'), 'version': os.environ.get('ImageVersion')},
         'stable_mac_release_modified': False,
         'fix_candidate': {
-            'issue': 'Modal Escape was intercepted by host keyboard routing and closed the entire editor',
+            'issue': 'Modal Escape closed the host editor; native Algorithm selected-text drawing could escape bypass grayscale',
             'base_commit': '7aedc756b90f3489a1cf2cc0e8e75816fac08b16',
             'received_patch_sha256': '59648ab2342f18f5cebb9d2d6d58bf6a9da1f94c7204e655749007bfdc8f6ed0',
+            'followup_patch_sha256': '693d58ec7aaa30d0543faaf21730c804e110cb90956d21f84c2fed7040f8fff5',
+            'tested_escape_base_commit': 'aa3d23718e6149cb23883cf49fa74039f33ef9b6',
+            'combo_grayscale_negative_control': gray_regression,
             'product_file': 'common/ui/NativeEditorWindows.cpp',
             'retained_lifetime_fix': 'CI run16 captured native button dispatch resuming after Delete rebuilt its parent. Queue modal button and Escape actions on the surviving editor; invalidate stale queued actions by modal generation.',
             'prior_lifetime_diagnostic_run_url': 'https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/runs/37841801452',
-            'change': 'Request modal Escape from the host dialog router with WM_GETDLGCODE; close only the overlay using the existing deferred action; let an open native combo list dismiss first; retain preview.17 fixes',
+            'change': 'Request modal Escape from the host dialog router with WM_GETDLGCODE; close only the overlay using the existing deferred action; let an open native combo list dismiss first; apply existing bypass grayscale repaint after CB_SETCURSEL; retain preview.17 fixes',
             'reaper_7_41_at_175_percent_dpi_revalidation': 'NOT_RUN_FOR_THIS_CANDIDATE',
             'concurrent_combo_cycles_per_plugin': 16,
             'negative_control': regression,
@@ -137,13 +143,15 @@ def main():
     write(out/'preview-manifest.json', manifest)
     notes = f'''# JUST 0.1.0 Windows x64 preview {args.run_number}
 
-**Unsigned modal-Escape routing fix candidate; actual REAPER keyboard revalidation remains pending.**
+**Unsigned Escape and native combo grayscale fix candidate; actual REAPER revalidation remains pending.**
 
 Preview.17 physical-input testing found that Escape could close REAPER's entire floating plugin editor instead of only JUST's open overlay. This candidate starts from `7aedc756b90f3489a1cf2cc0e8e75816fac08b16`, requests Escape through `WM_GETDLGCODE` only while an overlay exists, and uses the existing deferred close action. An open native combo list retains its first-Escape dismissal. Other keys and product text are unchanged. The earlier native combo/button lifetime, sibling clipping and bypass grayscale fixes are retained; DSP, IDs, parameters, state formats and Mac code are unchanged.
 
 The native regression now checks Escape negotiation and closure from the scale and language combos, close button, editor root, preset name and preset selector. It verifies that the editor/host remain alive, the overlay closes, Escape is no longer claimed afterward, and normal Tab routing remains available. Each plugin completes 12 Escape checks plus the existing 16 modal/audio cycles. The pinned preview.17 EQ DLL must fail the new routing assertion. These are hidden HWND protocol tests; physical input, REAPER accelerators and themed popup behavior still require user-machine validation.
 
-本候选只修复浮层 Escape 的宿主键盘协商。请确认焦点后逐项复测关闭按钮、缩放／语言／预设下拉框、预设名称输入框：Escape 只关闭浮层，插件和 REAPER 工程仍打开；展开下拉列表时首次 Escape 先收起列表。继续核对前述缩放、预设和 Limiter 旁路颜色，不把 preview.17 的实机结果自动记为本包通过。实机确认前不作为正式版。
+The Algorithm combo follow-up adds `CB_SETCURSEL` to the existing synchronous bypass repaint path. A separate native pixel regression shows only its own test HWND without activation and reads the combo client with `BitBlt`, without requesting a new paint during capture. Test-only native text colour gives deterministic contrast even when ClearType is unavailable. Three active positive controls and twelve bypass pixel checks across three editor opens must pass; the pinned preview.17 Limiter DLL must fail the same grayscale assertion. This is controlled native paint evidence, not a screenshot or acceptance of the user’s REAPER session. No system font settings are changed.
+
+本候选保留已测试的浮层 Escape 宿主键盘协商修复，并在原生算法下拉框更新选中文字后执行既有旁路灰度重绘。原始实机失败图与较早正常图不同，候选是否消除实机彩色子像素仍需重新截图核对。请确认焦点后逐项复测关闭按钮、缩放／语言／预设下拉框、预设名称输入框：Escape 只关闭浮层，插件和 REAPER 工程仍打开；展开下拉列表时首次 Escape 先收起列表。继续核对前述缩放、预设和 Limiter 旁路颜色，不把 preview.17 的实机结果自动记为本包通过。实机确认前不作为正式版。
 
 - Download `JUST-{suffix}-Setup.exe` for the selectable installer (all ten selected by default).
 - `Portable.zip` contains the exact ten tested x64 VST3 bundles and installation scripts.

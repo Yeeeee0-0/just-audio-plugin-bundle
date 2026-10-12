@@ -22,8 +22,31 @@ Close REAPER normally after saving your work. The installer refuses to run
 while REAPER or its plugin host processes are running; it never kills them.
 
 User presets, REAPER settings, licenses and projects are not read or changed.
-No registry uninstall entry is created. Use the recorded backup transaction
-and its included Installer-Engine.ps1 -Action Restore to undo this preview.
+No registry uninstall entry or Start menu shortcut is created. Successful
+Setup records the exact transaction's JUST-uninstall.exe and report path.
+Keep that entry, its adjacent transaction-binding.json and old backups in
+their original directory. Run the recorded EXE in place to undo this transaction.
+
+Uninstall / undo this installation undoes ALL plugins selected in this
+transaction: first-time installations are removed; overwritten plugins are
+restored to their verified original versions. The transaction backups remain.
+The confirmation shows the original VST3 destination and selected identities.
+Normal Cancel does not call Restore or change plugins/journal. Silent /S uses
+the same binding and protection. /REPORT= selects an external log path outside
+the VST3 destination and transaction directory.
+
+The uninstall entry uses its embedded trusted engine. It refuses moved entries,
+missing or inconsistent bindings and unknown target/backup changes, including
+empty directories and type changes. These writable transaction checks prevent
+accidental mis-binding; they are not an administrator-resistant signature.
+Entry-generation failure is incomplete Setup even if plugins were copied.
+Each Setup binds its own private engine report and invocation GUID; a shared
+external report never chooses the uninstall transaction. Default public
+reports use a unique GUID filename. Create/Finalize require journal INSTALLED.
+Requested uninstall reports are not written until the exact context and
+outside-target path are verified. Early errors use only independently safe
+refusal evidence or actual error output. After successful restoration, repeat
+use permits only the exact old state; later reinstallations are preserved.
 
 The source repository's LICENSE and THIRD_PARTY_NOTICES.md remain applicable.
 No paid services, software downloads or account credentials are required by

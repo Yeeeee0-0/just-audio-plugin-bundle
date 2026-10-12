@@ -1,6 +1,8 @@
 # Building JUST 0.1.0
 
-These instructions describe the public source preparation derived from frozen macOS arm64 snapshot `b99abd3be4ad89b21e3a0c3caf1f12904503f168`. That provenance hash is not a checkout instruction for the prepared public repository's new history. These instructions do not claim that Windows, Intel macOS or an older macOS runtime has passed release acceptance.
+For the Windows package in `v0.1.0-installers.20261012`, use that tag's source. The unchanged macOS arm64 package uses original public source commit `f2a710510415395e13e548400143604c455df8fe` (`v0.1.0`), derived from frozen snapshot `b99abd3be4ad89b21e3a0c3caf1f12904503f168`. The snapshot hash is provenance, not a public checkout ref. The packages were not rebuilt together. See [the release record](docs/releases/0.1.0-installers-20261012.md) for their distinct verification boundaries.
+
+中文：重建本次 Windows 包请使用 `v0.1.0-installers.20261012` 的源码；macOS 原安装包对应上面的原公开提交，文件保持不变。锁定依赖和工具链会影响输出，源码一致不保证不同机器构建出的文件摘要一致。Intel macOS、Universal 和旧系统运行兼容性未由本发布验证。
 
 The project is MIT licensed. Runtime artwork required by the build is included under the terms documented in ARTWORK.md. Keep these files to reproduce the frozen product.
 
@@ -11,7 +13,7 @@ The project is MIT licensed. Runtime artwork required by the build is included u
 - A C++17 compiler and, for macOS, Apple Command Line Tools or Xcode with a macOS SDK, Objective-C++ support and `codesign`.
 - Network access to the official Steinberg repositories for the initial dependency bootstrap, or a separately verified copy of the pinned dependency checkout.
 
-Run the commands from the repository root. No command below installs plugins, changes a DAW configuration or launches an editor.
+Run the commands from the repository root. Build outputs remain local; building does not install plugins or change a DAW configuration. The explicitly listed CLI test subsets do not start an editor.
 
 ## Pinned dependency
 
@@ -86,9 +88,25 @@ The validation script runs the SDK command-line validator on the ten build-direc
 
 The full macOS CTest registry includes native/offscreen editor fixtures. Inspect `ctest --preset mac-arm64-clt -N` before running a broader set. Activated UI tests are separately gated by `JUST_ACTIVATED_UI_TESTS`, which defaults to `OFF`. Automated, offscreen and command-line results do not substitute for native mouse/keyboard or DAW acceptance.
 
+## Windows x64
+
+Use native Windows x64 PowerShell, Visual Studio 2022 C++ tools and a Windows SDK, CMake >= 3.25, Python >= 3.9 and the pinned VST3 SDK. The preset uses Release and the static MSVC runtime:
+
+```powershell
+python scripts/bootstrap-sdk.py
+cmake --preset windows-x64
+cmake --build --preset windows-x64 --parallel 2 --target Just_eq Just_reverb Just_delay Just_tremolo Just_compressor Just_limiter Just_gate Just_flanger Just_fake_stereo Just_distortion
+```
+
+The ten x64 bundles are under `build/windows-x64/VST3/Release/`. NSIS 3 is needed only to build Setup. `scripts/windows/Build-Installer.ps1` requires a validated candidate directory and verifies its complete payload; see [the installer build instructions](installers/windows/README.md). It does not sign the result.
+
+`scripts/windows/Build-And-Test.ps1` and the existing CI workflow are developer verification recipes. They can run a broader suite than the bounded checks performed for this publication. Historical preparation templates under `docs/windows/` do not describe the current package's results; use [the release record](docs/releases/0.1.0-installers-20261012.md). No tests were rerun merely to publish these files.
+
+中文：Windows 使用原生 x64 PowerShell 与 Visual Studio 2022，编译命令如上；安装器另需已有 NSIS 3。编译、候选检查、真实宿主操作和安装器检查是不同步骤。发布记录列出本次实际检查及沿用的旧逻辑证据，不能从源码或脚本存在推定运行通过。
+
 ## Other configured platforms
 
-The `windows-x64` preset selects Visual Studio 2022 and x64. It is a development configuration: the separate Windows port has not been accepted for 0.1.0. No supported Windows binary is promised by this document. Linux is limited here to `JUST_BUILD_VST3=OFF` core builds.
+Intel macOS and universal presets remain available without accepted binaries in this release. Linux is limited here to `JUST_BUILD_VST3=OFF` core builds.
 
 ## Compatibility when changing code
 

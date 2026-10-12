@@ -16,24 +16,63 @@ bool queueModalEscape(HWND h);
 
 // System controls keep their native input, accessibility and edit semantics.
 // Desaturate their actual native paint only while the ancestor is bypassed.
-LRESULT CALLBACK nativeGrayProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR){
+LRESULT CALLBACK nativeGrayProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR moduleContent){
     // Let the actual host/dialog keyboard router deliver Escape to the plugin.
     // A direct WM_KEYDOWN fixture bypasses this negotiation and cannot test it.
     if(m==WM_GETDLGCODE && wantsModalEscape(h,w,l))return DefSubclassProc(h,m,w,l)|DLGC_WANTMESSAGE;
     if(m==WM_KEYDOWN && w==VK_ESCAPE && queueModalEscape(h))return 0;
 
-    if((m==WM_PAINT || m==WM_PRINTCLIENT) && win::paused(h)){win::Paint p(h,true,m==WM_PRINTCLIENT?reinterpret_cast<HDC>(w):nullptr);DefSubclassProc(h,WM_PRINTCLIENT,reinterpret_cast<WPARAM>(p.dc()),PRF_CLIENT|PRF_ERASEBKGND);return 0;}
+    const bool gray=win::paused(h);
+    wchar_t name[32]{};GetClassNameW(h,name,32);
+    // A module dropdown owns its pending choice until it closes. Periodic
+    // model refresh must not reset that choice before native input commits it.
+    // The next regular refresh applies the latest model value after close/cancel.
+    if(m==CB_SETCURSEL && moduleContent && !lstrcmpiW(name,L"COMBOBOX")
+        && (GetWindowLongPtrW(h,GWL_STYLE)&3)==CBS_DROPDOWNLIST
+        && SendMessageW(h,CB_GETDROPPEDSTATE,0,0))return SendMessageW(h,CB_GETCURSEL,0,0);
+    const bool ownerDraw=!lstrcmpiW(name,L"BUTTON") && (GetWindowLongPtrW(h,GWL_STYLE)&BS_TYPEMASK)==BS_OWNERDRAW;
+    if(m==WM_SETTEXT && (!lstrcmpiW(name,L"STATIC") || !lstrcmpiW(name,L"BUTTON"))
+        && win::windowText(h)==(l?reinterpret_cast<const wchar_t*>(l):L""))return TRUE;
+
+    // The buffered paint below supplies the complete background. A separate
+    // native screen erase exposes a blank frame before that buffer is copied,
+    // especially for owner-draw buttons invalidated with erase on every tick.
+    if(m==WM_ERASEBKGND && (gray || ownerDraw))return 1;
+    if((m==WM_PAINT || m==WM_PRINTCLIENT) && (gray || ownerDraw)){win::Paint p(h,true,m==WM_PRINTCLIENT?reinterpret_cast<HDC>(w):nullptr);DefSubclassProc(h,WM_PRINTCLIENT,reinterpret_cast<WPARAM>(p.dc()),PRF_CLIENT|PRF_ERASEBKGND);return 0;}
+    if(gray){
+        // Refresh sends these same values repeatedly. Suspending an unchanged
+        // child on every tick briefly removes WS_VISIBLE and can expose its
+        // parent's background in a real host frame. Keep stable children intact.
+        if(m==BM_SETCHECK && SendMessageW(h,BM_GETCHECK,0,0)==LRESULT(w))return 0;
+        if(m==BM_SETSTATE && ((SendMessageW(h,BM_GETSTATE,0,0)&BST_PUSHED)!=0)==(w!=0))return 0;
+        if(m==CB_SETCURSEL && (GetWindowLongPtrW(h,GWL_STYLE)&3)==CBS_DROPDOWNLIST
+            && !SendMessageW(h,CB_GETDROPPEDSTATE,0,0) && SendMessageW(h,CB_GETCURSEL,0,0)==LRESULT(w))return LRESULT(w);
+    }
     // Native setters can draw immediately, without going through WM_PAINT.
     // Limiter refreshes its checked BUTTON every timer tick. Repaint that
     // control through the grayscale buffer before the setter returns.
-    if(win::paused(h) && (m==BM_SETCHECK || m==BM_SETSTATE || m==WM_SETTEXT || m==WM_ENABLE || m==WM_SETFONT)){
+    // CB_SETCURSEL can also draw selected text immediately. Apply the same
+    // bypass conversion before returning, including native colour subpixels.
+    if((gray && (m==BM_SETCHECK || m==BM_SETSTATE || m==CB_SETCURSEL || m==WM_SETTEXT || m==WM_ENABLE || m==WM_SETFONT))
+        || (ownerDraw && m==WM_SETTEXT)){
+        // Native setters may draw to the screen before they return. Repainting
+        // afterward alone exposes a coloured intermediate frame to the host.
+        // Suspend that direct drawing and publish only the complete buffered repaint.
+        // Never enable redraw on an already hidden/externally suspended child:
+        // WM_SETREDRAW(TRUE) would add WS_VISIBLE and reveal it.
+        const bool suspend=IsWindowVisible(h) && !GetPropW(h,L"SysSetRedraw");
+        if(suspend)DefSubclassProc(h,WM_SETREDRAW,FALSE,0);
         LRESULT result=DefSubclassProc(h,m,w,l);
-        if(IsWindow(h))RedrawWindow(h,nullptr,nullptr,RDW_INVALIDATE|RDW_UPDATENOW);
+        if(IsWindow(h) && suspend){
+            DefSubclassProc(h,WM_SETREDRAW,TRUE,0);
+            RedrawWindow(h,nullptr,nullptr,RDW_INVALIDATE|RDW_UPDATENOW|RDW_FRAME);
+        }
         return result;
     }
     if(m==WM_NCDESTROY)RemoveWindowSubclass(h,nativeGrayProc,0x4a555354);return DefSubclassProc(h,m,w,l);
 }
-BOOL CALLBACK prepareNativeGray(HWND h,LPARAM exclude){if(h==reinterpret_cast<HWND>(exclude))return TRUE;wchar_t name[64]{};GetClassNameW(h,name,64);if(!lstrcmpiW(name,L"STATIC") || !lstrcmpiW(name,L"EDIT") || !lstrcmpiW(name,L"COMBOBOX") || !lstrcmpiW(name,L"BUTTON"))SetWindowSubclass(h,nativeGrayProc,0x4a555354,0);return TRUE;}
+struct NativeGrayContext {HWND exclude=nullptr,moduleParent=nullptr;};
+BOOL CALLBACK prepareNativeGray(HWND h,LPARAM data){const auto& context=*reinterpret_cast<const NativeGrayContext*>(data);if(h==context.exclude)return TRUE;wchar_t name[64]{};GetClassNameW(h,name,64);if(!lstrcmpiW(name,L"STATIC") || !lstrcmpiW(name,L"EDIT") || !lstrcmpiW(name,L"COMBOBOX") || !lstrcmpiW(name,L"BUTTON"))SetWindowSubclass(h,nativeGrayProc,0x4a555354,static_cast<DWORD_PTR>(context.moduleParent && IsChild(context.moduleParent,h)));return TRUE;}
 constexpr UINT deferredModalCommand=WM_APP+0x4a5;
 constexpr int presetID=100,bypassID=101,advancedID=102,settingsID=103,aboutID=104;
 constexpr int settingsTabID=201,aboutTabID=202,presetsTabID=203,closeID=204,scaleID=210,languageID=211,lowID=212;
@@ -100,7 +139,7 @@ struct NativeView {
             if(GetFocus()==h)win::stroke(g,{.5f,.5f,std::max(1.f,w-1),std::max(1.f,height-1)},0x74b9c3,3);return;
         }bool down=(SendMessageW(h,BM_GETSTATE,0,0)&BST_PUSHED)!=0;unsigned fillColor=bypassButton && on?0xd83e48:on?0xd8f5f5:down?0xe8f2f5:0xffffff;win::fill(g,{0,0,w,height},(GetParent(h)==body || GetParent(h)==panel)?0xf7fbfc:0xfbfdfe);win::fill(g,{.5f,.5f,std::max(1.f,w-1),std::max(1.f,height-1)},fillColor,8);if(!bypassButton)win::stroke(g,{.5f,.5f,std::max(1.f,w-1),std::max(1.f,height-1)},0xd5e2e7,8);win::text(g,win::windowText(h),{3,0,w-6,height},id==settingsID?20.f:12.f,!IsWindowEnabled(h)?0x99adb4:bypassButton && on?0xffffff:0x17333c,false,Gdiplus::StringAlignmentCenter);if(GetFocus()==h)win::stroke(g,{2,2,std::max(1.f,w-4),std::max(1.f,height-4)},0x74b9c3,6);}
     void endAudition(){const auto& s=callbacks.services;if(s.readAuditionStatus && s.endAudition){auto a=s.readAuditionStatus(s.owner);if(a.token)s.endAudition(s.owner,a.token);}}
-    void refresh(){if(!window || destroying)return;EnumChildWindows(window,prepareNativeGray,reinterpret_cast<LPARAM>(bypass));const auto& s=callbacks.services;auto transaction=s.readPresetTransaction?s.readPresetTransaction(s.owner):PresetTransactionStatus::unavailable;EnableWindow(preset,transaction!=PresetTransactionStatus::pending);if(GetForegroundWindow()!=GetAncestor(window,GA_ROOT))endAudition();bool pause=callbacks.getBypass(callbacks.owner);
+    void refresh(){if(!window || destroying)return;NativeGrayContext nativeGrayContext{bypass,contentParent};EnumChildWindows(window,prepareNativeGray,reinterpret_cast<LPARAM>(&nativeGrayContext));const auto& s=callbacks.services;auto transaction=s.readPresetTransaction?s.readPresetTransaction(s.owner):PresetTransactionStatus::unavailable;EnableWindow(preset,transaction!=PresetTransactionStatus::pending);if(GetForegroundWindow()!=GetAncestor(window,GA_ROOT))endAudition();bool pause=callbacks.getBypass(callbacks.owner);
         if(!presentationInitialized || lastPaused!=pause){if(callbacks.view->visualsPaused && !pause)++callbacks.view->visualResumeGeneration;callbacks.view->visualsPaused=pause;if(callbacks.setVisualsPaused)callbacks.setVisualsPaused(callbacks.owner,pause);if(content)content->setVisualsPaused(pause);presentationInitialized=true;lastPaused=pause;invalidate();}
         labelButton(preset,transaction==PresetTransactionStatus::pending?tr(L"等待预设…",L"Pending…"):transaction==PresetTransactionStatus::rejected?tr(L"重试预设",L"Retry preset"):tr(L"预设 ▾",L"Preset ▾"));labelButton(bypass,tr(L"● 旁路",L"● Bypass"));labelButton(advanced,callbacks.view->advanced?tr(L"简易",L"Simple"):tr(L"高级",L"Advanced"));labelButton(about,tr(L"关于",L"About"));SendMessageW(bypass,BM_SETCHECK,pause?BST_CHECKED:BST_UNCHECKED,0);SendMessageW(advanced,BM_SETCHECK,callbacks.view->advanced?BST_CHECKED:BST_UNCHECKED,0);
         auto snapshot=callbacks.readStatus?callbacks.readStatus(callbacks.owner):StatusSnapshot{};if(content)content->refresh(*callbacks.view,snapshot);
@@ -182,5 +221,38 @@ void* createNativeEditor(void* parent,const PluginIdentity& p,EditorCallbacks c)
     if(auto factory=moduleDefinition().createEditorContent){v->contentParent=CreateWindowExW(0,L"JUST.Shared.Surface.v3",L"JUST module",WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN,0,84,10,10,v->window,nullptr,v->module,v.get());if(!v->contentParent)return nullptr;v->content.reset(factory());if(!v->content || !v->content->attach(v->contentParent,c.services)){v->content.reset();DestroyWindow(v->contentParent);v->contentParent=nullptr;}}
     v->layout();v->refresh();SetTimer(v->window,1,v->timerMilliseconds,nullptr);return v.release();}
 void destroyNativeEditor(void* handle){delete static_cast<NativeView*>(handle);}
+bool handleNativeModalEscape(void* handle){
+    auto* v=static_cast<NativeView*>(handle);
+    if(!v || v->destroying || !v->window || !v->overlay)return false;
+    HWND focus=GetFocus();
+    if(focus!=v->window && !IsChild(v->window,focus))return false;
+    // Keep the native combo's cancellation semantics: one Escape dismisses
+    // its open list, then a later Escape closes only the plugin modal.
+    wchar_t klass[32]{};GetClassNameW(focus,klass,32);
+    if(!lstrcmpiW(klass,L"COMBOBOX") && SendMessageW(focus,CB_GETDROPPEDSTATE,0,0)){
+        SendMessageW(focus,WM_KEYDOWN,VK_ESCAPE,1);return true;
+    }
+    v->command(closeID,BN_CLICKED);return true;
+}
+bool handleNativeControlKey(void* handle,unsigned key){
+    auto* v=static_cast<NativeView*>(handle);
+    if(!v || v->destroying || !v->window || v->overlay)return false;
+    HWND focus=GetFocus();
+    if(!focus || !IsChild(v->window,focus) || !IsWindowEnabled(focus))return false;
+    for(HWND parent=GetParent(focus);parent;parent=GetParent(parent))if(!IsWindowEnabled(parent))return false;
+    wchar_t klass[64]{};GetClassNameW(focus,klass,64);
+    if(!lstrcmpW(klass,L"JUST.Shared.Rotary.v3")){
+        switch(key){case VK_RETURN:case VK_F2:case VK_ESCAPE:case VK_HOME:case VK_END:
+        case VK_PRIOR:case VK_NEXT:case VK_LEFT:case VK_RIGHT:case VK_UP:case VK_DOWN:
+            SendMessageW(focus,WM_KEYDOWN,key,1);return true;default:return false;}
+    }
+    if(!lstrcmpiW(klass,L"EDIT") && (key==VK_RETURN || key==VK_ESCAPE)){
+        HWND parent=GetParent(focus);GetClassNameW(parent,klass,64);
+        if(!lstrcmpW(klass,L"JUST.Shared.Rotary.v3") && GetDlgItem(parent,1)==focus){
+            SendMessageW(focus,WM_KEYDOWN,key,1);return true;
+        }
+    }
+    return false;
+}
 void resizeNativeEditor(void* handle,int width,int height){if(!handle)return;auto* v=static_cast<NativeView*>(handle);if(!v->window)return;MoveWindow(v->window,0,0,width,height,TRUE);v->layout();}
 }

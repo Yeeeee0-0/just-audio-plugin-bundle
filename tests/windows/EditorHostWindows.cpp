@@ -1,4 +1,5 @@
-// A Windows-native, hidden-window VST3 host. Never opens an audio device or REAPER.
+// A Windows-native VST3 host, hidden by default. --combo-gray-only shows
+// its own isolated HWND for native paint regression; never opens audio or REAPER.
 // Its PASS is deliberately narrower than real-host/manual visual acceptance.
 #ifndef _WIN32
 #error This host must be compiled and run natively on Windows.
@@ -16,6 +17,7 @@
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 #include "pluginterfaces/vst/ivstmessage.h"
 #include "pluginterfaces/gui/iplugview.h"
+#include "pluginterfaces/base/keycodes.h"
 #include "base/source/fobject.h"
 #include "base/source/fstreamer.h"
 #include <windows.h>
@@ -51,7 +53,14 @@ using just_windows_test::Product;
 namespace {
 std::atomic<unsigned> checks{0};
 unsigned comboStressCycles = 0;
+unsigned nativeComboGrayChecks=0,nativeComboActiveControls=0,nativeComboReopens=0;
+unsigned nativeCheckboxGrayChecks=0;
+bool nativeComboLiveProbe=false;
+unsigned nativeAnalysisOverlayChecks=0;
+unsigned nativeBackgroundEraseChecks=0;
 unsigned buttonDispatchChecks = 0, escapeDispatchChecks = 0, escapeRoutingQueries = 0;
+unsigned vst3EscapeChecks = 0;
+unsigned vst3NumericChecks = 0;
 std::uint64_t comboAudioBlocks = 0;
 std::string phase = "startup";
 std::ofstream logFile;
@@ -185,7 +194,7 @@ class Window {
 public:
     HWND handle = nullptr;
     Window() {
-        // Intentionally never WS_VISIBLE, ShowWindow, SetForegroundWindow or SetFocus.
+        // Hidden for the standard suite; only --combo-gray-only explicitly shows it without activation.
         handle = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, L"STATIC", L"JUST hidden test host",
             WS_POPUP | WS_CLIPCHILDREN, 0, 0, 1800, 1200, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
         check(handle != nullptr, "create hidden HWND parent");
@@ -550,6 +559,69 @@ public:
     }
 };
 
+void checkVst3ModalEscape(Session& s) {
+    for(int targetID:{204,210,211,220,221,-1}) {
+        click(s.window.handle,103);
+        if(targetID==220 || targetID==221)click(s.window.handle,203);
+        HWND editor=GetWindow(s.window.handle,GW_CHILD);
+        HWND target=targetID<0?editor:control(s.window.handle,targetID);
+        check(target!=nullptr,"VST3 Escape focus target exists");
+        SetFocus(s.window.handle);
+        check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultFalse,"unowned host focus retains host Escape");
+        SetFocus(target);check(GetFocus()==target,"VST3 Escape uses actual child focus");
+        check(s.view->onKeyDown(0,KEY_TAB,0)==kResultFalse,"VST3 modal leaves Tab to native host routing");
+        WindowLifetime lifetime(target);
+        check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultTrue,"VST3 host-forwarded modal Escape is handled");
+        check(lifetime.alive(),"VST3 Escape preserves sender until callback returns");
+        settle();
+        check(control(s.window.handle,204)==nullptr && IsWindow(editor),"VST3 Escape closes only plugin modal");
+        check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultTrue,"handled held Escape repeat does not leak to host");
+        check(s.view->onKeyUp(0,KEY_ESCAPE,0)==kResultTrue,"handled Escape key-up stays consumed");
+        check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultFalse,"fresh Escape without a modal returns to host");
+        check(s.view->onKeyUp(0,KEY_ESCAPE,0)==kResultFalse,"unhandled Escape key-up returns to host");
+        ++vst3EscapeChecks;
+    }
+}
+
+void checkVst3NumericKeys(Session& s,bool switched=false) {
+    HWND rotary=nullptr;
+    EnumChildWindows(s.window.handle,[](HWND h,LPARAM data)->BOOL{
+        wchar_t klass[64]{};GetClassNameW(h,klass,64);
+        if(!lstrcmpW(klass,L"JUST.Shared.Rotary.v3") && IsWindowEnabled(h)){
+            *reinterpret_cast<HWND*>(data)=h;return FALSE;
+        }return TRUE;
+    },reinterpret_cast<LPARAM>(&rotary));
+    // EQ only exposes a rotary in Advanced.
+    if(!rotary){check(!switched,"Advanced exposes a native rotary");click(s.window.handle,102);checkVst3NumericKeys(s,true);return;}
+    HWND edit=GetDlgItem(rotary,1);check(edit!=nullptr,"native numeric field exists");
+    const auto before=state(s.controller.get());const auto original=windowText(edit);
+    const auto writes=s.handler->writes;
+    SetFocus(s.window.handle);
+    check(s.view->onKeyDown(0,KEY_F2,0)==kResultFalse,"unowned host focus retains F2");
+    SetFocus(rotary);
+    check(s.view->onKeyDown(0,KEY_F2,kCommandKey)==kResultFalse,"modified host shortcuts stay with host");
+    check(s.view->onKeyDown(0,KEY_F2,0)==kResultTrue && GetFocus()==edit,"VST3 F2 enters native numeric edit");
+    check(s.view->onKeyUp(0,KEY_F2,0)==kResultTrue,"handled F2 key-up consumed");
+    SetWindowTextW(edit,L"invalid cancelled input");
+    MSG escape{};escape.message=WM_KEYDOWN;escape.wParam=VK_ESCAPE;
+    check(SendMessageW(edit,WM_GETDLGCODE,VK_ESCAPE,reinterpret_cast<LPARAM>(&escape)) & DLGC_WANTMESSAGE,"numeric field claims native Escape routing");
+    check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultTrue && GetFocus()==rotary,"VST3 Escape cancels numeric edit without closing view");
+    check(s.view->onKeyDown(0,KEY_ESCAPE,0)==kResultTrue,"numeric Escape repeat stays consumed");
+    check(s.view->onKeyUp(0,KEY_ESCAPE,0)==kResultTrue,"numeric Escape key-up consumed");
+    check(windowText(edit)==original && state(s.controller.get())==before,"numeric cancel preserves value and state");
+    check(s.view->onKeyDown(0,KEY_RETURN,0)==kResultTrue && GetFocus()==edit,"VST3 Return enters native numeric edit");
+    check(s.view->onKeyDown(0,KEY_RETURN,0)==kResultTrue && GetFocus()==edit,"held Return does not immediately commit");
+    check(s.view->onKeyUp(0,KEY_RETURN,0)==kResultTrue,"handled Return release consumed");
+    SetWindowTextW(edit,L"invalid committed input");
+    check(s.view->onKeyDown(0,KEY_RETURN,0)==kResultTrue && GetFocus()==rotary,"VST3 Return completes native numeric validation");
+    check(s.view->onKeyUp(0,KEY_RETURN,0)==kResultTrue,"numeric completion key-up consumed");
+    check(state(s.controller.get())==before && s.handler->writes==writes,"invalid numeric text emits no parameter change");
+    check(s.view->onKeyDown(0,KEY_TAB,0)==kResultFalse,"numeric Tab retains native host routing");
+    ++vst3NumericChecks;
+}
+
+#include "NativeComboPaintProbe.hpp"
+
 class ConcurrentAudio {
     std::atomic<bool> stop{false};
     std::atomic<std::uint64_t> processed{0};
@@ -796,6 +868,10 @@ template<class Sample> void run(const VST3::Hosting::Module::Ptr& module, HostAp
     for (int id : {221, 222, 223, 224, 225}) check(control(s.window.handle, id) != nullptr, "preset manager control exists");
     capture("preset-manager");
     click(s.window.handle, 204);
+    // Preserve the historical combo/button negative-control failure points.
+    // The new VST3 callback coverage remains required in both sample formats.
+    checkVst3ModalEscape(s);
+    checkVst3NumericKeys(s);
     check(s.handler->writes == initialWrites, "resize/settings/language emit no automation"); render();
     const auto editorChunk = state(s.controller.get());
     s.close(); render(true); s.open();
@@ -877,11 +953,21 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
         << ",\n  \"button_dispatch_checks\": " << buttonDispatchChecks
         << ",\n  \"escape_dispatch_checks\": " << escapeDispatchChecks
         << ",\n  \"escape_routing_queries\": " << escapeRoutingQueries
+        << ",\n  \"vst3_host_escape_checks\": " << vst3EscapeChecks
+        << ",\n  \"vst3_host_numeric_checks\": " << vst3NumericChecks
+        << ",\n  \"native_combo_gray_checks\": " << nativeComboGrayChecks
+        << ",\n  \"native_checkbox_gray_checks\": " << nativeCheckboxGrayChecks
+        << ",\n  \"native_combo_active_controls\": " << nativeComboActiveControls
+        << ",\n  \"native_combo_reopen_cycles\": " << nativeComboReopens
+        << ",\n  \"native_combo_live_probe\": " << (nativeComboLiveProbe?"true":"false")
+        << ",\n  \"native_analysis_overlay_checks\": " << nativeAnalysisOverlayChecks
+        << ",\n  \"native_background_erase_checks\": " << nativeBackgroundEraseChecks
+        << ",\n  \"native_combo_probe_scope\": \"Separate opt-in shown test HWND; BitBlt of only owned combo client; test-only native text colour for deterministic contrast; no WM_PRINT, system changes or real REAPER\""
         << ",\n  \"concurrent_combo_audio_blocks\": " << comboAudioBlocks
         << ",\n  \"real_reaper_validation\": \"NOT_RUN\",\n  \"physical_mouse_keyboard_input\": \"NOT_RUN\","
         << "\n  \"audio_device_playback\": \"NOT_RUN\",\n  \"mac_vs_windows_audio_comparison\": \"NOT_RUN\","
-        << "\n  \"bmp_capture_scope\": \"hidden HWND tree; per-window WM_PRINTCLIENT in bottom-to-top Z order with ancestor clipping; native text/overlay pixel review required\","
-        << "\n  \"bmp_capture_limitations\": \"Never shown or activated; a control may decline hidden printing; owned popups/tooltips and real-host composition are not captured; no synthesized labels or feedback\","
+        << "\n  \"bmp_capture_scope\": " << quoted(nativeComboLiveProbe ? "BitBlt of existing pixels in only the shown owned native combo client; no capture-triggered repaint" : "hidden HWND tree; per-window WM_PRINTCLIENT in bottom-to-top Z order with ancestor clipping; native text/overlay pixel review required") << ","
+        << "\n  \"bmp_capture_limitations\": " << quoted(nativeComboLiveProbe ? "Controlled native text-colour contrast in an isolated shown test HWND; not physical input, ClearType-specific proof or REAPER acceptance" : "Never shown or activated; a control may decline hidden printing; owned popups/tooltips and real-host composition are not captured; no synthesized labels or feedback") << ","
         << "\n  \"analysis_capture_stimulus\": \"128 real 64-sample blocks at 48000 Hz after view attachment before each capture; unchanged twin-audio assertions; not a real-time device\","
         << "\n  \"test_baseline\": \"b99abd3be4ad89b21e3a0c3caf1f12904503f168\"\n}\n";
 }
@@ -889,8 +975,8 @@ void report(const fs::path& path, const std::string& slug, bool passed, const st
 
 int wmain(int argc, wchar_t** argv) {
     static_assert(sizeof(void*) == 8, "build the host for Windows x64");
-    if (argc != 4 && !(argc == 5 && (!std::wcscmp(argv[4],L"--button-lifetime-only") || !std::wcscmp(argv[4],L"--escape-routing-only")))) {
-        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory> [--button-lifetime-only|--escape-routing-only]\n"; return 2;
+    if (argc != 4 && !(argc == 5 && (!std::wcscmp(argv[4],L"--button-lifetime-only") || !std::wcscmp(argv[4],L"--escape-routing-only") || !std::wcscmp(argv[4],L"--vst3-escape-only") || !std::wcscmp(argv[4],L"--vst3-numeric-only") || !std::wcscmp(argv[4],L"--combo-gray-only") || !std::wcscmp(argv[4],L"--analysis-overlay-only") || !std::wcscmp(argv[4],L"--native-erase-only")))) {
+        std::cerr << "Usage: just_editor_host_windows <bundle.vst3> <slug> <new-evidence-directory> [--button-lifetime-only|--escape-routing-only|--vst3-escape-only|--vst3-numeric-only|--combo-gray-only|--analysis-overlay-only|--native-erase-only]\n"; return 2;
     }
     fs::path evidence; std::string slug; bool comReady = false;
     try {
@@ -903,7 +989,7 @@ int wmain(int argc, wchar_t** argv) {
         check(fs::create_directories(evidence), "create new isolated evidence directory");
         logFile.open(evidence / "runtime.log"); check(bool(logFile), "create runtime log");
         crashPath=evidence/"fatal-exception.txt";SetUnhandledExceptionFilter(recordFatalException);
-        log("SCOPE Windows x64 DLL runtime + hidden HWND; NOT REAPER or physical-input acceptance");
+        log("SCOPE Windows x64 DLL runtime; standard suite hidden, optional native combo probe shows owned test HWND; NOT REAPER or physical-input acceptance");
         phase = "bundle"; const fs::path binary = validateBundle(fs::absolute(argv[1]), *product);
         const auto presetRoot = evidence / "isolated-presets";
         check(SetEnvironmentVariableW(L"JUST_USER_PRESET_ROOT", presetRoot.c_str()) != 0, "isolate potential user preset access");
@@ -919,7 +1005,22 @@ int wmain(int argc, wchar_t** argv) {
         check(bool(module), "load actual candidate DLL: " + error); dllLoaded = true; loadedBinary = binary.u8string(); phase = "factory";
         HostApplication host; module->getFactory().setHostContext(&host);
         const auto ids = validateFactory(module, *product);
-        if(argc == 5 && !std::wcscmp(argv[4],L"--escape-routing-only")) {
+        if(argc == 5 && !std::wcscmp(argv[4],L"--native-erase-only")) {
+            phase="native-erase-only";check(slug=="flanger","native erase probe uses Flanger");
+            Session session;session.initialize(module,host,ids);checkNativeBackgroundErase(session,evidence);
+        } else if(argc == 5 && !std::wcscmp(argv[4],L"--analysis-overlay-only")) {
+            phase="analysis-overlay-only";check(slug=="distortion","native analysis overlap probe uses Distortion");
+            Session session;session.initialize(module,host,ids);checkNativeAnalysisOverlay(session,evidence);
+        } else if(argc == 5 && !std::wcscmp(argv[4],L"--combo-gray-only")) {
+            phase="combo-gray-only";check(slug=="limiter","native combo paint probe uses Limiter");
+            Session session;session.initialize(module,host,ids);checkNativeComboPaint(session,evidence);
+        } else if(argc == 5 && !std::wcscmp(argv[4],L"--vst3-numeric-only")) {
+            phase="vst3-numeric-only";
+            Session session;session.initialize(module,host,ids);session.open();checkVst3NumericKeys(session);
+        } else if(argc == 5 && !std::wcscmp(argv[4],L"--vst3-escape-only")) {
+            phase="vst3-escape-only";
+            Session session;session.initialize(module,host,ids);session.open();checkVst3ModalEscape(session);
+        } else if(argc == 5 && !std::wcscmp(argv[4],L"--escape-routing-only")) {
             phase="escape-routing-only";
             Session session;session.initialize(module,host,ids);session.open();
             click(session.window.handle,103);escapeModal(session.window.handle);

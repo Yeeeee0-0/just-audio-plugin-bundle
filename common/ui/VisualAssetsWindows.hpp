@@ -14,6 +14,11 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <atomic>
+#include <cstdint>
+#include <cstring>
+#include <new>
+#include <commctrl.h>
 #include "VisualAssets.hpp"
 namespace just::win {
 inline std::wstring wide(const char* s){if(!s || !*s)return {};int n=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,s,-1,nullptr,0);if(n<=1)return {};std::wstring out(std::size_t(n),L'\0');MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,s,-1,out.data(),n);out.resize(std::size_t(n-1));return out;}
@@ -24,7 +29,59 @@ inline constexpr const wchar_t* viewProperty=L"JUST.Editor.View.v1";
 inline EditorViewState* view(HWND h){for(;h;h=GetParent(h))if(auto p=GetPropW(h,viewProperty))return reinterpret_cast<EditorViewState*>(p);return nullptr;}
 inline double scale(HWND h){auto v=view(h);return v?std::clamp(v->renderScale,.75,1.5):1.;}
 inline bool paused(HWND h){auto v=view(h);return v && v->visualsPaused;}
-inline void place(HWND h,double x,double y,double w,double height){double s=scale(h);MoveWindow(h,int(std::lround(x*s)),int(std::lround(y*s)),std::max(1,int(std::lround(w*s))),std::max(1,int(std::lround(height*s))),TRUE);}
+namespace placement {
+inline constexpr const wchar_t* property=L"JUST.Editor.Placement.v1";
+inline constexpr UINT_PTR subclassID=0x4a55504c;
+struct Environment {
+    HWND parent=nullptr;RECT actual{};UINT dpi=0,parentDpi=0;
+    HANDLE windowContext=nullptr,threadContext=nullptr;HFONT font=nullptr;
+    LOGFONTW fontDescription{};int fontBytes=0;LONG_PTR style=0,extendedStyle=0;
+};
+struct Cache {
+    Environment environment;int x=0,y=0,width=0,fullHeight=0;
+    double renderScale=0;std::uint64_t generation=0;bool valid=false;
+};
+inline std::uint64_t nextGeneration(){static std::atomic<std::uint64_t> value{0};return ++value;}
+inline UINT dpi(HWND h){using Function=UINT(WINAPI*)(HWND);static auto function=reinterpret_cast<Function>(GetProcAddress(GetModuleHandleW(L"user32.dll"),"GetDpiForWindow"));return h&&function?function(h):0;}
+inline HANDLE windowContext(HWND h){using Function=HANDLE(WINAPI*)(HWND);static auto function=reinterpret_cast<Function>(GetProcAddress(GetModuleHandleW(L"user32.dll"),"GetWindowDpiAwarenessContext"));return function?function(h):nullptr;}
+inline HANDLE threadContext(){using Function=HANDLE(WINAPI*)();static auto function=reinterpret_cast<Function>(GetProcAddress(GetModuleHandleW(L"user32.dll"),"GetThreadDpiAwarenessContext"));return function?function():nullptr;}
+inline bool sameContext(HANDLE a,HANDLE b){using Function=BOOL(WINAPI*)(HANDLE,HANDLE);static auto function=reinterpret_cast<Function>(GetProcAddress(GetModuleHandleW(L"user32.dll"),"AreDpiAwarenessContextsEqual"));return function&&a&&b?function(a,b)!=FALSE:a==b;}
+inline bool read(HWND h,Environment& value){
+    value.parent=GetParent(h);if(!GetWindowRect(h,&value.actual))return false;
+    if(value.parent)MapWindowPoints(nullptr,value.parent,reinterpret_cast<POINT*>(&value.actual),2);
+    value.dpi=dpi(h);value.parentDpi=dpi(value.parent);value.windowContext=windowContext(h);value.threadContext=threadContext();
+    value.font=reinterpret_cast<HFONT>(SendMessageW(h,WM_GETFONT,0,0));
+    if(value.font)value.fontBytes=GetObjectW(value.font,sizeof(value.fontDescription),&value.fontDescription);
+    value.style=GetWindowLongPtrW(h,GWL_STYLE);value.extendedStyle=GetWindowLongPtrW(h,GWL_EXSTYLE);return true;
+}
+inline bool same(const Environment& a,const Environment& b){return a.parent==b.parent&&EqualRect(&a.actual,&b.actual)&&a.dpi==b.dpi&&a.parentDpi==b.parentDpi&&sameContext(a.windowContext,b.windowContext)&&sameContext(a.threadContext,b.threadContext)&&a.font==b.font&&a.fontBytes==b.fontBytes&&(!a.fontBytes||!std::memcmp(&a.fontDescription,&b.fontDescription,sizeof(a.fontDescription)))&&a.style==b.style&&a.extendedStyle==b.extendedStyle;}
+inline LRESULT CALLBACK procedure(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR id,DWORD_PTR data){
+    auto* cache=reinterpret_cast<Cache*>(data);
+    if(m==WM_SETFONT||m==WM_FONTCHANGE||m==WM_DPICHANGED||m==WM_DPICHANGED_BEFOREPARENT||m==WM_DPICHANGED_AFTERPARENT)cache->valid=false;
+    if(m==WM_NCDESTROY){if(GetPropW(h,property)==cache)RemovePropW(h,property);RemoveWindowSubclass(h,procedure,id);delete cache;}
+    return DefSubclassProc(h,m,w,l);
+}
+inline Cache* get(HWND h){
+    if(auto* cached=static_cast<Cache*>(GetPropW(h,property)))return cached;
+    auto* cached=new(std::nothrow) Cache;if(!cached)return nullptr;cached->generation=nextGeneration();
+    if(!SetPropW(h,property,cached)){delete cached;return nullptr;}
+    if(!SetWindowSubclass(h,procedure,subclassID,reinterpret_cast<DWORD_PTR>(cached))){RemovePropW(h,property);delete cached;return nullptr;}
+    return cached;
+}
+}
+inline void place(HWND h,double x,double y,double w,double height){
+    const double s=scale(h);const int px=int(std::lround(x*s)),py=int(std::lround(y*s)),pw=std::max(1,int(std::lround(w*s))),ph=std::max(1,int(std::lround(height*s)));
+    auto* cache=placement::get(h);const auto generation=cache?cache->generation:0;placement::Environment current;
+    // A native combo's visible rectangle is collapsed. Keep its full requested
+    // dropdown height separately; the rectangle only detects external changes.
+    if(cache&&cache->valid&&cache->x==px&&cache->y==py&&cache->width==pw&&cache->fullHeight==ph&&cache->renderScale==s&&placement::read(h,current)&&placement::same(cache->environment,current))return;
+    if(cache)cache->valid=false;
+    const BOOL moved=MoveWindow(h,px,py,pw,ph,TRUE);
+    auto* alive=static_cast<placement::Cache*>(GetPropW(h,placement::property));
+    if(moved&&alive==cache&&alive&&alive->generation==generation&&placement::read(h,current)){
+        alive->environment=current;alive->x=px;alive->y=py;alive->width=pw;alive->fullHeight=ph;alive->renderScale=s;alive->valid=true;
+    }
+}
 inline Gdiplus::PointF point(HWND h,LPARAM l){double s=scale(h);return {float(GET_X_LPARAM(l)/s),float(GET_Y_LPARAM(l)/s)};}
 inline Gdiplus::SizeF size(HWND h){RECT r{};GetClientRect(h,&r);double s=scale(h);return {float(r.right/s),float(r.bottom/s)};}
 inline Gdiplus::Color color(unsigned rgb,BYTE alpha=255){return {alpha,BYTE(rgb>>16),BYTE(rgb>>8),BYTE(rgb)};}

@@ -1,4 +1,6 @@
 {
+  "record_scope": "HISTORICAL_WINDOWS_PREVIEW_PREPARATION_TEMPLATE_NOT_CURRENT_PACKAGE_RESULTS",
+  "current_release_record": "docs/releases/0.1.0-installers-20261012.md",
   "kind": "WINDOWS_PREVIEW_BRANCH_REQUIRING_PER_RELEASE_EVIDENCE",
   "product_version": "0.1.0",
   "source_provenance_commit_not_public_revision": "d63e3dbe34c878cf307e642862279d9c9364f827",
