@@ -11,42 +11,59 @@ checklist. Do not replace a production project with a test project.
 
 Choose any of the ten components. All ten are selected initially. Only
 selected JUST bundles in the selected destination are replaced. Unselected
-JUST plugins and other vendors' files are left unchanged.
+JUST plugins and other vendors' files are left unchanged. Unrelated vendor
+links elsewhere in the shared VST3 directory are not followed or changed;
+selected JUST trees and their path ancestors must be direct local paths.
 
 Before replacing files, the installer validates every candidate file and
-creates verified backups of selected existing bundles. An installation error
-triggers rollback where the files still match the known transaction. Keep
-backups until you have completed real host tests.
+creates verified backups of selected existing bundles. It stages verified
+whole replacements on the destination volume outside the selected VST3 scan
+root. The old whole bundles are renamed into that transaction's owned parking
+area and kept intact, including bundles mapped by a running host. Every move
+records its intent and result in the bound transaction journal.
 
-Close REAPER normally after saving your work. The installer refuses to run
-while REAPER or its plugin host processes are running; it never kills them.
+Save your projects. Hosts may remain open when selected bundles can be renamed.
+Existing loaded instances keep their old code. If a hard lock refuses a move,
+the installer reports the actual error and attempts the known inverse; it
+never closes or kills hosts, changes ACLs or queues a restart installation.
+Close and reopen your host normally to use the installed version. There is
+no DSP hot switch. Keep the backup and owned swap paths until host tests pass.
 
 User presets, REAPER settings, licenses and projects are not read or changed.
 No registry uninstall entry or Start menu shortcut is created. Successful
 Setup records the exact transaction's JUST-uninstall.exe and report path.
-Keep that entry, its adjacent transaction-binding.json and old backups in
-their original directory. Run the recorded EXE in place to undo this transaction.
+Keep that entry, its adjacent transaction-binding.json, journal, old backups
+and owned swap directory in their original locations. Run the recorded EXE
+in place to undo this transaction.
 
 Uninstall / undo this installation undoes ALL plugins selected in this
-transaction: first-time installations are removed; overwritten plugins are
-restored to their verified original versions. The transaction backups remain.
-The confirmation shows the original VST3 destination and selected identities.
-Normal Cancel does not call Restore or change plugins/journal. Silent /S uses
-the same binding and protection. /REPORT= selects an external log path outside
-the VST3 destination and transaction directory.
+transaction: first-time installations are moved out of the scan root;
+overwritten plugins return to their verified original versions. Live mapped
+trees are preserved rather than recursively deleted. The backups remain.
+Save work before undo; locks may require closing the host normally, and a
+normal reopen activates the restored version. Cancel performs no Restore.
+Silent /S uses the same binding and protection. /REPORT= selects an external
+log path outside the VST3 destination, swap and transaction directories.
 
-The uninstall entry uses its embedded trusted engine. It refuses moved entries,
-missing or inconsistent bindings and unknown target/backup changes, including
-empty directories and type changes. These writable transaction checks prevent
-accidental mis-binding; they are not an administrator-resistant signature.
-Entry-generation failure is incomplete Setup even if plugins were copied.
+The uninstall entry uses its embedded trusted engine. Schema 3 binds the
+Setup invocation, engine hash, full old/new states and root identities, a
+nonce-owned swap directory, and same-volume stage/park paths outside the scan
+root. It refuses moved entries, inconsistent bindings and unknown external
+changes. Writable metadata is not an administrator-resistant signature.
+Retained schema 2 transactions must use their original uninstall entry and
+original packaged engine; this installer does not reinterpret old journals.
+
+Entry-generation failure is incomplete Setup even after successful swaps.
 Each Setup binds its own private engine report and invocation GUID; a shared
-external report never chooses the uninstall transaction. Default public
-reports use a unique GUID filename. Create/Finalize require journal INSTALLED.
-Requested uninstall reports are not written until the exact context and
-outside-target path are verified. Early errors use only independently safe
-refusal evidence or actual error output. After successful restoration, repeat
-use permits only the exact old state; later reinstallations are preserved.
+external report never chooses a transaction. Create/Finalize require the exact
+SWAPPED_ENTRY_PENDING journal. Only verified swaps, backups and completed
+uninstall Finalize permit INSTALLED with installerCompletion=READY. Any later
+entry failure invokes recovery for that private transaction, then reports
+failed Setup with the original error and recovery result. Unknown changes or
+blocked inverse moves are preserved and reported, never claimed as success.
+Requested reports are written only after the exact context and outside-tree
+path are verified. After restoration, repeat use permits only the exact old
+state; later reinstallations are preserved.
 
 The source repository's LICENSE and THIRD_PARTY_NOTICES.md remain applicable.
 No paid services, software downloads or account credentials are required by

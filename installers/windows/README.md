@@ -11,12 +11,11 @@ The displayed version is `0.1.0`, vendor `Yee Huang`.
 
 ## Build using the already installed NSIS
 
-Run in Windows x64 PowerShell after `Stage-Candidate.ps1` has produced its
-validated native candidate directory:
+Run in Windows x64 PowerShell with an already validated native candidate.
+The installer build can reuse that exact payload; it does not rebuild plugins:
 
 ```powershell
 ./scripts/windows/Build-Installer.ps1 -CandidateDir 'D:\work\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP' -OutputDir 'D:\work\installer'
-./scripts/windows/Test-Installer.ps1 -CandidateDir 'D:\work\JUST-0.1.0-Windows-x64-candidate-TIMESTAMP' -InstallerPath 'D:\work\installer\JUST-0.1.0-Windows-x64-preview-setup.exe' -EvidenceDir 'D:\work\installer-evidence'
 ```
 
 Prefer a verified fixed local work volume for source, outputs, evidence and
@@ -46,10 +45,13 @@ and retain it if inspection is needed. They do not load REAPER.
 
 ## Interactive installation
 
-Save current work and close REAPER normally. Run the verified setup executable,
-choose the desired components, and select the x64 VST3 destination. The default
-is the system's 64-bit Common Files `VST3` directory. The setup requests
-administrator elevation for that machine-wide location.
+Save current work. Hosts may remain open if the selected whole bundles can be
+renamed. Old loaded bundles are kept intact; existing instances keep their old
+code. A hard lock refuses the move without closing the host. Close and reopen
+the host normally to activate the installed version; there is no DSP hot switch.
+Run the verified setup executable, choose components, and select the x64 VST3
+destination. The default is the system's 64-bit Common Files `VST3` directory.
+The setup requests administrator elevation for that machine-wide location.
 
 Only selected `Just_<slug>.vst3` bundles in that destination are modified.
 Unselected plugins and unrelated files are retained. The engine never reads,
@@ -66,8 +68,10 @@ journal. Save the report and backup until real host acceptance is complete.
 Each real Setup first generates a private invocation GUID and context inside
 its own NSIS resource directory. The trusted engine receives that GUID and
 writes its authoritative installation report into the same private directory.
-Create/Finalize bind only that report and cross-check the GUID with the journal
-and full stable context; the journal must be exactly `INSTALLED`. External
+Create/Finalize bind only that report and cross-check the GUID with the schema 3
+journal and full stable context; the journal must be `SWAPPED_ENTRY_PENDING`.
+Only exact swaps, backups and completed uninstall Finalize permit `INSTALLED`
+with `installerCompletion=READY`. External
 `/REPORT=` is a readable evidence copy, never the sole binding authority, even
 when two Setup invocations intentionally reuse it. The private temporary files
 are removed with normal NSIS cleanup; the durable journal/binding/report retain
@@ -91,34 +95,47 @@ Omit `/SELECT=` to install all ten, or use `all`. Supported slugs are
 `eq,reverb,delay,tremolo,compressor,limiter,gate,flanger,fake_stereo,distortion`.
 Unknown, duplicate and empty selections are refused by the engine. Do not
 place candidate, destination or backup paths inside one another. Reports must
-also stay outside those trees. Local drive paths are required; reparse points,
-UNC paths, drive roots and ambiguous Windows path components are refused.
+also stay outside the candidate, destination, swap and backup trees. Local drive
+paths are required. Selected JUST bundles, their descendants and path ancestors
+must have no reparse points; UNC paths, drive roots and ambiguous components are
+refused. Unrelated vendor links elsewhere in the shared destination are neither
+traversed nor changed and do not by themselves block this transaction.
 
 ## Verified backups and restoration
 
 The engine checks the manifest's **entire ten-plugin SHA256 tree**, even when
 only one plugin is selected. It also checks each binary's AMD64 PE header and
-`0.1.0` / `Yee Huang` version resources. It verifies selected old bundles after
-copying them into the backup, verifies staged replacements, and journals each
-replacement before changing the target.
+`0.1.0` / `Yee Huang` version resources. Before any canonical replacement, it
+verifies all selected old backups and complete staged candidate bundles.
 
-If installation fails, it attempts to restore selected touched bundles from
-those verified backups. If a target acquired unknown external modifications,
-rollback stops and reports `ROLLBACK_BLOCKED` instead of discarding them.
-A power loss or forcibly terminated installer leaves a journal for explicit
-restoration. Backups contain selected plugin files and installation metadata
-only; no user presets or REAPER private files.
+Schema 3 binds full original/new root state and root identity, the engine and
+manifest hashes, and the Setup invocation. A nonce-owned swap directory is on
+the destination volume outside the selected VST3 scan root. The original whole
+bundle is renamed into its bound `park` path; the preverified whole replacement
+is moved to the original canonical path. Intent is journaled before each move,
+and its result and observed identities are journaled afterward. Mapped old
+bundles stay intact; no mapped tree is recursively deleted.
 
-Only after the install report says `INSTALLED` with `installerCompletion=READY`
-does Setup provide the real uninstall entry. Its exact path is the report's
+If installation fails, it attempts the inverse of this transaction's known
+moves. Unknown external targets are never overwritten; blocked recovery reports
+`ROLLBACK_BLOCKED` and preserves the journal and trees. Hard locks may require
+saving work and closing the host normally before retrying recovery. A power loss
+or forcibly terminated installer leaves its bound journal for explicit recovery.
+Keep the recorded backup and owned swap directories together. These contain
+selected plugin bundles and metadata, not user presets or REAPER private files.
+
+Setup claims completion only after the install report says `INSTALLED` with
+`installerCompletion=READY`, including the exact uninstall entry. Its path is the report's
 `uninstallerPath`: `<this transaction's backupDirectory>\JUST-uninstall.exe`.
 The adjacent fixed `transaction-binding.json` and journal must stay there.
 No registry entry or Start menu shortcut is created.
 
 卸载／撤销本次安装：撤销本次所选的全部插件；首次安装的插件将移除，覆盖安装的插件将恢复安装前版本；保留本次备份。
 
-Close REAPER normally. Run that exact EXE in place to see the original VST3
-destination, ordered selected plugin identities and external report path.
+Save work. Run that exact EXE in place to see the original VST3 destination,
+ordered selected plugin identities and external report path. Hosts may remain
+open if the required whole-bundle moves succeed; locks may require a normal
+host close. Close and reopen normally to activate the restored canonical version.
 Cancel does not invoke Restore or change plugins/journal. Confirm undoes the
 entire selection from this transaction; there is no arbitrary old-transaction
 picker or individual uninstall selection. The unsigned entry requests the
@@ -139,11 +156,15 @@ $uninstallArguments = '/S /REPORT="D:\test\reports\uninstall.json" _?=' + $origi
 Start-Process $entry -Wait -WindowStyle Hidden -ArgumentList $uninstallArguments
 ```
 
-A successful actual EXE restore reports `RESTORED`; a refusal reports `REFUSED`
-and an error. Retain the journal, old backups, binding and uninstall EXE after
-success. Entry generation failure returns a nonzero Setup result and reports
-`INSTALLER_ENTRY_FAILED` or leaves `INSTALLED_ENTRY_PENDING`; neither means
-complete Setup success. Keep the known transaction for scoped recovery.
+A successful actual EXE restore reports `RESTORED`; a refusal reports `REFUSED`,
+`RESTORE_BLOCKED` or `ROLLBACK_BLOCKED` and an error. Retain the journal, old backups, binding and uninstall EXE after
+success. Every entry failure after successful swaps (Create, Finalize, missing
+transfer context, WriteUninstaller or the bounded interleaving wait) invokes
+`RollbackInstall` for this Setup's exact private authority and schema 3 context.
+The original helper/NSIS error is retained before recovery changes its output.
+Actual recovery reports `ROLLED_BACK_AFTER_ENTRY_FAILURE` or `ROLLBACK_BLOCKED`;
+Setup returns nonzero and aborts even when the inverse succeeds. A blocked or
+unprovable recovery preserves incomplete state and never reports complete Setup.
 
 No requested report is written before the exact uninstall context and binding
 are verified and the path is proved outside the original backup/destination.
@@ -158,30 +179,38 @@ available. Existing detailed engine restore failures are retained.
 The embedded trusted engine is extracted and checked against its build-time
 SHA; the mutable saved engine in the backup is never executed by this entry.
 A per-transaction EXE trailer fixes the original directory, transaction ID,
-binding hash and engine hash. The binding cross-checks schema 2's destination,
-manifest, ordered selection and full original/new root type, existence,
-directories and file hashes. Moving the EXE or losing/changing its binding
+binding hash and engine hash. The schema 3 binding cross-checks destination,
+manifest, ordered selection, full original/new root type, existence, directories
+and hashes, root identities, swap ownership nonce and same-volume stage/park
+paths outside the scan root. Retained schema 2 transactions continue through
+their original uninstall EXE and original packaged engine; the new engine
+refuses old journals. Moving the EXE or losing/changing its binding
 refuses operation. NSIS's native self-copy is supported only in its specific
 TEMP/`~nsu<hex>.tmp`/`Un.exe` layout, with matching actual process path, internal
 original-directory command line, original EXE still present and full byte hash.
 These checks prevent accidental mis-binding; they are not a digital signature
 or protection against an administrator forging writable metadata.
 
-Before any deletion, the engine preflights ALL selected targets and old backups;
-it repeats full-state and binding/journal/engine checks immediately before each
-selected deletion. Unknown bytes, files, empty directories, root type changes
-and reparse entries refuse operation. Touched missing upgrade targets recover
-their verified original; initial installs already missing are idempotent.
-Only known same-type partial original/candidate trees are eligible. Ordinary
-mutexes and rechecks do not promise atomic exclusion of arbitrary external
-writers. Newly added user content after restoration remains protected.
-After a successful restore, repeated calls permit only the exact original
-full state as a no-op; later reinstallations of the same candidate, empty
-same-name roots, missing or partial old trees are refused and preserved.
+Before any rename, the engine preflights ALL selected targets, old backups and
+bound swap trees; it repeats full-state, ownership, object-identity and
+binding/journal/engine checks immediately before each selected move. Unknown
+bytes, files, empty directories, root type changes and reparse entries refuse
+operation. Restore moves the known current bundle outside the scan root and
+returns the verified original whole bundle without deleting live mapped trees.
+An authorized missing upgrade target may recover its verified original; initial
+installs already absent are idempotent. Ordinary mutexes and rechecks do not
+promise atomic exclusion of arbitrary external writers. After successful
+restoration, repeated calls permit only the exact original full state and
+identity as a no-op; later reinstallations or unknown same-name trees are kept.
 
-## What the isolated test script proves
+## Archived schema 2 fixture coverage
 
-The existing script runs the **actual built NSIS executable** for default selection and
+The descriptions below cover the retained earlier installer and test records.
+They do not claim that the older full test matrix was rerun for schema 3. Current
+schema 3 validation must use its bounded Engine/Binding/Setup and live-host
+reports, including locks, inverse failures and normal host reopening.
+
+The archived script ran the **actual built NSIS executable** for default selection and
 for EQ-only selection. It compares installed files with the source candidate,
 checks nine unselected old-plugin sentinels, checks the selected prior-version
 backup and explicit restoration, and checks unrelated files. It separately
@@ -196,7 +225,7 @@ unchanged. These are synthetic fixtures; no real private files are read.
 Neither these tests nor the manifest claim a user REAPER session, visual
 matching, automation acceptance or audible DSP acceptance.
 
-`Test-Uninstaller.ps1` separately checks the actual generated uninstall EXE,
+The archived `Test-Uninstaller.ps1` separately checked the actual generated uninstall EXE,
 interactive cancellation evidence, default-ten / EQ-only / mixed restoration,
 unknown-state rejection, binding/backup failures, moved entry / external
 directory overrides, deletion-boundary mutation and repeat restores. Its test

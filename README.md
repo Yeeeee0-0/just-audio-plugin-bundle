@@ -1,19 +1,19 @@
 # JUST Audio Plugins
 
-JUST is a suite of ten audio effects in VST3 format, written in C++17 with native platform editors. Both installers report version **0.1.0** and offer ten independent choices, selected by default.
+JUST is a suite of ten VST3 audio effects, written in C++17 with native platform editors. Both installers report version **0.1.0** and offer ten independent choices, selected by default.
 
-**Recommended downloads:** [Windows x64 preview and macOS Apple silicon installers](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261012). This prerelease pairs the updated Windows UI installer with the unchanged macOS arm64 package from [v0.1.0](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0). Older releases and assets remain available.
+**Recommended downloads:** [Windows installer host fix](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix). This prerelease updates only the Windows installation mechanism; the ten plugin DLLs, UI, DSP and approved artwork are unchanged. Older releases and assets remain available.
 
-- [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe) — unsigned preview; see [Windows installation and removal](docs/windows/START-HERE-zh.md).
-- [macOS arm64 PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) — Apple silicon only, unsigned and not notarized; see [macOS installation and removal](INSTALLING.md).
+- [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — unsigned preview; [installation and removal](docs/windows/START-HERE-zh.md).
+- [macOS arm64 PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) — unchanged Apple silicon package, unsigned and not notarized; [installation and removal](INSTALLING.md).
 
-See the [release record and SHA-256 values](docs/releases/0.1.0-installers-20261012.md) for exact bytes, source provenance and verification limits. The current tag contains the final Windows source; the macOS package retains the original source at [`f2a7105`](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/f2a710510415395e13e548400143604c455df8fe). The two packages were not rebuilt together.
+Save projects. Windows hosts may remain running when selected bundles can be moved safely. If an open plugin editor locks files, close that editor and retry; the installer safely refuses rather than terminating the host. Reopen the host or reload the plugin to use the installed copy. See the [release record and SHA-256 values](docs/releases/0.1.0-installers-20261013-host-fix.md) for exact bytes and bounded verification. The new tag contains matching Windows installer source; macOS keeps its [original source](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/f2a710510415395e13e548400143604c455df8fe).
 
 ## 中文
 
-JUST 包含十款独立 VST3 音频效果器，版本均为 **0.1.0**。上方是本次推荐下载：Windows x64 预览安装器修复了菜单关闭、选项回退和按钮闪烁，并使用已批准的安装器图标及欢迎/完成页；macOS 安装包沿用原已交付文件，仅包含 Apple silicon **arm64**，不包含 Intel 或 Universal 二进制。两个安装器默认十款全选，可分别取消勾选。
+JUST 包含十款独立 VST3 效果器，版本均为 **0.1.0**，默认全选，可分别取消勾选。推荐下载上方新版 Windows x64 安装器：第三方未选中的链接目录不再误挡，宿主运行时可在文件允许安全移动的条件下安装和撤销。插件 DLL、UI、DSP 与批准美术没有改动。旧版本仍保留。
 
-Windows 安装器和插件未签名；macOS PKG 未签名、未公证，插件使用开发 ad-hoc 签名。下载后请核对[发布记录中的 SHA-256](docs/releases/0.1.0-installers-20261012.md)，保存工程并正常关闭音频宿主，再按 [Windows 说明](docs/windows/START-HERE-zh.md)或 [macOS 说明](INSTALLING.md)安装、扫描和移除。Windows 本次通过十款有限范围原生 UI 检查及 REAPER 8 项定向检查；macOS Installer GUI 检查停在实际安装前确认页。上述结果不代表所有 DAW、系统或完整音频矩阵均已验证。
+先保存工程；若插件编辑窗口锁住文件，安装器会安全拒绝，关闭该插件编辑窗口后重试。安装完成后正常重新打开宿主或重新加载插件使用新副本，不承诺所有 DAW 无条件热替换。Windows 仍为未签名预览，本轮八项安装器/REAPER 定向检查完成，未重跑完整插件矩阵。macOS 沿用原包，只包含 Apple silicon arm64，PKG 未签名、未公证；详见[发布记录](docs/releases/0.1.0-installers-20261013-host-fix.md)、[Windows 说明](docs/windows/START-HERE-zh.md)和 [macOS 说明](INSTALLING.md)。
 
 | Effect | What it does | Source module |
 | --- | --- | --- |
@@ -36,10 +36,10 @@ The shared framework supplies the VST3 processor/controller, parameter and state
 | --- | --- |
 | macOS on Apple silicon (`arm64`) | Ten Release bundles; selective installer GUI checked. Only Apple silicon binaries are included. |
 | Intel macOS / Universal | Build preset exists; no accepted binary or runtime validation in this release. |
-| Windows x64 | Unsigned selectable preview installer; ten bounded native UI scopes and eight directed REAPER checks passed for this package. Full host/audio acceptance is outside those checks. |
+| Windows x64 | Unsigned selectable preview; eight directed installer/REAPER branches checked. DLL/UI/DSP unchanged from the prior UI-fix release; full host/audio acceptance remains pending. |
 | Linux | Core tests can be configured without VST3; no plugin release. |
 
-The configured macOS deployment target is 11.0. That setting alone does not establish that the plugins have been tested on macOS 11.0. The frozen build uses development ad-hoc signatures; it does not establish Developer ID signing or notarization. Windows and macOS have distinct verification records; see the [current release record](docs/releases/0.1.0-installers-20261012.md).
+The configured macOS deployment target is 11.0. That setting alone does not establish that the plugins have been tested on macOS 11.0. The frozen build uses development ad-hoc signatures; it does not establish Developer ID signing or notarization. Windows and macOS have distinct verification records; see the [current release record](docs/releases/0.1.0-installers-20261013-host-fix.md).
 
 ## Build and use
 

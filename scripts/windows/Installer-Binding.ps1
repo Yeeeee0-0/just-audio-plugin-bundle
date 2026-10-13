@@ -2,7 +2,7 @@
 # It never runs the mutable engine copy retained in a transaction backup.
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('PrepareInstall','InvokeInstall','PublishInstall','WaitBindingGap','Create','Finalize','Describe','Restore','Cancel')][string]$Operation,
+    [Parameter(Mandatory=$true)][ValidateSet('PrepareInstall','InvokeInstall','PublishInstall','WaitBindingGap','Create','Finalize','RollbackInstall','Describe','Restore','Cancel')][string]$Operation,
     [string]$EnginePath,
     [Parameter(Mandatory=$true)][string]$ExpectedEngineSHA256,
     [string]$ManifestSHA256,
@@ -58,6 +58,7 @@ function Write-BindingTransfer($Context) {
     if (-not $bindingRequest.TransferPath) { return }
     $path=Full-InstallerPath $bindingRequest.TransferPath
     Assert-InstallerSeparate $path $Context.backupDirectory; Assert-InstallerSeparate $path $Context.destination
+    if ($Context.schema -eq 3) { Assert-InstallerSeparate $path $Context.swapRoot }
     $text="[Entry]`r`nbackupDirectory=$($Context.backupDirectory)`r`ndestination=$($Context.destination)`r`nselected=$($Context.selected -join ',')`r`n"
     [IO.File]::WriteAllText($path,$text,[Text.Encoding]::Unicode)
 }
@@ -80,6 +81,7 @@ function Get-BindingContext([string]$Backup) {
     return (Get-InstallerStableContext $snapshot.journal $Backup)
 }
 function Assert-BindingInstalled($Context) {
+    if ($Context.schema -eq 3) { Assert-InstallerLiveInstalled $Context; return }
     foreach ($item in $Context.items) {
         $bundle="Just_$($item.slug).vst3"
         if (-not (Equal-InstallerState (Get-InstallerState (Join-Path $Context.destination $bundle)) $item.newState)) { throw "Installed full-state mismatch: $bundle" }
@@ -89,7 +91,7 @@ function Assert-BindingInstalled($Context) {
 function Read-SetupInvocation {
     $privateReport=Join-Path $PSScriptRoot 'install-authority.json'
     if ((Full-InstallerPath $bindingRequest.InstallReportPath) -cne $privateReport) { throw 'The authority report must be this Setup resource directory\install-authority.json.' }
-    $identity=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'setup-invocation.json') -Raw | ConvertFrom-Json
+    $identity=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'setup-invocation.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($identity.schema -ne 1 -or $bindingRequest.SetupInvocationId -cnotmatch '^[0-9a-f]{32}$' -or $identity.setupInvocationId -cne $bindingRequest.SetupInvocationId -or $identity.authoritativeReportPath -cne $privateReport -or $identity.engineSHA256 -cne $bindingRequest.ExpectedEngineSHA256 -or $identity.candidateManifestSHA256 -cne $bindingRequest.ManifestSHA256) { throw 'This Setup invocation identity/authority report mismatch.' }
     $expected=@(if ($bindingRequest.ExpectedSelected -eq 'all') { @($script:Slugs) } else { @($bindingRequest.ExpectedSelected.Split(',')) })
     if ($identity.destination -cne (Full-InstallerPath $bindingRequest.ExpectedDestination) -or $identity.backupRoot -cne (Full-InstallerPath $bindingRequest.BackupRoot) -or $identity.publicReportPath -cne $bindingSafeReport -or ($identity.selected -join ',') -cne ($expected -join ',')) { throw 'Private Setup invocation destination/backup/report/ordered selection changed.' }
@@ -100,7 +102,7 @@ function Read-SetupInvocation {
 function Read-SetupAuthority($Identity) {
     # An explicit external /REPORT may be shared or overwritten by another
     # Setup. It is never read here and never supplies transaction identity.
-    $installed=Get-Content -LiteralPath $Identity.authoritativeReportPath -Raw | ConvertFrom-Json
+    $installed=Get-Content -LiteralPath $Identity.authoritativeReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($installed.action -ne 'Install' -or $installed.version -ne '0.1.0' -or $installed.setupInvocationId -cne $Identity.setupInvocationId) { throw 'Private engine report did not originate from this Setup invocation.' }
     return $installed
 }
@@ -279,15 +281,43 @@ function Get-BindingNativeRawEvidence([string]$Path) {
     return [ordered]@{ bytes=[long]$file.Length; sha256=(Get-FileHash -LiteralPath $Path -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant() }
 }
 function Observe-BindingNativeExit([IntPtr]$Handle) { return [JustBindingNativeCaptureV2]::ObserveExit($Handle) }
-function Invoke-SetupEngine($Identity) {
+function Get-BindingFailureAdvice([string]$PrimaryError,[int]$FileWin32Error=-1,[string]$StartException='', [bool]$AuthorityValidated=$false,$NativeExitCode=$null) {
+    # Classify the actual error; never replace or prefix its diagnostic text.
+    $kind='ENGINE_FAILURE'; $guidance='Keep the actual diagnostic, report and any transaction backup before retrying.'
+    if ($null -ne $NativeExitCode -and $NativeExitCode -eq 0 -and $AuthorityValidated) { return [ordered]@{ failureKind=''; guidance='' } }
+    if ($PrimaryError.Contains('REAPER is running.')) {
+        $kind='HOST_RUNNING'; $guidance='Save work and close REAPER and its plugin-host processes normally, then retry. The installer never terminates processes.'
+    } elseif ($StartException) {
+        $kind='ENGINE_START_EXCEPTION'; $guidance='The native installer engine could not start. Keep its start exception and diagnostic; closing a DAW is not a verified remedy.'
+    } elseif ($PrimaryError -match '(?i)\bReparse (?:points are not supported|point refused|transaction entry refused|bundle root refused|entry appeared during availability preflight|path refused)') {
+        $kind='REPARSE_POINT_REFUSED'; $guidance='The reported path contains an unsupported link or reparse point. Selected JUST bundles and their ancestors must be direct local paths. Do not delete unrelated plugins.'
+    } elseif ($FileWin32Error -eq 32 -or $PrimaryError -match '(?i)\bWin32Error:\s*32\b|\bHRESULT:\s*0x80070020\b') {
+        $kind='SELECTED_PLUGIN_SHARING_VIOLATION'; $guidance='The reported selected file is in use. Save work and close the application using that file normally, then retry. The installer never terminates processes.'
+    } elseif ($FileWin32Error -eq 5 -or $PrimaryError -match '(?i)\bWin32Error:\s*5\b|\bHRESULT:\s*0x80070005\b') {
+        $kind='SELECTED_PLUGIN_ACCESS_DENIED'; $guidance='The reported selected operation was denied. An open plugin window or file handle, or existing access rights or attributes, can prevent a bundle rename. Save work and release the application holding that path normally if it is in use; otherwise check elevation and existing permissions. Error 5 alone cannot distinguish these causes. The installer never closes hosts or changes ACLs.'
+    } elseif (-not $AuthorityValidated) {
+        $kind='AUTHORITY_REPORT_MISSING_OR_INVALID'; $guidance='Keep the native diagnostic and any transaction backup. Target changes and recovery could not be verified from an authoritative engine report.'
+    } elseif ($PrimaryError.Contains('Selected plugin is unavailable for replacement.')) {
+        $kind='SELECTED_PLUGIN_UNAVAILABLE'; $guidance='The reported selected path could not be opened for replacement. Keep its exact path and Win32 error before retrying.'
+    }
+    return [ordered]@{ failureKind=$kind; guidance=$guidance }
+}
+function Invoke-SetupEngine($Identity,$RecoveryContext=$null) {
     $native=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
-    $engineArguments=@('-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',$trusted,'-Action','Install','-CandidateDir',(Join-Path $PSScriptRoot 'candidate'),'-Destination',$Identity.destination,'-BackupRoot',$Identity.backupRoot,'-Selected',($Identity.selected -join ','),'-SetupInvocationId',$Identity.setupInvocationId,'-ReportPath',$Identity.authoritativeReportPath)
+    $authorityPath=$Identity.authoritativeReportPath
+    if ($null -ne $RecoveryContext) {
+        $authorityPath=Join-Path $PSScriptRoot 'install-entry-recovery.json'
+        if (Test-Path -LiteralPath $authorityPath) { throw 'Entry recovery was already attempted; preserve its report and retained objects.' }
+        $engineArguments=@('-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',$trusted,'-Action','Restore','-BackupDir',$RecoveryContext.backupDirectory,'-ReportPath',$authorityPath)
+    } else {
+        $engineArguments=@('-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',$trusted,'-Action','Install','-CandidateDir',(Join-Path $PSScriptRoot 'candidate'),'-Destination',$Identity.destination,'-BackupRoot',$Identity.backupRoot,'-Selected',($Identity.selected -join ','),'-SetupInvocationId',$Identity.setupInvocationId,'-ReportPath',$authorityPath)
+    }
     $logDirectory=Full-InstallerPath (Join-Path ([IO.Path]::GetDirectoryName($bindingSafeReport)) ('engine-'+[Guid]::NewGuid().ToString('N')))
     foreach ($other in @($Identity.destination,$Identity.backupRoot,$Identity.authoritativeReportPath,$PSScriptRoot)) { Assert-InstallerSeparate $logDirectory $other }
     if (Test-Path -LiteralPath $logDirectory) { throw 'Native diagnostic directory must be new.' }
     $stdoutPath=Join-Path $logDirectory 'stdout.raw'; $stderrPath=Join-Path $logDirectory 'stderr.raw'
     $metadataPath=Join-Path $logDirectory 'native-engine.json'
-    $diagnostic=[ordered]@{ schema=2; executable=$native; arguments=$engineArguments; workingDirectory=$PSScriptRoot; setupInvocationId=$Identity.setupInvocationId; helperProcessId=$PID; helperIs64Bit=[Environment]::Is64BitProcess; helperProcessorArchitectureEnvironment=$env:PROCESSOR_ARCHITECTURE; childProcessId=$null; actualModulePath=$null; imageObservationError=''; nativeExitCode=$null; childExitObserved=$false; startException=''; postStartException=''; captureErrorCount=0; captureErrors=@(); failureKind=''; primaryError=''; authorityReportPath=$Identity.authoritativeReportPath; authorityReportExists=$false; authorityValidated=$false; authorityStatus=''; stdout=$null; stderr=$null; metadataPath=$metadataPath; metadataWritten=$false; metadataSHA256=$null; targetMutationState='UNKNOWN_AUTHORITY_NOT_VALIDATED'; recoveryState='NO_RECOVERY_CLAIM_BY_WRAPPER'; utc=[DateTime]::UtcNow.ToString('o') }
+    $diagnostic=[ordered]@{ schema=2; executable=$native; arguments=$engineArguments; workingDirectory=$PSScriptRoot; setupInvocationId=$Identity.setupInvocationId; helperProcessId=$PID; helperIs64Bit=[Environment]::Is64BitProcess; helperProcessorArchitectureEnvironment=$env:PROCESSOR_ARCHITECTURE; childProcessId=$null; actualModulePath=$null; imageObservationError=''; nativeExitCode=$null; childExitObserved=$false; startException=''; postStartException=''; captureErrorCount=0; captureErrors=@(); failureKind=''; primaryError=''; originalPrimaryError=''; guidance=''; availabilityFailure=$null; authorityReportPath=$Identity.authoritativeReportPath; authorityReportExists=$false; authorityValidated=$false; authorityStatus=''; stdout=$null; stderr=$null; metadataPath=$metadataPath; metadataWritten=$false; metadataSHA256=$null; targetMutationState='UNKNOWN_AUTHORITY_NOT_VALIDATED'; recoveryState='NO_RECOVERY_CLAIM_BY_WRAPPER'; utc=[DateTime]::UtcNow.ToString('o') }
     $script:bindingReport.nativeEngine=$diagnostic
     try { New-Item -ItemType Directory -Path $logDirectory -ErrorAction Stop | Out-Null }
     catch { Add-BindingNativeCaptureError $diagnostic 'Diagnostic directory' $_.Exception.ToString() }
@@ -374,45 +404,67 @@ function Invoke-SetupEngine($Identity) {
         } catch { $log.rawFileComplete=$false; Add-BindingNativeCaptureError $diagnostic ($pair.name+' raw evidence') $_.Exception.ToString() }
         $diagnostic[$pair.name]=$log
     }
-    try { $diagnostic.authorityReportExists=[bool](Test-Path -LiteralPath $Identity.authoritativeReportPath -PathType Leaf -ErrorAction Stop) }
+    $diagnostic.authorityReportPath=$authorityPath
+    $diagnostic['purpose']=if ($null -eq $RecoveryContext) { 'INSTALL' } else { 'ENTRY_FAILURE_RECOVERY' }
+    try { $diagnostic.authorityReportExists=[bool](Test-Path -LiteralPath $authorityPath -PathType Leaf -ErrorAction Stop) }
     catch { Add-BindingNativeCaptureError $diagnostic 'Authority presence observation' $_.Exception.ToString() }
     $installed=$null; $authorityError=''
     if ($diagnostic.authorityReportExists) {
         try {
-            $installed=Read-SetupAuthority $Identity
+            if ($null -eq $RecoveryContext) { $installed=Read-SetupAuthority $Identity }
+            else {
+                $installed=Get-Content -LiteralPath $authorityPath -Raw -Encoding UTF8|ConvertFrom-Json
+                if ($installed.action -cne 'Restore' -or $installed.schema -ne 3 -or $installed.version -cne '0.1.0' -or $installed.setupInvocationId -cne $Identity.setupInvocationId -or $installed.transactionId -cne $RecoveryContext.transactionId -or $installed.engineSHA256 -cne $RecoveryContext.engineSHA256 -or $installed.backupDirectory -cne $RecoveryContext.backupDirectory) { throw 'Entry recovery report identity mismatch; no restoration claim.' }
+            }
             $diagnostic.authorityValidated=$true; $diagnostic.authorityStatus=[string]$installed.status
             $diagnostic.targetMutationState='RECORDED_IN_VERIFIED_ENGINE_REPORT'
-        } catch { $authorityError=$_.Exception.ToString(); Add-BindingNativeCaptureError $diagnostic 'Authority validation' $authorityError }
+        } catch {
+            # Rejected or partial JSON must never supply child diagnostics.
+            $installed=$null
+            $diagnostic.authorityValidated=$false
+            $diagnostic['authorityStatus']=''
+            $diagnostic.targetMutationState='UNKNOWN_AUTHORITY_NOT_VALIDATED'
+            $authorityError=$_.Exception.ToString()
+            Add-BindingNativeCaptureError $diagnostic 'Authority validation' $authorityError
+        }
     } else { $diagnostic.targetMutationState='UNKNOWN_NO_AUTHORITY_REPORT' }
     $primary=if ($null -ne $installed -and $result -ne 0 -and $installed.error) { [string]$installed.error } elseif ($null -ne $diagnostic.stderr -and $diagnostic.stderr.text.Trim()) { $diagnostic.stderr.text.Trim() } elseif ($null -ne $diagnostic.stdout -and $diagnostic.stdout.text.Trim()) { $diagnostic.stdout.text.Trim() } elseif ($diagnostic.startException) { $diagnostic.startException } else { 'No child error output was captured.' }
+    $diagnostic.originalPrimaryError=$primary
     $diagnostic.primaryError=([regex]::Replace($primary,'\s+',' ')).Trim()
-    $advice='Save your projects and close any DAWs or audio hosts using the selected plugins, then retry.'
-    if ($null -ne $result -and $result -ne 0 -and $diagnostic.primaryError.Contains('REAPER is running.')) {
-        $diagnostic.failureKind='HOST_RUNNING'; $diagnostic.primaryError=$advice+' REAPER is running. The installer never terminates processes.'
-    } elseif ($diagnostic.startException) { $diagnostic.failureKind='ENGINE_START_EXCEPTION' }
-    elseif (-not $diagnostic.authorityValidated) { $diagnostic.failureKind='AUTHORITY_REPORT_MISSING_OR_INVALID' }
-    elseif ($result -ne 0 -and $diagnostic.primaryError.Contains('Selected plugin is unavailable for replacement.')) { $diagnostic.failureKind='SELECTED_PLUGIN_UNAVAILABLE' }
-    elseif ($result -eq 0) { $diagnostic.primaryError='' }
-    if ($null -ne $result -and $result -ne 0 -and $diagnostic.failureKind -ne 'HOST_RUNNING') { $diagnostic.primaryError=$advice+' '+$diagnostic.primaryError }
+    $fileWin32Error=-1
+    if ($null -ne $installed -and $null -ne $installed.PSObject.Properties['availabilityChecks']) {
+        $refusals=@($installed.availabilityChecks | Where-Object { $_.status -ceq 'REFUSED' })
+        if ($refusals.Count -gt 0) {
+            $diagnostic.availabilityFailure=$refusals[-1]
+            if ($null -ne $refusals[-1].PSObject.Properties['win32Error']) { $fileWin32Error=[int]$refusals[-1].win32Error }
+        }
+    }
+    $classification=Get-BindingFailureAdvice $diagnostic.primaryError $fileWin32Error $diagnostic.startException $diagnostic.authorityValidated $result
+    $diagnostic.failureKind=$classification.failureKind; $diagnostic.guidance=$classification.guidance
+    if ($classification.failureKind -ceq '') { $diagnostic.primaryError=''; $diagnostic.originalPrimaryError='' }
     try { Write-InstallerJson $diagnostic $metadataPath; $diagnostic.metadataWritten=$true }
     catch { Add-BindingNativeCaptureError $diagnostic 'Diagnostic metadata write' $_.Exception.ToString() }
     if ($diagnostic.metadataWritten) {
         try { $diagnostic.metadataSHA256=(Get-FileHash -LiteralPath $metadataPath -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant() }
         catch { Add-BindingNativeCaptureError $diagnostic 'Diagnostic metadata hash' $_.Exception.ToString() }
     }
-    if (-not $started) { throw "$($diagnostic.primaryError) Native engine was not started. Diagnostic: $metadataPath. Target changes and recovery are not verified." }
+    if (-not $started) { throw "$($diagnostic.primaryError) Native engine was not started. Diagnostic: $metadataPath. Target changes and recovery are not verified. Guidance: $($diagnostic.guidance)" }
     if (-not $diagnostic.childExitObserved) { throw "Native child exit was not observed. Preserve child PID $($diagnostic.childProcessId) and available diagnostics. Target changes and recovery are not verified." }
-    if (-not $diagnostic.authorityValidated) { throw "$($diagnostic.primaryError) Native engine exit: $result. Its authority report was not created or validated. Diagnostic: $metadataPath. Target changes and recovery are not verified. $authorityError" }
+    if (-not $diagnostic.authorityValidated) { throw "$($diagnostic.primaryError) Native engine exit: $result. Its authority report was not created or validated. Diagnostic: $metadataPath. Target changes and recovery are not verified. $authorityError Guidance: $($diagnostic.guidance)" }
     $installed | Add-Member -NotePropertyName nativeEngine -NotePropertyValue $diagnostic -Force
+    if ($null -ne $RecoveryContext) {
+        if ($result -ne 0) { Write-Host "$($diagnostic.primaryError) Native recovery exit: $result. Diagnostic: $metadataPath. Guidance: $($diagnostic.guidance)" }
+        return [ordered]@{ exitCode=[int]$result; report=$installed; reportPath=$authorityPath; nativeEngine=$diagnostic }
+    }
     try { Write-SetupEvidence $installed $Identity; $script:bindingEngineReportPreserved=$true }
     catch { throw "$($diagnostic.primaryError) Native engine exit: $result. Verified engine status: $($installed.status). Core report publication failed: $($_.Exception.Message). Available authority: $($Identity.authoritativeReportPath)." }
-    if ($result -ne 0) { Write-Host "$($diagnostic.primaryError) Native engine exit: $result. Diagnostic: $metadataPath." }
+    if ($result -ne 0) { Write-Host "$($diagnostic.primaryError) Native engine exit: $result. Diagnostic: $metadataPath. Failure kind: $($diagnostic.failureKind). Guidance: $($diagnostic.guidance)" }
     if ($diagnostic.captureErrorCount -gt 0) { Write-Host "Diagnostic capture is incomplete. The verified engine result is retained in $bindingSafeReport." }
     if ($null -ne $diagnostic.stdout -and $diagnostic.stdout.text) { Write-Host $diagnostic.stdout.text }
     return [int]$result
 }
 function Wait-SetupBindingGap($Identity,$Installed) {
-    if ($bindingRequest.TestInstallBindingGapRole -cne 'A' -or -not $bindingRequest.TestInstallBindingGapRoot -or $Installed.status -ne 'INSTALLED') { throw 'The controlled install gap requires role A and a successful private install report.' }
+    if ($bindingRequest.TestInstallBindingGapRole -cne 'A' -or -not $bindingRequest.TestInstallBindingGapRoot -or $Installed.status -ne 'SWAPPED_ENTRY_PENDING') { throw 'The controlled install gap requires role A and this pending private swap report.' }
     $gapRoot=Full-InstallerPath $bindingRequest.TestInstallBindingGapRoot
     $temp=Full-InstallerPath ([IO.Path]::GetTempPath())
     if ((Split-Path -Leaf $gapRoot) -cnotmatch '^JUST-install-binding-tests-[0-9a-f]{32}$' -or $temp -cne (Join-Path $gapRoot 'temp') -or -not $PSScriptRoot.StartsWith($temp+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'The install binding gap is limited to its dedicated temporary fixture.' }
@@ -424,7 +476,7 @@ function Wait-SetupBindingGap($Identity,$Installed) {
     while ($watch.Elapsed.TotalSeconds -lt 60) {
         if (Test-Path -LiteralPath $release -PathType Leaf) {
             $null=Full-InstallerPath $release
-            $decision=Get-Content -LiteralPath $release -Raw | ConvertFrom-Json
+            $decision=Get-Content -LiteralPath $release -Raw -Encoding UTF8 | ConvertFrom-Json
             if ($decision.setupInvocationId -cne $Identity.setupInvocationId) { throw 'The controlled release belongs to another Setup invocation.' }
             return
         }
@@ -468,6 +520,15 @@ function Resolve-BindingEntry {
     $bindingReport.earlyErrorReportPath=$bindingEarlyErrorPath
     $context=Get-BindingContext $backup
     Protect-BindingReport $context.destination
+    if ($context.schema -eq 3) {
+        # A context-proven retained tree must also exclude the fallback error
+        # report. Disable that fallback before any overlap assertion can throw.
+        $script:bindingEarlyErrorPath=''
+        Protect-BindingReport $context.swapRoot
+        Assert-InstallerSeparate $earlyPath $context.swapRoot
+        if ($bindingRequest.TransferPath) { Assert-InstallerSeparate (Full-InstallerPath $bindingRequest.TransferPath) $context.swapRoot }
+        $script:bindingEarlyErrorPath=$earlyPath
+    }
     if ($context.engineSHA256 -cne $bindingRequest.ExpectedEngineSHA256 -or $context.setupInvocationId -cne $stamp.setupInvocationId -or $context.setupInvocationId -cnotmatch '^[0-9a-f]{32}$' -or $context.destination -cne $stampDestination) { throw 'Transaction engine/Setup invocation identity differs from the generated entry.' }
     $fixed=Join-Path $backup 'transaction-binding.json'
     Assert-InstallerRestoreBinding $context $fixed ([string]$stamp.bindingSHA256)
@@ -528,16 +589,39 @@ try {
         exit 0
     }
     if ($bindingRequest.Operation -eq 'InvokeInstall') { $setupIdentity=Read-SetupInvocation; $result=Invoke-SetupEngine $setupIdentity; exit $result }
-    if ($bindingRequest.Operation -in @('PublishInstall','WaitBindingGap','Create','Finalize')) { $setupIdentity=Read-SetupInvocation; $installed=Read-SetupAuthority $setupIdentity }
+    if ($bindingRequest.Operation -in @('PublishInstall','WaitBindingGap','Create','Finalize','RollbackInstall')) { $setupIdentity=Read-SetupInvocation; $installed=Read-SetupAuthority $setupIdentity }
     if ($bindingRequest.Operation -eq 'PublishInstall') { Write-SetupEvidence $installed $setupIdentity; exit 0 }
     if ($bindingRequest.Operation -eq 'WaitBindingGap') { Wait-SetupBindingGap $setupIdentity $installed; exit 0 }
+    if ($bindingRequest.Operation -eq 'RollbackInstall') {
+        # Recovery authority comes only from this Setup's private report and
+        # immutable context. A shared external REPORT never authorizes a move.
+        if ($installed.status -notin @('SWAPPED_ENTRY_PENDING','INSTALLED_ENTRY_PENDING','INSTALLER_ENTRY_FAILED','INSTALLED')) { throw 'No precisely identified swapped installation is available for entry-failure recovery.' }
+        $backup=Full-InstallerPath ([string]$installed.backup)
+        $snapshot=Read-InstallerJournalSnapshot (Join-Path $backup 'installer-transaction.json')
+        $bindingContext=Get-InstallerStableContext $snapshot.journal $backup
+        foreach ($other in @($backup,$bindingContext.destination,$bindingContext.swapRoot)) { Protect-BindingReport $other }
+        if ($bindingContext.schema -ne 3 -or $bindingContext.setupInvocationId -cne $setupIdentity.setupInvocationId -or $bindingContext.engineSHA256 -cne $setupIdentity.engineSHA256 -or $bindingContext.candidateManifestSHA256 -cne $setupIdentity.candidateManifestSHA256 -or $bindingContext.destination -cne $setupIdentity.destination -or ($bindingContext.selected -join ',') -cne ($setupIdentity.selected -join ',') -or $installed.transactionId -cne $bindingContext.transactionId) { throw 'Entry recovery private transaction identity mismatch.' }
+        # Reuse the existing concurrent native stdout/stderr pumps, including
+        # their logger-I/O fallback and observed child exit. A missing recovery
+        # report never replaces the captured original child diagnostic.
+        $recoveryCall=Invoke-SetupEngine $setupIdentity $bindingContext
+        $recoveryPath=$recoveryCall.reportPath; $recoveryExit=$recoveryCall.exitCode; $recovery=$recoveryCall.report
+        $installed | Add-Member -NotePropertyName entryRecovery -NotePropertyValue ([ordered]@{ reportPath=$recoveryPath; reportSHA256=(Get-FileHash -LiteralPath $recoveryPath).Hash.ToLowerInvariant(); exitCode=$recoveryExit; status=$recovery.status; originalFilesRestored=($recoveryExit -eq 0 -and $recovery.status -in @('ROLLED_BACK','RESTORED')); recoveryReport=$recovery }) -Force
+        $installed.status=if ($installed.entryRecovery.originalFilesRestored) { 'ROLLED_BACK_AFTER_ENTRY_FAILURE' } else { 'ROLLBACK_BLOCKED' }
+        Write-SetupEvidence $installed $setupIdentity
+        $script:bindingEngineReportPreserved=$true
+        Write-Output "Entry recovery: $($installed.status). Original error and all retained backup/stage/park objects are recorded in $bindingSafeReport."
+        exit $(if ($installed.entryRecovery.originalFilesRestored) { 0 } else { 1 })
+    }
     if ($bindingRequest.Operation -in @('Create','Finalize')) {
-        if ($installed.status -notin @('INSTALLED','INSTALLED_ENTRY_PENDING') -or $installed.action -ne 'Install') { throw 'A successful, precisely identified installation report is required.' }
+        if ($installed.status -notin @('SWAPPED_ENTRY_PENDING','INSTALLED_ENTRY_PENDING') -or $installed.action -ne 'Install') { throw 'A precisely identified pending swap report is required; installation is not complete yet.' }
         $backup=Full-InstallerPath ([string]$installed.backup)
         $bindingSnapshot=Read-InstallerJournalSnapshot (Join-Path $backup 'installer-transaction.json')
-        if ($bindingSnapshot.journal.status -cne 'INSTALLED') { throw 'Create/Finalize require this invocation journal to be exactly INSTALLED.' }
+        if ($bindingSnapshot.journal.status -cne 'SWAPPED_ENTRY_PENDING') { throw 'Create/Finalize require this invocation journal to be exactly SWAPPED_ENTRY_PENDING.' }
         $bindingContext=Get-InstallerStableContext $bindingSnapshot.journal $backup
+        Lock-InstallerDestination $bindingContext.destination
         Protect-BindingReport $backup; Protect-BindingReport $bindingContext.destination
+        Protect-BindingReport $bindingContext.swapRoot
         if ($bindingContext.setupInvocationId -cne $setupIdentity.setupInvocationId -or $bindingContext.engineSHA256 -cne $bindingRequest.ExpectedEngineSHA256 -or $bindingContext.candidateManifestSHA256 -cne $bindingRequest.ManifestSHA256 -or $bindingContext.destination -ine (Full-InstallerPath $bindingRequest.ExpectedDestination)) { throw 'Installed Setup invocation, manifest, engine or destination identity mismatch.' }
         $expected=@(if ($bindingRequest.ExpectedSelected -eq 'all') { @($script:Slugs) } else { @($bindingRequest.ExpectedSelected.Split(',')) })
         if (($bindingContext.selected -join ',') -cne ($expected -join ',') -or ($installed.selected -join ',') -cne ($bindingContext.selected -join ',') -or [string]$installed.transactionId -cne $bindingContext.transactionId) { throw 'Installed selection/transaction identity mismatch.' }
@@ -562,6 +646,8 @@ try {
             try { $stream.Write($data,0,$data.Length); $length=[BitConverter]::GetBytes([uint32]$data.Length); $stream.Write($length,0,$length.Length); $stream.Write($bindingTrailerMagic,0,$bindingTrailerMagic.Length) } finally { $stream.Dispose() }
             $readback=Read-BindingTrailer $entry
             if ((Get-InstallerJsonSHA256 $readback) -cne (Get-InstallerJsonSHA256 $stamp)) { throw 'Generated entry trailer readback mismatch.' }
+            $completion=[ordered]@{ completionId=[Guid]::NewGuid().ToString('N'); uninstallerPath=$entry; uninstallerSHA256=(Get-FileHash -LiteralPath $entry -Algorithm SHA256).Hash.ToLowerInvariant(); bindingPath=$fixed; bindingSHA256=$digest }
+            Complete-InstallerLiveTransaction $bindingContext $completion
             $installed.status='INSTALLED'; $installed.installerCompletion='READY'
             foreach ($pair in @(@('uninstallerPath',$entry),@('uninstallerSHA256',(Get-FileHash -LiteralPath $entry -Algorithm SHA256).Hash.ToLowerInvariant()),@('bindingPath',$fixed),@('bindingSHA256',$digest))) { $installed | Add-Member -NotePropertyName $pair[0] -NotePropertyValue $pair[1] -Force }
             Write-SetupEvidence $installed $setupIdentity
@@ -579,7 +665,7 @@ try {
         $nativePreference=$ErrorActionPreference
         try { $ErrorActionPreference='Continue'; & $native @args; $result=$LASTEXITCODE }
         finally { $ErrorActionPreference=$nativePreference }
-        $engineReport=Get-Content -LiteralPath $bindingSafeReport -Raw | ConvertFrom-Json
+        $engineReport=Get-Content -LiteralPath $bindingSafeReport -Raw -Encoding UTF8 | ConvertFrom-Json
         foreach ($key in @('RestoreCalled','uninstallerPath','actualModulePath','uninstallerSHA256','launchMode','bindingSHA256')) { $engineReport | Add-Member -NotePropertyName $key -NotePropertyValue $bindingReport[$key] -Force }
         Write-InstallerJson $engineReport $bindingSafeReport
         exit $result
@@ -589,12 +675,24 @@ try {
     exit 0
 } catch {
     $bindingReport.status=if ($bindingRequest.Operation -in @('Create','Finalize')) { 'INSTALLER_ENTRY_FAILED' } else { 'REFUSED' }
-    if ($bindingRequest.Operation -in @('PrepareInstall','InvokeInstall','PublishInstall','WaitBindingGap','Create','Finalize')) { $bindingReport.action='Install'; $bindingReport.setupInvocationId=$bindingRequest.SetupInvocationId }
+    if ($bindingRequest.Operation -in @('PrepareInstall','InvokeInstall','PublishInstall','WaitBindingGap','Create','Finalize','RollbackInstall')) { $bindingReport.action='Install'; $bindingReport.setupInvocationId=$bindingRequest.SetupInvocationId }
     $bindingReport.error=$_.Exception.Message
     # Failed entry generation is not a complete successful Setup. The known
     # transaction and all backups remain for an explicit scoped recovery.
     if ($null -ne $bindingContext) { $bindingReport.backup=$bindingContext.backupDirectory; $bindingReport.backupDirectory=$bindingContext.backupDirectory; $bindingReport.destination=$bindingContext.destination; $bindingReport.selected=@($bindingContext.selected); $bindingReport.transactionId=$bindingContext.transactionId; $bindingReport.engineSHA256=$bindingContext.engineSHA256; $bindingReport.candidateManifestSHA256=$bindingContext.candidateManifestSHA256 }
+    if ($bindingRequest.Operation -in @('Create','Finalize') -and (Get-Variable -Name setupIdentity -ErrorAction SilentlyContinue) -and (Get-Variable -Name installed -ErrorAction SilentlyContinue)) {
+        # Persist the original entry failure alongside the verified private
+        # swap authority before the separate normal recovery operation.
+        try {
+            $installed | Add-Member -NotePropertyName installerEntryFailure -NotePropertyValue ([ordered]@{ operation=$bindingRequest.Operation; error=$bindingReport.error; previousStatus=$installed.status; utc=[DateTime]::UtcNow.ToString('o') }) -Force
+            $installed.status='INSTALLER_ENTRY_FAILED'
+            Write-SetupEvidence $installed $setupIdentity
+            $script:bindingEngineReportPreserved=$true
+        } catch { Write-Warning 'Could not persist entry-failure metadata; prior private authority and native error output are preserved.' }
+    }
     try { Write-BindingReport } catch { Write-Warning 'Could not write the external binding report.' }
     Write-Error "$($bindingReport.status): $($bindingReport.error)" -ErrorAction Continue
     exit 1
+} finally {
+    if (Get-Command -Name Unlock-InstallerDestination -CommandType Function -ErrorAction SilentlyContinue) { Unlock-InstallerDestination }
 }

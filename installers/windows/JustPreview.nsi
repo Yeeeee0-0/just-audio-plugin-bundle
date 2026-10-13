@@ -61,6 +61,12 @@ Var InstallBindingGapRole
 Var BindingOutput
 Var BindingPreview
 Var BindingDiagnosticPath
+Var InstallSwapsCompleted
+Var InstallEntryError
+Var InstallEntryErrorPath
+Var InstallEntryErrorPreview
+Var InstallEntryRecoveryPreview
+Var InstallEntryRecoveryExit
 !macro RunBinding OP ENTRY
   ; The fixed UTF-16 request keeps long supported local paths out of NSIS's
   ; 1024-character command string. It is data, never interpolated PS code.
@@ -114,7 +120,7 @@ Var BindingDiagnosticPath
 !define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\art-v2\JUST-Welcome-164x314.bmp"
 !define MUI_ABORTWARNING
 !define MUI_WELCOMEPAGE_TITLE "JUST Windows x64 Preview"
-!define MUI_WELCOMEPAGE_TEXT "Install any of the ten JUST VST3 plugins. All are selected by default.$\r$\n$\r$\nVersion 0.1.0 by Yee Huang.$\r$\n$\r$\nThis preview is unsigned. Full REAPER visual/audio acceptance is still pending. Save your projects and close DAWs or audio hosts using the selected plugins before continuing.$\r$\n$\r$\nOnly selected plugins are replaced after verified backups. Presets, licenses, settings and projects are not accessed."
+!define MUI_WELCOMEPAGE_TEXT "Install any of the ten JUST VST3 plugins. All are selected by default.$\r$\n$\r$\nVersion 0.1.0 by Yee Huang. Unsigned preview; full host/audio acceptance is pending.$\r$\n$\r$\nSave projects. Hosts may stay open if selected bundles can be renamed. Old loaded bundles are kept; locks refuse installation without closing hosts.$\r$\n$\r$\nClose and reopen your host normally to use the installed version. No DSP hot switch.$\r$\n$\r$\nOnly selected bundles change after verified backups. Private settings, projects, presets and licenses are not accessed."
 !insertmacro MUI_PAGE_WELCOME
 !define MUI_LICENSEPAGE_TEXT_TOP "Read the preview and backup notice before installing."
 !insertmacro MUI_PAGE_LICENSE "${NOTICE_FILE}"
@@ -123,7 +129,7 @@ Var BindingDiagnosticPath
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_TITLE "Selected JUST preview plugins installed"
-!define MUI_FINISHPAGE_TEXT "The selected bundles passed file integrity checks. This is an unsigned preview, not REAPER visual/audio acceptance.$\r$\n$\r$\nKeep the backup directory recorded in the installer report. Save your projects and close DAWs or audio hosts using the selected plugins.$\r$\n$\r$\nInstaller report:$\r$\n$ReportPath"
+!define MUI_FINISHPAGE_TEXT "Selected bundles passed integrity checks. This unsigned preview still requires host/audio acceptance.$\r$\n$\r$\nOld loaded bundles are kept. Save projects, then close and reopen your host normally to use the installed version; no DSP hot switch.$\r$\n$\r$\nKeep the recorded backup and transaction paths.$\r$\n$\r$\nInstaller report:$\r$\n$ReportPath"
 !insertmacro MUI_PAGE_FINISH
 UninstPage custom un.ConfirmTransaction
 !define MUI_CUSTOMFUNCTION_UNABORT un.JustCancelTransaction
@@ -177,6 +183,7 @@ Section "-Install selected VST3 bundles" SEC_INSTALL
   ReadINIStr $SetupInvocationId "$PLUGINSDIR\invocation.ini" "Invocation" "id"
   ReadINIStr $ReportPath "$PLUGINSDIR\invocation.ini" "Invocation" "reportPath"
   ${If} $SetupInvocationId == ""
+    StrCpy $BindingPreview "PrepareInstall did not supply this Setup's invocation identity. The install engine was not invoked."
     Goto entry_failed
   ${EndIf}
   DetailPrint "Selected plugins: $Selected"
@@ -187,9 +194,11 @@ Section "-Install selected VST3 bundles" SEC_INSTALL
   ${If} $ExitResult != 0
     SetErrorLevel 1
     IfSilent +2
-      MessageBox MB_ICONSTOP "Installation was stopped.$\r$\n$\r$\nEngine diagnostic:$\r$\n$BindingPreview$\r$\n$\r$\nSave your projects and close any DAWs or audio hosts using the selected plugins, then retry. This installer never closes them.$\r$\n$\r$\nKeep the exact report before retrying:$\r$\n$ReportPath"
+      MessageBox MB_ICONSTOP "Installation was stopped.$\r$\n$\r$\nEngine diagnostic:$\r$\n$BindingPreview$\r$\n$\r$\nUse the guidance for the actual error above. Keep the exact report before retrying:$\r$\n$ReportPath"
     Abort
   ${EndIf}
+  ; A successful engine swap still needs this invocation's uninstall entry.
+  StrCpy $InstallSwapsCompleted 1
   ${If} $InstallBindingGapRoot != ""
   ${OrIf} $InstallBindingGapRole != ""
     !insertmacro RunBinding WaitBindingGap "$EXEPATH"
@@ -198,7 +207,7 @@ Section "-Install selected VST3 bundles" SEC_INSTALL
       Goto entry_failed
     ${EndIf}
   ${EndIf}
-  ; The exact successful report supplies this unique transaction. Never use
+  ; The exact pending-swap report supplies this unique transaction. Never use
   ; latest-directory discovery, the product destination, or a caller override.
   !insertmacro RunBinding Create "$EXEPATH"
   Pop $ExitResult
@@ -207,11 +216,15 @@ Section "-Install selected VST3 bundles" SEC_INSTALL
   ${EndIf}
   ReadINIStr $TransactionDirectory "$PLUGINSDIR\entry.ini" "Entry" "backupDirectory"
   ${If} $TransactionDirectory == ""
+    StrCpy $BindingPreview "Create did not supply this invocation's exact transaction directory. Setup did not complete."
     Goto entry_failed
   ${EndIf}
   ClearErrors
   WriteUninstaller "$TransactionDirectory\JUST-uninstall.exe"
-  IfErrors entry_failed
+  IfErrors 0 uninstall_written
+  StrCpy $BindingPreview "WriteUninstaller failed for this invocation's transaction entry. Setup did not complete."
+  Goto entry_failed
+  uninstall_written:
   ; Appending the per-transaction trailer preserves the native NSIS CRC and
   ; is copied with the entire EXE by NSIS's normal uninstaller self-copy.
   !insertmacro RunBinding Finalize "$TransactionDirectory\JUST-uninstall.exe"
@@ -223,9 +236,25 @@ Section "-Install selected VST3 bundles" SEC_INSTALL
   SetErrorLevel 0
   Goto entry_done
   entry_failed:
+  ; Preserve the original helper/NSIS error before recovery updates its output.
+  StrCpy $InstallEntryError $BindingPreview
+  StrCpy $InstallEntryErrorPath $BindingDiagnosticPath
+  StrCpy $InstallEntryErrorPreview $InstallEntryError 350
+  DetailPrint "Original entry diagnostic: $InstallEntryError"
+  DetailPrint "Original helper diagnostic file: $InstallEntryErrorPath"
+  ${If} $InstallSwapsCompleted == 1
+    ; Recovery derives ONLY this invocation's private authority and context.
+    !insertmacro RunBinding RollbackInstall "$EXEPATH"
+    Pop $InstallEntryRecoveryExit
+    StrCpy $InstallEntryRecoveryPreview $BindingPreview 250
+    DetailPrint "Entry recovery actual exit: $InstallEntryRecoveryExit; diagnostic: $BindingPreview"
+  ${Else}
+    StrCpy $InstallEntryRecoveryPreview "The install engine did not report successful swaps. Entry recovery was not invoked."
+  ${EndIf}
+  ; Even a successful inverse is an incomplete, failed Setup.
   SetErrorLevel 1
   IfSilent +2
-    MessageBox MB_ICONSTOP "The transaction's uninstall entry did not complete. Setup is incomplete. Keep the exact backup and read the report before any recovery:$\r$\n$ReportPath"
+    MessageBox MB_ICONSTOP "Setup did not complete.$\r$\n$\r$\nOriginal entry diagnostic (preview):$\r$\n$InstallEntryErrorPreview$\r$\n$\r$\nRecovery diagnostic (preview):$\r$\n$InstallEntryRecoveryPreview$\r$\n$\r$\nPreserve the transaction and report:$\r$\n$ReportPath"
   Abort
   entry_done:
 SectionEnd
@@ -237,7 +266,7 @@ Section "Uninstall"
   ${If} $ExitResult != 0
     SetErrorLevel 1
     IfSilent +2
-      MessageBox MB_ICONSTOP "Undo was refused or did not finish. Preserve the transaction and read:$\r$\n$ReportPath"
+      MessageBox MB_ICONSTOP "Undo was refused or did not finish.$\r$\n$\r$\nActual engine/helper diagnostic:$\r$\n$BindingPreview$\r$\n$\r$\nPreserve the transaction and read:$\r$\n$ReportPath"
     Abort
   ${EndIf}
   DetailPrint "Transaction restored. Old backups and this uninstall entry are retained."
@@ -335,6 +364,7 @@ Function .onInit
   StrCpy $SetupInvocationId ""
   StrCpy $InstallBindingGapRoot ""
   StrCpy $InstallBindingGapRole ""
+  StrCpy $InstallSwapsCompleted 0
   ${GetParameters} $Parameters
   StrCpy $0 ""
   ${GetOptions} $Parameters "/BACKUPROOT=" $0
