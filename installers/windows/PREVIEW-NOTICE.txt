@@ -1,13 +1,13 @@
-JUST 0.1.0 -- Windows x64 preview
+JUST 0.1.0 -- Windows x64
 Yee Huang
 
 This installer and the VST3 plugins are unsigned. Windows may display an
 unknown-publisher warning. Verify the published SHA256 before running.
 
-Windows native automated build/test evidence is separate from real host
-acceptance. These plugins have NOT been visually or audibly accepted in the
-user's REAPER installation. Use a NEW test project and follow the acceptance
-checklist. Do not replace a production project with a test project.
+Native automated checks and recorded host checks cover limited cases.
+Full DAW compatibility and audio coverage have not been verified.
+Try changes in a separate test project before changing your working project.
+Do not replace a production project with a test project.
 
 Choose any of the ten components. All ten are selected initially. Only
 selected JUST bundles in the selected destination are replaced. Unselected

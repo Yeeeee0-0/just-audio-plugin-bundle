@@ -27,20 +27,20 @@ Unicode true
 !ifndef MANIFEST_SHA256
   !error "MANIFEST_SHA256 is required."
 !endif
-Name "JUST 0.1.0 Windows x64 Preview"
+Name "JUST 0.1.0 Windows x64"
 OutFile "${OUTPUT_FILE}"
 InstallDir "$COMMONFILES64\VST3"
 RequestExecutionLevel admin
 SetCompressor /SOLID lzma
 CRCCheck force
 ShowInstDetails show
-BrandingText "Yee Huang | Unsigned Windows preview"
+BrandingText "Yee Huang | Unsigned Windows installer"
 VIProductVersion "0.1.0.0"
-VIAddVersionKey "ProductName" "JUST Audio Plugin Bundle Windows Preview"
+VIAddVersionKey "ProductName" "JUST Audio Plugin Bundle Windows"
 VIAddVersionKey "ProductVersion" "0.1.0"
 VIAddVersionKey "FileVersion" "0.1.0"
 VIAddVersionKey "CompanyName" "Yee Huang"
-VIAddVersionKey "FileDescription" "Unsigned x64 VST3 preview installer; REAPER acceptance pending"
+VIAddVersionKey "FileDescription" "Unsigned x64 VST3 installer; DAW compatibility coverage unverified"
 VIAddVersionKey "LegalCopyright" "Yee Huang"
 
 Var Selected
@@ -119,17 +119,17 @@ Var InstallEntryRecoveryExit
 !define MUI_UNICON "${__FILEDIR__}\art-v2\JUST-Installer.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "${__FILEDIR__}\art-v2\JUST-Welcome-164x314.bmp"
 !define MUI_ABORTWARNING
-!define MUI_WELCOMEPAGE_TITLE "JUST Windows x64 Preview"
-!define MUI_WELCOMEPAGE_TEXT "Install any of the ten JUST VST3 plugins. All are selected by default.$\r$\n$\r$\nVersion 0.1.0 by Yee Huang. Unsigned preview; full host/audio acceptance is pending.$\r$\n$\r$\nSave projects. Hosts may stay open if selected bundles can be renamed. Old loaded bundles are kept; locks refuse installation without closing hosts.$\r$\n$\r$\nClose and reopen your host normally to use the installed version. No DSP hot switch.$\r$\n$\r$\nOnly selected bundles change after verified backups. Private settings, projects, presets and licenses are not accessed."
+!define MUI_WELCOMEPAGE_TITLE "JUST 0.1.0 Windows x64"
+!define MUI_WELCOMEPAGE_TEXT "Install any of the ten JUST VST3 plugins. All are selected by default.$\r$\n$\r$\nVersion 0.1.0 by Yee Huang. Unsigned installer; full DAW compatibility and audio coverage have not been verified.$\r$\n$\r$\nSave projects. Hosts may stay open if selected bundles can be renamed. Old loaded bundles are kept; locks refuse installation without closing hosts.$\r$\n$\r$\nClose and reopen your host normally to use the installed version. No DSP hot switch.$\r$\n$\r$\nOnly selected bundles change after verified backups. Private settings, projects, presets and licenses are not accessed."
 !insertmacro MUI_PAGE_WELCOME
-!define MUI_LICENSEPAGE_TEXT_TOP "Read the preview and backup notice before installing."
+!define MUI_LICENSEPAGE_TEXT_TOP "Read the installation and backup notice before installing."
 !insertmacro MUI_PAGE_LICENSE "${NOTICE_FILE}"
 !insertmacro MUI_PAGE_COMPONENTS
 !define MUI_DIRECTORYPAGE_TEXT_TOP "Choose the x64 VST3 directory used by your host. Only selected JUST bundles in this directory will be backed up and replaced. Unselected plugins remain untouched."
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-!define MUI_FINISHPAGE_TITLE "Selected JUST preview plugins installed"
-!define MUI_FINISHPAGE_TEXT "Selected bundles passed integrity checks. This unsigned preview still requires host/audio acceptance.$\r$\n$\r$\nOld loaded bundles are kept. Save projects, then close and reopen your host normally to use the installed version; no DSP hot switch.$\r$\n$\r$\nKeep the recorded backup and transaction paths.$\r$\n$\r$\nInstaller report:$\r$\n$ReportPath"
+!define MUI_FINISHPAGE_TITLE "Selected JUST plugins installed"
+!define MUI_FINISHPAGE_TEXT "Selected bundles passed integrity checks. This installer is unsigned. Compatibility across all DAW hosts has not been verified.$\r$\n$\r$\nOld loaded bundles are kept. Save projects, then close and reopen your host normally to use the installed version; no DSP hot switch.$\r$\n$\r$\nKeep the recorded backup and transaction paths.$\r$\n$\r$\nInstaller report:$\r$\n$ReportPath"
 !insertmacro MUI_PAGE_FINISH
 UninstPage custom un.ConfirmTransaction
 !define MUI_CUSTOMFUNCTION_UNABORT un.JustCancelTransaction
@@ -349,7 +349,7 @@ FunctionEnd
 
 Function .onInit
   ${IfNot} ${RunningX64}
-    MessageBox MB_ICONSTOP "This preview requires native Windows x64."
+    MessageBox MB_ICONSTOP "This installer requires native Windows x64."
     SetErrorLevel 1
     Abort
   ${EndIf}
