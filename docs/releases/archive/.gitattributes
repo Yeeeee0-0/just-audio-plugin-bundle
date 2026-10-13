@@ -1,0 +1,2 @@
+*.original.md -text -whitespace
+releases-api.original.json -text

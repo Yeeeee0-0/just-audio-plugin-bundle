@@ -1,0 +1,40 @@
+{
+  "method": "Exact name, size, sha256 digest and browser_download_url comparison against archive/releases-api.original.json; not a new binary download verification",
+  "appendix_asset_checks": [
+    {
+      "tag": "v0.1.0-installers.20261013-host-fix",
+      "name": "JUST-0.1.0-Windows-x64-preview-setup.exe",
+      "size": 4031050,
+      "sha256": "22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040",
+      "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe",
+      "matched_api": true
+    },
+    {
+      "tag": "v0.1.0-installers.20261012",
+      "name": "JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe",
+      "size": 4013818,
+      "sha256": "4fd10096f4135fc1520875eb78eda7e5ff82347bcdd8f85b8bc52d23712d8bab",
+      "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe",
+      "matched_api": true
+    },
+    {
+      "tag": "v0.1.0-installers.20261012",
+      "name": "JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+      "size": 11254806,
+      "sha256": "c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc",
+      "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+      "matched_api": true
+    },
+    {
+      "tag": "v0.1.0",
+      "name": "JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+      "size": 11254806,
+      "sha256": "c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc",
+      "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+      "matched_api": true
+    }
+  ],
+  "supporting_attachment_names_confirmed": true,
+  "stable_all_eight_attachment_names_confirmed": true,
+  "mismatches": []
+}
