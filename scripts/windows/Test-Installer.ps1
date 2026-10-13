@@ -9,7 +9,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 if ([Environment]::OSVersion.Platform -ne 'Win32NT' -or -not [Environment]::Is64BitProcess) { throw 'Native Windows x64 required.' }
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-if (-not $InstallerPath) { $InstallerPath=Join-Path $root 'build\installer\JUST-0.1.0-Windows-x64-preview-setup.exe' }
+if (-not $InstallerPath) { $InstallerPath=Join-Path $root 'build\installer\JUST-0.1.0-Windows-x64-Setup.exe' }
 if (-not $EvidenceDir) { $EvidenceDir=Join-Path $root 'build\windows-evidence\installer' }
 $installer=(Resolve-Path -LiteralPath $InstallerPath).Path
 $candidate=(Resolve-Path -LiteralPath $CandidateDir).Path
