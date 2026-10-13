@@ -1,0 +1,83 @@
+# Draft only. Copy into .github/ISSUE_TEMPLATE only after owner approval (plan §9.9).
+name: Bug report / 问题反馈
+description: Report a reproducible JUST issue / 反馈可复现的 JUST 问题
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please include the exact package and host versions so the issue can be reproduced.
+        请填写准确的安装包和宿主版本，便于复现。
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Plugin / 插件
+      options:
+        - EQ
+        - Reverb
+        - Delay
+        - Tremolo
+        - Compressor
+        - Limiter
+        - Gate
+        - Flanger
+        - Wider
+        - Distortion
+    validations:
+      required: true
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system and version / 操作系统及版本
+      placeholder: "e.g. macOS 15.7 or Windows 11 24H2"
+    validations:
+      required: true
+  - type: input
+    id: cpu-architecture
+    attributes:
+      label: CPU architecture / CPU 架构
+      placeholder: "e.g. arm64 (Apple silicon), x64 (AMD64)"
+    validations:
+      required: true
+  - type: input
+    id: daw
+    attributes:
+      label: DAW name and version / DAW 名称及版本
+      placeholder: "e.g. REAPER 7.41"
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: JUST installer filename or release tag / JUST 安装包文件名或 tag
+      placeholder: "e.g. v0.1.0-installers.20261013-host-fix"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce / 复现步骤
+      description: Include plugin settings and whether the host is stopped or playing / 写明插件设置和宿主停止或播放状态。
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result / 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result / 实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Screenshots or logs (optional) / 截图或日志（可选）
+      description: 'Attach relevant screenshots or log excerpts. Windows installer logs: %ProgramData%\JUST\Windows-preview-logs / 可附相关截图或日志片段，Windows 安装器日志位置同上。'

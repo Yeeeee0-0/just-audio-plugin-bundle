@@ -1,0 +1,460 @@
+{
+  "repository": "Yeeeee0-0/just-audio-plugin-bundle",
+  "review_date": "2026-10-13",
+  "main_baseline": "de16de3f7e3b5582a7bbe374a27d7ca4105d04ef",
+  "raw_api_file": "releases-api.original.json",
+  "raw_api_utf8_sha256": "d2033d9dde4c445c7b9de41791d9668af417007c78973eea385b134172dc7034",
+  "encoding": "UTF-8; original body line endings retained",
+  "releases": [
+    {
+      "tag": "v0.1.0-installers.20261013-host-fix",
+      "release_id": 411523142,
+      "original_title": "JUST 0.1.0 — Windows installer host fix / Windows 安装器宿主修复",
+      "original_title_utf8_sha256": "a077adab4a9e2f6332ae7d8fefebcacf0b65f6cc58f9c2dc1bfa48424ee98e68",
+      "original_body_utf8_bytes": 3296,
+      "original_body_utf8_sha256": "5ed5052a792baaa3876c4abef44b2a055a1aa1275c19032c75d924b69122ca70",
+      "original_body_crlf_count": 22,
+      "archive_file": "v0.1.0-installers.20261013-host-fix.original.md",
+      "archive_prefix_utf8_bytes": 77,
+      "archive_file_sha256": "0572ad2d4854b20f1bd1aaf65a2f3c7ac13accbcf265c1088eb324c00a737277",
+      "proposed_title": "JUST 0.1.0 — Windows x64 安装器修复 / Windows x64 installer fix",
+      "proposed_body_utf8_sha256": "2dcbc3cae3c4b893f77169eb51371b8dade71c74816b5214a3b548ea49c71882",
+      "original_body_preserved_as_exact_suffix": false,
+      "original_prerelease": true,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 636590250,
+          "name": "JUST-0.1.0-Windows-x64-preview-setup.exe",
+          "size": 4031050,
+          "digest": "sha256:22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe"
+        },
+        {
+          "id": 636590469,
+          "name": "release-manifest.json",
+          "size": 2813,
+          "digest": "sha256:a596d2261c05ccf9fa676ded45ffe074a4d1d0934868302714fcda5b2c526b73",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/release-manifest.json"
+        },
+        {
+          "id": 636590510,
+          "name": "SHA256SUMS.txt",
+          "size": 195,
+          "digest": "sha256:06d12e11efc524fdd7fe7d023582b064ee5c0793dbc1c2ebc8e7567a24aee24e",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/SHA256SUMS.txt"
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0-installers.20261012",
+      "release_id": 410916224,
+      "original_title": "JUST 0.1.0 — Windows UI fix & macOS arm64 / 双平台安装包",
+      "original_title_utf8_sha256": "ca45aefb2ebf1b0a802506f9cd7d2d722c69dfdac5539e344dda89f6c4f7295b",
+      "original_body_utf8_bytes": 3999,
+      "original_body_utf8_sha256": "3aab920a8b6b0b50695559e230d48b3a778e22d982c034f9c50cade1243e496f",
+      "original_body_crlf_count": 38,
+      "archive_file": "v0.1.0-installers.20261012.original.md",
+      "archive_prefix_utf8_bytes": 68,
+      "archive_file_sha256": "cbcbbbb580d9ef708ced32f9e614fc4ef915ee7ef208414a1beb381b6886ffcf",
+      "proposed_title": "JUST 0.1.0 — Windows UI 修复 + macOS 原包 / Windows UI fix + macOS (Windows 已取代)",
+      "proposed_body_utf8_sha256": "c260509333702106e9ce0ec2cc8bfaec2f4196d65fa6f40c2c8300b16f87d5a7",
+      "original_body_preserved_as_exact_suffix": false,
+      "original_prerelease": true,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 634694440,
+          "name": "JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe",
+          "size": 4013818,
+          "digest": "sha256:4fd10096f4135fc1520875eb78eda7e5ff82347bcdd8f85b8bc52d23712d8bab",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe"
+        },
+        {
+          "id": 634694546,
+          "name": "JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+          "size": 11254806,
+          "digest": "sha256:c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg"
+        },
+        {
+          "id": 634727569,
+          "name": "release-manifest.json",
+          "size": 27148,
+          "digest": "sha256:ea8ca1f5c547d41a0ee26cf277aa115d2a11fe3c375d2e91e4c048ce92ccae7a",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/release-manifest.json"
+        },
+        {
+          "id": 634727633,
+          "name": "SHA256SUMS.txt",
+          "size": 343,
+          "digest": "sha256:6b994f866a4536ec82bc8c06078dbe052746c56c9aa30bf4265c0acac6a57c40",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/SHA256SUMS.txt"
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0",
+      "release_id": 406818605,
+      "original_title": "JUST 0.1.0 — macOS Apple Silicon",
+      "original_title_utf8_sha256": "15c0850d1281e35fa43ad268f6ece998bcd8812bcfa91b391f05ce52e4092bf6",
+      "original_body_utf8_bytes": 1805,
+      "original_body_utf8_sha256": "9b36afd70841a33bec292d4cd360cdaafeaeb7f8058bf1412b4ed11de3b63538",
+      "original_body_crlf_count": 19,
+      "archive_file": "v0.1.0.original.md",
+      "archive_prefix_utf8_bytes": 38,
+      "archive_file_sha256": "5dc71defc9d86a5cc272ead6f94bc8b0609e09af1969ed087ff4629ef956a1c3",
+      "proposed_title": "JUST 0.1.0 — macOS Apple silicon 正式版 / macOS stable",
+      "proposed_body_utf8_sha256": "7d914adcd0c38d81e098a2b226f3591ec14f95f15fbd777baaf5d6fcf784a844",
+      "original_body_preserved_as_exact_suffix": false,
+      "original_prerelease": false,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 621811527,
+          "name": "INSTALLATION-GUIDE.md",
+          "size": 3885,
+          "digest": "sha256:53efb3a6b68fdf4a5a7b79c8ded7c2452596826098dc052e5e89680694c85f00",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/INSTALLATION-GUIDE.md"
+        },
+        {
+          "id": 621811600,
+          "name": "JUST-0.1.0-macOS-arm64-VST3.zip",
+          "size": 11202699,
+          "digest": "sha256:fadb8711b98a3aed420351d8b4b24be4668e587c72caa5662540f4077fd011a2",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/JUST-0.1.0-macOS-arm64-VST3.zip"
+        },
+        {
+          "id": 621811737,
+          "name": "JUST-0.1.0-source.zip",
+          "size": 3947209,
+          "digest": "sha256:97116e6763f401ef7471adb9b4fdb6f8da8dcfeea38aadea3fe4b1c788882db0",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/JUST-0.1.0-source.zip"
+        },
+        {
+          "id": 621811815,
+          "name": "JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+          "size": 11254806,
+          "digest": "sha256:c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg"
+        },
+        {
+          "id": 621811888,
+          "name": "LICENSE.txt",
+          "size": 1066,
+          "digest": "sha256:7a8333edeba1408bc07c0d08b2c2ba0e0e72062b3e71cdd94c1d3c473cdff984",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/LICENSE.txt"
+        },
+        {
+          "id": 621811908,
+          "name": "SHA256SUMS.txt",
+          "size": 669,
+          "digest": "sha256:4ecd38854d0875643efa8cbd6ecc944df465119ee058e9255f912222d6c1864b",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/SHA256SUMS.txt"
+        },
+        {
+          "id": 621811933,
+          "name": "SOURCE-SNAPSHOT.json",
+          "size": 60366,
+          "digest": "sha256:fb26329a26da83565010b354d4cdd9f074d9630e6c205f027a3d533112f398b3",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/SOURCE-SNAPSHOT.json"
+        },
+        {
+          "id": 621811973,
+          "name": "THIRD_PARTY_NOTICES.md",
+          "size": 2888,
+          "digest": "sha256:e6786eee8375bfae538980ac81dea9a82f66151cd7c1a860d1c1cdf120b378cc",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0/THIRD_PARTY_NOTICES.md"
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0-windows-preview.17",
+      "release_id": 407268650,
+      "original_title": "JUST 0.1.0 Windows x64 preview 17 — 待实机验证",
+      "original_title_utf8_sha256": "68c8f0b7c2a1fd1895bea68570f861d90831f7c283c39bb276e3fa6545b2b53f",
+      "original_body_utf8_bytes": 4427,
+      "original_body_utf8_sha256": "cdc632e7d1be45959b56dfe0dc7655f0d7f8bcad274ce0ca7141de6c13b1dd7d",
+      "original_body_crlf_count": 24,
+      "archive_file": "v0.1.0-windows-preview.17.original.md",
+      "archive_prefix_utf8_bytes": 57,
+      "archive_file_sha256": "497a85e67ba7cd2eda3b7702789e700175614ea5ebd651e527c6577826a2c275",
+      "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 17",
+      "proposed_body_utf8_sha256": "ff3f6b47c3c67e3e9d87dd3527da421a1ef2d9ed96a20c451d0dc0f969cfbffe",
+      "original_body_preserved_as_exact_suffix": true,
+      "original_prerelease": true,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 623025380,
+          "name": "ACCEPTANCE-zh.md",
+          "size": 6199,
+          "digest": "sha256:2fd6e430221623642e014123ea3350576442ce3d7abb8c49a9133950380b95d6",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/ACCEPTANCE-zh.md"
+        },
+        {
+          "id": 623025382,
+          "name": "JUST-0.1.0-Windows-x64-preview.17-Evidence.zip",
+          "size": 2323285,
+          "digest": "sha256:cd7ee307c2e3c5a7be9e40d3cbae50a59dc92f37f5f0d6907ce340abb81aa41b",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/JUST-0.1.0-Windows-x64-preview.17-Evidence.zip"
+        },
+        {
+          "id": 623025384,
+          "name": "JUST-0.1.0-Windows-x64-preview.17-Portable.zip",
+          "size": 17032647,
+          "digest": "sha256:488bfe54d72c6b01a8bfd526919dac59d965ce44f5cfc9b9615789a2a3f71cf1",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/JUST-0.1.0-Windows-x64-preview.17-Portable.zip"
+        },
+        {
+          "id": 623025383,
+          "name": "JUST-0.1.0-Windows-x64-preview.17-Setup.exe",
+          "size": 3680886,
+          "digest": "sha256:607bea3ac984f69c1da201ac48ec73ee7da7fde5a9f7f65016bbb379115a36d3",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/JUST-0.1.0-Windows-x64-preview.17-Setup.exe"
+        },
+        {
+          "id": 623025381,
+          "name": "JUST-0.1.0-Windows-x64-preview.17-Source.zip",
+          "size": 4153989,
+          "digest": "sha256:402646cf8762fafb698044c21e5490b4d1ee20d0af9ee9504e4a4841b4e44389",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/JUST-0.1.0-Windows-x64-preview.17-Source.zip"
+        },
+        {
+          "id": 623025402,
+          "name": "KNOWN-DIFFERENCES-zh.md",
+          "size": 6720,
+          "digest": "sha256:5c49b99bba706f88e92a00bd666bf3dc88eb9bf6ba337500ac3036a974e471f5",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/KNOWN-DIFFERENCES-zh.md"
+        },
+        {
+          "id": 623025429,
+          "name": "preview-manifest.json",
+          "size": 8373,
+          "digest": "sha256:5f17d981a2936f5a4d9558a04f530b810214df0bd846ff0915689db08d606b29",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/preview-manifest.json"
+        },
+        {
+          "id": 623025412,
+          "name": "RELEASE-NOTES.md",
+          "size": 4427,
+          "digest": "sha256:cdc632e7d1be45959b56dfe0dc7655f0d7f8bcad274ce0ca7141de6c13b1dd7d",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/RELEASE-NOTES.md"
+        },
+        {
+          "id": 623025416,
+          "name": "SHA256SUMS.txt",
+          "size": 988,
+          "digest": "sha256:eae7e81790f546e75ce4fa34cff1ddf84865a94514722de40240711f6727f3fe",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/SHA256SUMS.txt"
+        },
+        {
+          "id": 623025428,
+          "name": "verify-preview-download.py",
+          "size": 6873,
+          "digest": "sha256:a498a7edf635dbd63c7ddc114c473125ba368f7baac14f2f0d019d233464241d",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/verify-preview-download.py"
+        },
+        {
+          "id": 623025417,
+          "name": "WINDOWS-CODEX-PROMPT-zh.txt",
+          "size": 5825,
+          "digest": "sha256:f55c4c843ac71888a32416247c14a48121a9df4542b2b6ff12c7887494d1e404",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.17/WINDOWS-CODEX-PROMPT-zh.txt"
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0-windows-preview.13",
+      "release_id": 407178845,
+      "original_title": "JUST 0.1.0 Windows x64 preview 13 — 待实机验证",
+      "original_title_utf8_sha256": "0b31077f3403c810d2b97865e0f3ccdd139fe8885376960ba874597e9f9ca821",
+      "original_body_utf8_bytes": 2731,
+      "original_body_utf8_sha256": "24d0f2ec99ccdb5865cbcccffec4dea7700080deece45d6f9c0f4f6f6845dea8",
+      "original_body_crlf_count": 22,
+      "archive_file": "v0.1.0-windows-preview.13.original.md",
+      "archive_prefix_utf8_bytes": 57,
+      "archive_file_sha256": "f4d41979f2f2ebd78898d45075bb57f64ff1e2ecd61d20f8900bb841bb264bda",
+      "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 13",
+      "proposed_body_utf8_sha256": "d5fd476387acd3022a38e0c1e387afb1b1351c3e1941f3b516e255c7cbe030c8",
+      "original_body_preserved_as_exact_suffix": true,
+      "original_prerelease": true,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 622757258,
+          "name": "ACCEPTANCE-zh.md",
+          "size": 6199,
+          "digest": "sha256:2fd6e430221623642e014123ea3350576442ce3d7abb8c49a9133950380b95d6",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/ACCEPTANCE-zh.md"
+        },
+        {
+          "id": 622757255,
+          "name": "JUST-0.1.0-Windows-x64-preview.13-Evidence.zip",
+          "size": 2238327,
+          "digest": "sha256:fa2f6f9cd055e3503986c9ebfd087ce89628e85cbded57321fadc90c83857e46",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/JUST-0.1.0-Windows-x64-preview.13-Evidence.zip"
+        },
+        {
+          "id": 622757256,
+          "name": "JUST-0.1.0-Windows-x64-preview.13-Portable.zip",
+          "size": 17020645,
+          "digest": "sha256:edc84f4c49ebd17df2fa8d84ed592460d710d9f4f4926385839e38b8bb782726",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/JUST-0.1.0-Windows-x64-preview.13-Portable.zip"
+        },
+        {
+          "id": 622757251,
+          "name": "JUST-0.1.0-Windows-x64-preview.13-Setup.exe",
+          "size": 3676793,
+          "digest": "sha256:a5c793828262be6f11bc4b27fc9b58ba631db3122c403aeb09826e1f03f52a13",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/JUST-0.1.0-Windows-x64-preview.13-Setup.exe"
+        },
+        {
+          "id": 622757257,
+          "name": "JUST-0.1.0-Windows-x64-preview.13-Source.zip",
+          "size": 4143834,
+          "digest": "sha256:3d3a8cf1fe8680e1e3583583f1693402eb2c3f6258aca1ec488bafe125e4e430",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/JUST-0.1.0-Windows-x64-preview.13-Source.zip"
+        },
+        {
+          "id": 622757295,
+          "name": "KNOWN-DIFFERENCES-zh.md",
+          "size": 6720,
+          "digest": "sha256:5c49b99bba706f88e92a00bd666bf3dc88eb9bf6ba337500ac3036a974e471f5",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/KNOWN-DIFFERENCES-zh.md"
+        },
+        {
+          "id": 622757332,
+          "name": "preview-manifest.json",
+          "size": 6955,
+          "digest": "sha256:1b61976c217f9f79df7e306f6d6709111f43c8a0ec4c174212f225ab8df68788",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/preview-manifest.json"
+        },
+        {
+          "id": 622757312,
+          "name": "RELEASE-NOTES.md",
+          "size": 2731,
+          "digest": "sha256:24d0f2ec99ccdb5865cbcccffec4dea7700080deece45d6f9c0f4f6f6845dea8",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/RELEASE-NOTES.md"
+        },
+        {
+          "id": 622757316,
+          "name": "SHA256SUMS.txt",
+          "size": 988,
+          "digest": "sha256:2275deb1a3ce39a99355c76614bef2ef6a8b4d47689d14f9830f59b58abf4834",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/SHA256SUMS.txt"
+        },
+        {
+          "id": 622757345,
+          "name": "verify-preview-download.py",
+          "size": 6873,
+          "digest": "sha256:a498a7edf635dbd63c7ddc114c473125ba368f7baac14f2f0d019d233464241d",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/verify-preview-download.py"
+        },
+        {
+          "id": 622757334,
+          "name": "WINDOWS-CODEX-PROMPT-zh.txt",
+          "size": 5825,
+          "digest": "sha256:f55c4c843ac71888a32416247c14a48121a9df4542b2b6ff12c7887494d1e404",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.13/WINDOWS-CODEX-PROMPT-zh.txt"
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0-windows-preview.12",
+      "release_id": 407102965,
+      "original_title": "JUST 0.1.0 Windows x64 preview 12 — 待实机验证",
+      "original_title_utf8_sha256": "390e79d1a4f34207bd36f3249142c06bb159537481001dd85f9f228c54d68eb8",
+      "original_body_utf8_bytes": 1818,
+      "original_body_utf8_sha256": "fb0cd878036e729f8162383735060d164d7ff87e941d9481d9d7c5c7bf2d5c5a",
+      "original_body_crlf_count": 18,
+      "archive_file": "v0.1.0-windows-preview.12.original.md",
+      "archive_prefix_utf8_bytes": 57,
+      "archive_file_sha256": "33b73f4e995738fed98ae494a4d9696b1ea64a795e1c98bd0d4bc39986c55f5c",
+      "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 12",
+      "proposed_body_utf8_sha256": "efc8cf66c2047fb6fee654dd7fd6680c2fd4f1133a4788cbea18f01281ce7076",
+      "original_body_preserved_as_exact_suffix": true,
+      "original_prerelease": true,
+      "original_draft": false,
+      "asset_names_sizes_digests_unchanged": [
+        {
+          "id": 622538416,
+          "name": "ACCEPTANCE-zh.md",
+          "size": 6199,
+          "digest": "sha256:2fd6e430221623642e014123ea3350576442ce3d7abb8c49a9133950380b95d6",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/ACCEPTANCE-zh.md"
+        },
+        {
+          "id": 622538418,
+          "name": "JUST-0.1.0-Windows-x64-preview.12-Evidence.zip",
+          "size": 2238511,
+          "digest": "sha256:6415e41b949fd0a507141acee93e9f2e5b54bcfbf949ab99704a11faac097279",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/JUST-0.1.0-Windows-x64-preview.12-Evidence.zip"
+        },
+        {
+          "id": 622538424,
+          "name": "JUST-0.1.0-Windows-x64-preview.12-Portable.zip",
+          "size": 17019728,
+          "digest": "sha256:c83efb4dfb49f2c580c694143d477497a4b36b18c81c7eebe3e18ab00b93423b",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/JUST-0.1.0-Windows-x64-preview.12-Portable.zip"
+        },
+        {
+          "id": 622538415,
+          "name": "JUST-0.1.0-Windows-x64-preview.12-Setup.exe",
+          "size": 3675279,
+          "digest": "sha256:9f2d003081fdd87ee910864dc5cfbb33c67330e455e41c949f80994002e92d68",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/JUST-0.1.0-Windows-x64-preview.12-Setup.exe"
+        },
+        {
+          "id": 622538417,
+          "name": "JUST-0.1.0-Windows-x64-preview.12-Source.zip",
+          "size": 4142886,
+          "digest": "sha256:5b6ae4d02a2a49485c3092afb7dd2616589f70aae270dcb536aa767a270a9d82",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/JUST-0.1.0-Windows-x64-preview.12-Source.zip"
+        },
+        {
+          "id": 622538438,
+          "name": "KNOWN-DIFFERENCES-zh.md",
+          "size": 6720,
+          "digest": "sha256:5c49b99bba706f88e92a00bd666bf3dc88eb9bf6ba337500ac3036a974e471f5",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/KNOWN-DIFFERENCES-zh.md"
+        },
+        {
+          "id": 622538456,
+          "name": "preview-manifest.json",
+          "size": 6433,
+          "digest": "sha256:21dcbe196f168a26a26755a659fd6ec1e1379e1e1f057df6a943f6613c98581e",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/preview-manifest.json"
+        },
+        {
+          "id": 622538444,
+          "name": "RELEASE-NOTES.md",
+          "size": 1818,
+          "digest": "sha256:fb0cd878036e729f8162383735060d164d7ff87e941d9481d9d7c5c7bf2d5c5a",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/RELEASE-NOTES.md"
+        },
+        {
+          "id": 622538445,
+          "name": "SHA256SUMS.txt",
+          "size": 988,
+          "digest": "sha256:984db7a86a1cfd98b246ec1440ba30a3cb56e49b371b67197141381ccbfc15ff",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/SHA256SUMS.txt"
+        },
+        {
+          "id": 622538459,
+          "name": "verify-preview-download.py",
+          "size": 6873,
+          "digest": "sha256:a498a7edf635dbd63c7ddc114c473125ba368f7baac14f2f0d019d233464241d",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/verify-preview-download.py"
+        },
+        {
+          "id": 622538450,
+          "name": "WINDOWS-CODEX-PROMPT-zh.txt",
+          "size": 5825,
+          "digest": "sha256:f55c4c843ac71888a32416247c14a48121a9df4542b2b6ff12c7887494d1e404",
+          "browser_download_url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-windows-preview.12/WINDOWS-CODEX-PROMPT-zh.txt"
+        }
+      ]
+    }
+  ]
+}

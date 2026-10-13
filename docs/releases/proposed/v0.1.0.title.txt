@@ -1,0 +1,1 @@
+JUST 0.1.0 — macOS Apple silicon 正式版 / macOS stable
