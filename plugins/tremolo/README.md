@@ -18,4 +18,4 @@ Build from the repository root after configuration:
 cmake --build --preset mac-arm64-clt --parallel 2 --target Just_tremolo
 ```
 
-See [BUILDING.md](../../BUILDING.md) for dependencies and test boundaries, and the [suite README](../../README.md) for platform and license information. Only the macOS arm64 binary set is covered by this release.
+See [BUILDING.md](../../BUILDING.md) for dependencies and test boundaries, and the [suite README](../../README.md) for platform and license information. See [platform support and known limits](../../README.md#platform-support-and-known-limits) for the current platform status.

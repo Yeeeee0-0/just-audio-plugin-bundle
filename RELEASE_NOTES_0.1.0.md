@@ -1,3 +1,7 @@
+> **当前推荐 / Current recommendation**
+> 当前推荐的 Windows x64 安装包见 [2026-10-13 host-fix 预发布](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix)。下方保留 2026-10-12 的发布记录，macOS 安装包保持不变。
+> The current recommended Windows x64 installer is in the [2026-10-13 host-fix prerelease](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix). The 2026-10-12 release record is retained below, and the macOS package is unchanged.
+
 # JUST 0.1.0
 
 The recommended [2026-10-12 installer prerelease](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261012) contains the updated Windows x64 preview Setup and the unchanged macOS Apple silicon installer from `v0.1.0`. Product version remains **0.1.0**. Old releases and assets are retained.
