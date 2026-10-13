@@ -20,8 +20,8 @@
       "proposed_title": "JUST 0.1.0 — Windows x64 预览：安装器修复 / Windows x64 preview: installer fix",
       "proposed_body_utf8_sha256": "18ed745ddadd1d610761c0617a180d82508dfddbb6c0b73702f11a7e43cb730e",
       "original_body_preserved_as_exact_suffix": false,
-      "prerelease_unchanged": true,
-      "draft_unchanged": false,
+      "original_prerelease": true,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 636590250,
@@ -60,8 +60,8 @@
       "proposed_title": "JUST 0.1.0 — Windows UI 修复 + macOS 原包 / Windows UI fix + macOS (Windows 已取代)",
       "proposed_body_utf8_sha256": "14978a826d21422cfb5fd67d2a906e7c5d7921a191df7d40f592b05c8d731e19",
       "original_body_preserved_as_exact_suffix": false,
-      "prerelease_unchanged": true,
-      "draft_unchanged": false,
+      "original_prerelease": true,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 634694440,
@@ -107,8 +107,8 @@
       "proposed_title": "JUST 0.1.0 — macOS Apple silicon 正式版 / macOS stable",
       "proposed_body_utf8_sha256": "3c73d05c776808c763590d9a301d49e4deb44a8946ebb1c14538f9aa9c281025",
       "original_body_preserved_as_exact_suffix": false,
-      "prerelease_unchanged": false,
-      "draft_unchanged": false,
+      "original_prerelease": false,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 621811527,
@@ -182,8 +182,8 @@
       "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 17",
       "proposed_body_utf8_sha256": "961c8b31ce34946d3c0e83f193a2f20b3ad3e8cf95c583dc0e1ccb92b39ab368",
       "original_body_preserved_as_exact_suffix": true,
-      "prerelease_unchanged": true,
-      "draft_unchanged": false,
+      "original_prerelease": true,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 623025380,
@@ -278,8 +278,8 @@
       "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 13",
       "proposed_body_utf8_sha256": "bff60c08b344bd22f4d3fa61736e298bba801b823d5d9976b482d1ae3c1b512e",
       "original_body_preserved_as_exact_suffix": true,
-      "prerelease_unchanged": true,
-      "draft_unchanged": false,
+      "original_prerelease": true,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 622757258,
@@ -374,8 +374,8 @@
       "proposed_title": "[已取代 Superseded] JUST 0.1.0 Windows x64 preview 12",
       "proposed_body_utf8_sha256": "fe637dc28d338d9e201881a6aa654f2b84b32cb73c473f0032a9329ec10401b1",
       "original_body_preserved_as_exact_suffix": true,
-      "prerelease_unchanged": true,
-      "draft_unchanged": false,
+      "original_prerelease": true,
+      "original_draft": false,
       "asset_names_sizes_digests_unchanged": [
         {
           "id": 622538416,

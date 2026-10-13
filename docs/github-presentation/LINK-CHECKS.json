@@ -1,0 +1,152 @@
+{
+  "checked_date_utc": "2026-10-13",
+  "scope": "External links in the English and Chinese READMEs, changed plugin READMEs, presentation handoff documents and proposed Release bodies. Archive copies repeat historical originals and are not rewritten.",
+  "executor": "Read-only curl requests on the local Mac, with redirects followed. No assets or external settings were changed.",
+  "checks": [
+    {
+      "url": "https://doi.org/10.1109/LSP.2017.2675541",
+      "method": "HEAD, follow redirects",
+      "http_status": 202
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/runs/37817372049",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/runs/37829142655",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/actions/runs/37843968606",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/main/INSTALLING.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/main/docs/releases/0.1.0-installers-20261012.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/main/docs/windows/START-HERE-zh.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/v0.1.0-installers.20261013-host-fix/docs/releases/0.1.0-installers-20261013-host-fix.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/v0.1.0/BUILDING.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/blob/v0.1.0/RELEASE_NOTES_0.1.0.md",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261012",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/f2a710510415395e13e548400143604c455df8fe",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://github.com/Yeeeee0-0/just-audio-plugin-bundle/tree/v0.1.0",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://img.shields.io/badge/Windows-x64_preview-orange",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://img.shields.io/badge/format-VST3-blue",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://img.shields.io/badge/license-MIT-green",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://img.shields.io/badge/macOS-Apple_silicon-lightgrey",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://img.shields.io/badge/version-0.1.0-blue",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    },
+    {
+      "url": "https://www.dafx.de/paper-archive/2019/DAFx2019_paper_4.pdf",
+      "method": "HEAD, follow redirects",
+      "http_status": 200
+    }
+  ],
+  "follow_up_checks": [
+    {
+      "url": "https://doi.org/10.1109/LSP.2017.2675541",
+      "method": "GET, follow redirects",
+      "http_status": 202
+    }
+  ],
+  "exceptions": [
+    {
+      "url": "https://doi.org/10.1109/LSP.2017.2675541",
+      "note": "The existing Distortion paper DOI returned HTTP 202 for both HEAD and GET. The plan's HTTP 200 criterion is therefore not satisfied for this existing reference. Preserve the original technical citation; do not describe all external links as HTTP 200."
+    }
+  ],
+  "summary": {
+    "unique_requested_urls": 25,
+    "http_200": 24,
+    "http_202": 1,
+    "readme_external_urls": 8,
+    "readme_external_urls_http_200": 8
+  }
+}
