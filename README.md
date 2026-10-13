@@ -6,15 +6,15 @@
 
 Ten free, open-source VST3 effects — EQ, reverb, delay, dynamics, modulation and distortion — built in C++17 with native editors.
 
-![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue) ![VST3](https://img.shields.io/badge/format-VST3-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) ![macOS Apple silicon](https://img.shields.io/badge/macOS-Apple_silicon-lightgrey) ![Windows x64 preview](https://img.shields.io/badge/Windows-x64_preview-orange)
+![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue) ![VST3](https://img.shields.io/badge/format-VST3-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) ![macOS Apple silicon](https://img.shields.io/badge/macOS-Apple_silicon-lightgrey) ![Windows x64](https://img.shields.io/badge/Windows-x64-blue)
 
 [Explore the ten plugins](#plugins) · [Downloads](#downloads) · [Installation](#installation)
 
-**Download 0.1.0:** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) (unsigned preview) · [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) (arm64 only; unsigned, not notarized).
+**Download 0.1.0:** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) (unsigned) · [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) (arm64 only; unsigned, not notarized).
 
 ## About
 
-JUST is a personal project shared as open source: ten independent audio effects, all at version **0.1.0**. They share a custom framework for VST3 integration, parameters, state, presets, analysis and the editor shell. The editors use native platform interfaces, without JUCE or VSTGUI. Both installers offer ten independent choices, all selected by default.
+JUST is a personal project shared as open source: ten independent audio effects, all released as the official **0.1.0** version. They share a custom framework for VST3 integration, parameters, state, presets, analysis and the editor shell. The editors use native platform interfaces, without JUCE or VSTGUI. Both installers offer ten independent choices, all selected by default.
 
 <!-- TODO(owner): 可在这里写一两句做这个项目的起因 -->
 
@@ -39,7 +39,7 @@ JUST is a personal project shared as open source: ten independent audio effects,
 
 ### Windows x64
 
-[Download the Windows Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **unsigned preview**; full host/audio acceptance remains pending.
+[Download JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **unsigned official 0.1.0 release**; compatibility across all DAW hosts has not been verified.
 
 ### macOS Apple silicon
 
@@ -47,7 +47,7 @@ JUST is a personal project shared as open source: ten independent audio effects,
 
 <details><summary>Checksums / 校验值</summary>
 
-| File / 文件 | Bytes / 字节 | SHA-256 |
+| Original asset / 原附件名 | Bytes / 字节 | SHA-256 |
 | --- | ---: | --- |
 | `JUST-0.1.0-Windows-x64-preview-setup.exe` | 4,031,050 | `22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040` |
 | `JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg` | 11,254,806 | `c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc` |
@@ -84,7 +84,7 @@ If macOS blocks the package or plugin, obtain a Developer ID signed and notarize
 | --- | --- |
 | macOS Apple silicon (`arm64`) | Ten Release bundles. PKG unsigned and not notarized; plugins use development ad-hoc signatures, not Developer ID. Deployment target is macOS 11.0, which has not been runtime-tested. |
 | Intel macOS / Universal | Build presets exist; no binaries are provided and runtime support is unverified. |
-| Windows x64 | Unsigned preview. The Setup launcher is x86 and contains ten AMD64 plugins; no ARM64. Eight installer/REAPER checks completed; full host/audio acceptance remains pending. |
+| Windows x64 | Official 0.1.0 release, unsigned. The Setup launcher is x86 and contains ten AMD64 plugins; no ARM64. Eight installer/REAPER checks completed; compatibility across all DAW hosts has not been verified. |
 | Linux | Core tests only, without VST3; no plugin release. |
 
 - Compressor and Gate save lookahead settings but process with zero actual lookahead and zero latency.
@@ -92,7 +92,7 @@ If macOS blocks the package or plugin, obtain a Developer ID signed and notarize
 - Limiter's reconstructed-peak mode does not claim ITU/EBU compliance.
 - Existing processor/controller UIDs and parameter IDs are compatibility contracts and must remain unchanged.
 - Windows Setup and plugins are unsigned.
-- Full DAW compatibility acceptance has not been completed; support in every host is not guaranteed.
+- Compatibility across all DAW hosts has not been verified; support in every host is not guaranteed.
 
 See the [current release record](docs/releases/0.1.0-installers-20261013-host-fix.md) for the detailed verification scope.
 

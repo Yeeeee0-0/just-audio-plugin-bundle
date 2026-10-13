@@ -1,8 +1,14 @@
-# JUST 0.1.0 Windows preview installer
+# JUST 0.1.0 Windows installer
 
-This source builds an **unsigned x64 VST3 test installer**. A successful build
-or isolated installation test does not establish visual/audio acceptance in
-the user's REAPER. The Windows computer must perform that separate check.
+This source builds the **unsigned Windows x64 VST3 installer for JUST 0.1.0**.
+JUST **0.1.0** is the current formal product release. A successful build or
+isolated installation test does not establish full DAW compatibility or audio
+coverage; those remain unverified.
+
+The current NSIS source retains the window name `JUST 0.1.0 Windows x64 Preview`
+and the embedded `PREVIEW-NOTICE.txt` resource. Published installer bytes and
+those internal strings are unchanged by this documentation update. See
+[current naming and release status](../../docs/github-presentation/CURRENT-NAMING.md).
 
 The installer offers ten independent components, all selected by default:
 EQ, Reverb, Delay, Tremolo, Compressor, Limiter, Gate, Flanger, Wider and
@@ -63,7 +69,7 @@ Default plugin backup transactions are under
 The default installer report has a unique Setup GUID name under
 `%ProgramData%\JUST\Windows-preview-logs\installer-<setupInvocationId>.json`.
 Every backup has a unique timestamp/GUID directory and its own transaction
-journal. Save the report and backup until real host acceptance is complete.
+journal. Save the report and backup for verification and transaction restoration.
 
 Each real Setup first generates a private invocation GUID and context inside
 its own NSIS resource directory. The trusted engine receives that GUID and

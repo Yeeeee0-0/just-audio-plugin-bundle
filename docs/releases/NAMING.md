@@ -7,6 +7,9 @@
 现有 Release、tag、附件名、附件内容和脚本保持原样。无签名状态仍须在下载表、发布说明和清单中明确披露；在所有者决定前，不能把下文去掉 `unsigned` 的示例当作已批准规则。
 Existing releases, tags, asset names, asset bytes and scripts stay as they are. Unsigned status must remain explicit in download tables, release notes and manifests. Examples omitting `unsigned` await the owner's decision.
 
+当前产品为正式 **0.1.0**。Windows 下载链接显示为“JUST 0.1.0 Windows x64 Setup”；历史 tag、附件名中的 `preview` 保留，线上 GitHub Pre-release / Latest 元数据本轮没有修改。以下 `preview.N` 规则仅用于今后确实作为预览发布的版本。
+The current product release is **0.1.0**. Windows download links display “JUST 0.1.0 Windows x64 Setup”. Historical tags and asset names retain `preview`; online GitHub prerelease/latest metadata is unchanged in this revision. The `preview.N` rules below apply to future releases that are actually previews.
+
 ## Tag 和标题 / Tags and titles
 
 | 场景 | tag 格式 | 例子 | 类型 |
@@ -24,7 +27,7 @@ Existing releases, tags, asset names, asset bytes and scripts stay as they are. 
 | `v0.1.0` | 首个正式版，仅 macOS |
 | `v0.1.0-windows-preview.12/13/17` | 早期 Windows 预览，已被取代 |
 | `v0.1.0-installers.20261012` | Windows UI 修复，同时重新挂出 macOS 原包 |
-| `v0.1.0-installers.20261013-host-fix` | 当前推荐的 Windows 安装器 |
+| `v0.1.0-installers.20261013-host-fix` | 当前正式插件 0.1.0 使用的 Windows 安装器；仅修复安装器，插件版本与内容未变 |
 
 ## 附件规范 / Release assets
 
@@ -40,7 +43,7 @@ Existing releases, tags, asset names, asset bytes and scripts stay as they are. 
 | 现有附件名 | 问题 |
 | --- | --- |
 | `JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg` | 太长（70 多个字符）；前缀 `JUST-Audio-Plugin-Bundle-` 和其他文件的 `JUST-` 不统一；带了提交哈希 `b99abd3`，普通用户看不懂；`selectable`、`unsigned` 是状态说明，不该放进文件名 |
-| `JUST-0.1.0-Windows-x64-preview-setup.exe`（host-fix） | 没有预览序号。用户下载多次之后，分不清哪个是新的、哪个是旧的 |
+| `JUST-0.1.0-Windows-x64-preview-setup.exe`（host-fix） | 原附件名保留历史 `preview`，与当前正式 0.1.0 的展示名称不同；当前文件不改名。缺少安装器更新序号，用户不易区分多次下载 |
 | `JUST-0.1.0-Windows-x64-preview-UI-fix-setup.exe` | 把修复内容（`UI-fix`）写进了文件名。每次修复都换一种写法，命名无法预测 |
 | `JUST-0.1.0-Windows-x64-preview.12-Setup.exe` | `Setup` 首字母大写，另一个 Windows 包是小写 `setup`，大小写不统一 |
 | `JUST-0.1.0-macOS-arm64-VST3.zip`、`JUST-0.1.0-source.zip` | 基本合理，只是 `source` 和 `VST3` 的大小写风格不一致 |

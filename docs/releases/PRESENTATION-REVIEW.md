@@ -3,9 +3,14 @@
 此目录是 T3/T4 的可审阅交付。本轮只提交仓库文档：没有执行任何线上 Release 编辑，没有修改 tag、Pre-release / Latest 状态或附件。
 This is the reviewable T3/T4 handoff. This change only adds repository documents; no online release, tag, prerelease/latest state or asset was edited.
 
+## 当前发布定位 / Current release status
+
+按所有者最新确认，当前产品展示为正式 **0.1.0**，Windows 下载链接使用“JUST 0.1.0 Windows x64 Setup”，并明确未签名。历史 tag、附件名和原文中的 `preview` 均保留。线上 GitHub 记录仍保留归档中的 Pre-release / Latest 元数据，本轮没有修改；所有者后续单独决定其与当前产品定位的对齐方式。这次文案修订没有新增测试，也不表示已验证完整的 DAW 兼容性覆盖。
+Per the owner’s latest confirmation, the current product release is **0.1.0**. Windows download links use “JUST 0.1.0 Windows x64 Setup” and explicitly state that it is unsigned. Historical tags, asset names and original text retain `preview`. Online GitHub prerelease/latest metadata remains as archived; the owner must separately decide how to align it with the current product status. This text revision adds no tests and does not claim full DAW compatibility coverage.
+
 ## 交付文件 / Deliverables
 
-- [TEMPLATE.md](TEMPLATE.md)：策划书 §6.4 模板全文，逐字保留。
+- [TEMPLATE.md](TEMPLATE.md)：基于策划书 §6.4；按最新授权将 Windows 默认状态改为“未签名”，未来正式/预览状态按实际填写。
 - [NAMING.md](NAMING.md)：§6.1、§6.5、§6.6 的未来命名提案，顶部明确标出尚未获准采用。
 - [原始 API 快照](archive/releases-api.original.json)：本次读取的 6 个 Release 完整 API 返回。
 - [归档索引](archive/INDEX.json)：原标题、原正文 UTF-8 字节数 / SHA-256 / CRLF 数、归档前缀长度、附件和状态。
@@ -20,7 +25,7 @@ This is the reviewable T3/T4 handoff. This change only adds repository documents
 | `v0.1.0-windows-preview.13` | [标题](proposed/v0.1.0-windows-preview.13.title.txt) · [正文](proposed/v0.1.0-windows-preview.13.body.md) | [原标题 + 原正文](archive/v0.1.0-windows-preview.13.original.md) |
 | `v0.1.0-windows-preview.12` | [标题](proposed/v0.1.0-windows-preview.12.title.txt) · [正文](proposed/v0.1.0-windows-preview.12.body.md) | [原标题 + 原正文](archive/v0.1.0-windows-preview.12.original.md) |
 
-归档 `.original.md` 的第一行是原标题，空行后是原正文 UTF-8 字节。原正文共 18,076 字节，保留全部 CRLF 及末尾换行；原始 JSON 也保存完整 `name` / `body`。归档及旧 preview 正文使用局部 `.gitattributes` 避免 Git 转换换行。三个旧 preview 的拟上线正文仅增加附录 A.4 提示；原正文是逐字节相同的后缀，未改写任何历史结论。
+归档 `.original.md` 的第一行是原标题，空行后是原正文 UTF-8 字节。原正文共 18,076 字节，保留全部 CRLF 及末尾换行；原始 JSON 也保存完整 `name` / `body`。归档及旧 preview 正文使用局部 `.gitattributes` 避免 Git 转换换行。三个旧 preview 的拟上线正文仅增加附录 A.4 提示，并按最新授权把提示下载引导改为当前正式 0.1.0；原正文是逐字节相同的后缀，未改写任何历史结论。
 
 ## 已核对 / Verified against the API snapshot
 
@@ -40,7 +45,7 @@ These checks compare GitHub API asset metadata, not fresh downloads of every his
 
 1. **未来 tag 规范（策划书 §9.5）**：是否采用 `vX.Y.Z-preview.N` / `vX.Y.Z-pkg.N`。示例 `pkg.1` / `pkg.2` 没有正式分配。
 2. **未来附件规范及脚本（§9.10–11）**：是否采用新名称、是否保留 `-unsigned`，以及是否修改打包脚本。当前脚本和附件不动。
-3. **Latest 方案（§9.4）**：`v0.1.0` 拟上线正文对应方案 A 的提示，待所有者选择；方案 B 需等待 Windows 实机验收后另发正式版。本次不把任何预发布设为正式版或 Latest。
+3. **GitHub Pre-release / Latest 元数据（§9.4）**：当前产品定位已由所有者确认为正式 0.1.0；线上记录尚未调整，本次只改文档。`v0.1.0` 拟上线正文提供 Windows 0.1.0 下载引导。所有者需单独决定是否调整线上 Pre-release / Latest 元数据或另发 Release；本轮不执行状态修改，也不声称新增验收。
 4. **COMCTL32（§9.12）**：当前 API `preview.13` 正文没有 COMCTL32 条目，当前发布记录也没有足以确认其后续修复的证据。三个旧 preview 的提示按附录 A.4 的兜底要求省去“问题已在后续版本中修复”，仅称早期 Windows 测试版。仍需所有者提供可验证的修复结论。
 
 ## 下次发版的命名修改位置 / Future packaging locations
@@ -59,7 +64,7 @@ These checks compare GitHub API asset metadata, not fresh downloads of every his
 
 ```bash
 gh release edit 'v0.1.0-installers.20261013-host-fix' --repo Yeeeee0-0/just-audio-plugin-bundle \
-  --title 'JUST 0.1.0 — Windows x64 预览：安装器修复 / Windows x64 preview: installer fix' \
+  --title 'JUST 0.1.0 — Windows x64 安装器修复 / Windows x64 installer fix' \
   --notes-file 'docs/releases/proposed/v0.1.0-installers.20261013-host-fix.body.md'
 
 gh release edit 'v0.1.0-installers.20261012' --repo Yeeeee0-0/just-audio-plugin-bundle \

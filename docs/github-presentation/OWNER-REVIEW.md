@@ -2,6 +2,8 @@
 
 本文件汇总策划书 §9 的全部待确认项，并提供 §8 要求的所有者操作步骤。下列设置和草稿尚未启用；本轮不修改线上 About、Topics、社交预览、Release 标题/正文或任何 Release 状态。
 
+当前所有者已明确：十款插件是正式 **0.1.0**。当前产品名称、About 拟稿与下载显示文案据此更新；未签名、架构、DSP 和已记录的测试覆盖限制仍保留。软件/附件的实际遗留名称与后续最小方案见 [CURRENT-NAMING.md](CURRENT-NAMING.md)。线上设置与 Release 状态本轮仍未改变。
+
 ## 12 项待确认 / Decisions from §9
 
 | # | 所有者需要决定 | 当前交付与边界 |
@@ -9,7 +11,7 @@
 | 1 | README 是否增加项目起因？如需要，请所有者提供一两句原文。 | README 留有 `TODO(owner)` 注释；没有编写作者动机。 |
 | 2 | README 头图用图标总览，还是一行十个 40 px 小图标？ | 原总览图为 **1536 × 1024**；[HEADER-PREVIEW.md](HEADER-PREVIEW.md) 提供两种候选，首页头图暂未启用。只使用仓库现有图片。 |
 | 3 | About 用中英合一，还是纯英文？ | 两版完整文案见下文；线上描述保持原状。 |
-| 4 | Latest 选 §6.2 方案 A，还是等验收后执行方案 B？ | A：保留 `v0.1.0` 为 Latest，在其正文提示 Windows 下载入口。B：Windows 完成实机验收后再发正式版并设为 Latest。本轮不改预发布或 Latest 状态。 |
+| 4 | Latest 选方案 A，还是方案 B？ | A：保留 `v0.1.0` 为 Latest，在其正文提示 Windows 下载入口。B：另提供正式命名的发布/附件，并由所有者选择是否设为 Latest；这不增加新的测试通过声明。本轮不改预发布或 Latest 状态。 |
 | 5 | 未来 tag 是否采用 §6.1 的规范？ | [NAMING.md](../releases/NAMING.md) 记录建议。现有 tag 均保持不变；`pkg.1`、`pkg.2` 等对应编号仅作示意，正式编号由所有者确定。 |
 | 6 | BUILDING 的插件源码与当前安装器源码各对应哪个 tag？ | 原文与候选替换文字、依据见下文。`BUILDING.md` 本轮保留原文，待确认后再改。 |
 | 7 | `WINDOWS-CODEX-PROMPT-zh.txt` 移到 `docs/dev/`、删除，还是保留？ | 本轮保留根目录文件；未移动、未删除。 |
@@ -28,16 +30,16 @@ Website 字段与 Packages / Deployments 侧栏显示也保留待所有者决定
 中英合一（按策划书 §5.1）：
 
 ```text
-Ten free open-source VST3 effects (EQ, reverb, delay, compressor, limiter, gate, flanger, tremolo, wider, distortion) in C++17. macOS Apple silicon + Windows x64 preview. MIT. | 十款开源 VST3 效果器
+Ten free open-source VST3 effects (EQ, reverb, delay, compressor, limiter, gate, flanger, tremolo, wider, distortion) in C++17. macOS Apple silicon + Windows x64. Version 0.1.0. MIT. | 十款开源 VST3 效果器
 ```
 
 纯英文：
 
 ```text
-Ten free open-source VST3 effects (EQ, reverb, delay, compressor, limiter, gate, flanger, tremolo, wider, distortion) in C++17. macOS Apple silicon + Windows x64 preview. MIT.
+Ten free open-source VST3 effects (EQ, reverb, delay, compressor, limiter, gate, flanger, tremolo, wider, distortion) in C++17. macOS Apple silicon + Windows x64. Version 0.1.0. MIT.
 ```
 
-中英合一 191 字符，纯英文 175 字符，两版均在 350 字符上限内。策划书提供的完整文案超过其建议的 160 字符，但本草稿保留原拟稿供选择。
+中英合一 198 字符，纯英文 182 字符，两版均在 350 字符上限内。两版均按所有者最新要求使用正式 0.1.0 定位，语言选择仍待确认。
 
 ### 20 个 Topics
 
@@ -60,12 +62,12 @@ distortion stereo-widener macos apple-silicon windows
 
 执行前重新读取线上标题、正文、状态和附件列表；如相较归档发生变化，先重新归档和核对，避免覆盖后续发布内容。
 
-- `v0.1.0-installers.20261013-host-fix`：用附录 A.1 经核对的拟正文；其 macOS 下载继续链接原 `20261012` 附件。
+- `v0.1.0-installers.20261013-host-fix`：用按正式 0.1.0 定位更新的附录 A.1 拟正文；其 macOS 下载继续链接原 `20261012` 附件。
 - `v0.1.0-installers.20261012`：用附录 A.2 经核对的拟正文，明确仅本页 Windows 包被取代，macOS 原包仍有效。
 - `v0.1.0`：正文候选见附录 A.3。涉及 Latest 的处理仍需先确认第 4 项。
 - `v0.1.0-windows-preview.17`、`.13`、`.12`：只在顶部插入“已取代”提示，随后完整保留原正文。按第 12 项，提示暂不声称 COMCTL32 崩溃已确认修复。
 
-保存时保持原 tag、预发布状态、Latest 状态和全部附件不变。不要重命名、增删或重新上传附件。逐项检查下载链接和签名/验收限制仍然存在。若拟稿中的附件名、字节或摘要与线上不一致，暂停该项并交由所有者核清；不自行改数字。
+保存时保持原 tag、预发布状态、Latest 状态和全部附件不变。不要重命名、增删或重新上传附件。逐项检查下载链接，以及签名、架构、DSP 和已记录的测试覆盖限制仍然存在。若拟稿中的附件名、字节或摘要与线上不一致，暂停该项并交由所有者核清；不自行改数字。
 
 ## T5：BUILDING 源码说明候选（待第 6 项确认）
 

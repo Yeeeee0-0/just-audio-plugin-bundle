@@ -1,1 +1,1 @@
-JUST 0.1.0 — Windows x64 预览：安装器修复 / Windows x64 preview: installer fix
+JUST 0.1.0 — Windows x64 安装器修复 / Windows x64 installer fix

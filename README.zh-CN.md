@@ -6,15 +6,15 @@
 
 十款免费开源的 VST3 效果器：EQ、混响、延迟、动态、调制和失真。C++17 编写，原生界面。
 
-![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue) ![VST3](https://img.shields.io/badge/format-VST3-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) ![macOS Apple silicon](https://img.shields.io/badge/macOS-Apple_silicon-lightgrey) ![Windows x64 preview](https://img.shields.io/badge/Windows-x64_preview-orange)
+![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue) ![VST3](https://img.shields.io/badge/format-VST3-blue) ![MIT](https://img.shields.io/badge/license-MIT-green) ![macOS Apple silicon](https://img.shields.io/badge/macOS-Apple_silicon-lightgrey) ![Windows x64](https://img.shields.io/badge/Windows-x64-blue)
 
 [查看十款插件](#插件一览) · [下载](#下载) · [安装](#安装)
 
-**下载 0.1.0：** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)（未签名预览）· [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg)（仅 arm64；未签名、未公证）。
+**下载 0.1.0：** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)（未签名）· [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg)（仅 arm64；未签名、未公证）。
 
 ## 简介
 
-JUST 是开源分享的个人项目，包含十款独立音频效果器，版本均为 **0.1.0**。它们共用自研框架，负责 VST3 接入、参数、状态、预设、分析和界面外壳。编辑器采用原生平台界面，不使用 JUCE 或 VSTGUI。两个平台的安装器都有十项独立选择，默认全选。
+JUST 是开源分享的个人项目，包含十款独立音频效果器，均已正式发布为 **0.1.0**。它们共用自研框架，负责 VST3 接入、参数、状态、预设、分析和界面外壳。编辑器采用原生平台界面，不使用 JUCE 或 VSTGUI。两个平台的安装器都有十项独立选择，默认全选。
 
 <!-- TODO(owner): 可在这里写一两句做这个项目的起因 -->
 
@@ -39,7 +39,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，版本
 
 ### Windows x64
 
-[下载 Windows Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **未签名预览版**；完整宿主/音频验收尚未完成。
+[下载 JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **未签名的正式 0.1.0**；完整 DAW 宿主兼容性覆盖尚未验证。
 
 ### macOS Apple silicon
 
@@ -47,7 +47,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，版本
 
 <details><summary>Checksums / 校验值</summary>
 
-| File / 文件 | Bytes / 字节 | SHA-256 |
+| Original asset / 原附件名 | Bytes / 字节 | SHA-256 |
 | --- | ---: | --- |
 | `JUST-0.1.0-Windows-x64-preview-setup.exe` | 4,031,050 | `22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040` |
 | `JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg` | 11,254,806 | `c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc` |
@@ -84,7 +84,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，版本
 | --- | --- |
 | macOS Apple silicon（`arm64`） | 十个 Release bundle。PKG 未签名、未公证；插件带开发用 ad-hoc 签名，不是 Developer ID。部署目标 macOS 11.0，但没有在 11.0 上实测。 |
 | Intel macOS / Universal | 有构建 preset；不提供二进制，运行支持未验证。 |
-| Windows x64 | 未签名预览。Setup 启动程序是 x86，内含十个 AMD64 插件，不含 ARM64。完成八项安装器/REAPER 检查，完整宿主/音频验收尚未完成。 |
+| Windows x64 | 正式 0.1.0，未签名。Setup 启动程序是 x86，内含十个 AMD64 插件，不含 ARM64。完成八项安装器/REAPER 检查，完整 DAW 宿主兼容性覆盖尚未验证。 |
 | Linux | 只能构建核心测试，不含 VST3；不发布插件。 |
 
 - Compressor 和 Gate 会保存 lookahead 设置，但实际处理时 lookahead 和延迟均为 0。
@@ -92,7 +92,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，版本
 - Limiter 的重建峰值模式不代表符合 ITU/EBU 标准。
 - 现有 processor/controller UID 和参数 ID 是兼容性契约，必须保持不变。
 - Windows 安装器和插件都未签名。
-- 尚未完成完整 DAW 兼容性验收，不保证所有宿主都能使用。
+- 完整 DAW 宿主兼容性覆盖尚未验证，不保证所有宿主都能使用。
 
 详细验证范围见 [当前发布记录](docs/releases/0.1.0-installers-20261013-host-fix.md)。
 

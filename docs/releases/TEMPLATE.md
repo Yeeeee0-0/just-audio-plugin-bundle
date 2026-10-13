@@ -2,9 +2,11 @@
 
 ## 下载 / Downloads
 
+<!-- 根据实际发布填写正式版或预览版状态及签名情况；当前正式版本为 0.1.0。Future release and signing status must reflect the actual release. -->
+
 | 平台 Platform | 文件 File | 状态 Status |
 | --- | --- | --- |
-| Windows x64 | [<文件名>](<直链>) | 未签名预览 / Unsigned preview |
+| Windows x64 | [<文件名>](<直链>) | 未签名 / Unsigned |
 | macOS Apple silicon | [<文件名>](<直链>) | 未签名、未公证 / Unsigned, not notarized |
 
 <details><summary>校验值 / Checksums</summary>

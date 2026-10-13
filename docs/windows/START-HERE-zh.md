@@ -1,12 +1,12 @@
-# JUST 0.1.0 Windows x64：下载、安装与撤销
+# JUST 0.1.0 正式版 Windows x64：下载、安装与撤销
 
-推荐下载 [Windows 安装器宿主修复预览](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix) 中的 [JUST-0.1.0-Windows-x64-preview-setup.exe](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)，大小 **4,031,050 字节**，SHA-256：
+推荐下载 [JUST 0.1.0 Windows 安装器宿主修复](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix) 中的 [JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)，大小 **4,031,050 字节**，SHA-256：
 
 ```text
 22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040
 ```
 
-这是未签名 Windows x64 VST3 预览。安装器启动程序为 x86，内含十款 AMD64/PE32+ 插件，不含 Windows ARM64 插件。详见[本次发布记录](../releases/0.1.0-installers-20261013-host-fix.md)；旧安装包和发布历史保留。
+这是 JUST **0.1.0 正式版**的未签名 Windows x64 VST3 安装包。完整 DAW 兼容性与音频覆盖尚未验证。安装器启动程序为 x86，内含十款 AMD64/PE32+ 插件，不含 Windows ARM64 插件。详见[本次发布记录](../releases/0.1.0-installers-20261013-host-fix.md)；旧安装包和发布历史保留。
 
 ## 安装
 
@@ -27,4 +27,4 @@
 
 ## English quick start
 
-Download the Setup above and verify SHA-256. Save your project. Hosts may remain running if selected bundles can be moved safely; close a locking plugin editor and retry if installation refuses. Select components (all ten by default), keep the report and transaction backup, then normally reopen the host or reload plugins. Undo using the exact original transaction's uninstaller. Private projects, settings and licenses are outside the installer's scope. Eight directed installer/REAPER branches were checked; full host/audio acceptance remains pending. See the [release record](../releases/0.1.0-installers-20261013-host-fix.md).
+Download the Setup above and verify SHA-256. Save your project. Hosts may remain running if selected bundles can be moved safely; close a locking plugin editor and retry if installation refuses. Select components (all ten by default), keep the report and transaction backup, then normally reopen the host or reload plugins. Undo using the exact original transaction's uninstaller. Private projects, settings and licenses are outside the installer's scope. Eight directed installer/REAPER branches were checked; full DAW compatibility and audio coverage have not been verified. See the [release record](../releases/0.1.0-installers-20261013-host-fix.md).

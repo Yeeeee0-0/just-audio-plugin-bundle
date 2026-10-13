@@ -2,7 +2,7 @@
 
 <!-- Owner approval required before copying this draft to /CHANGELOG.md. -->
 
-This draft follows the Keep a Changelog structure. Each heading uses the existing release tag and publication date, because several packages share plugin version 0.1.0. The entries summarize only the six original Release bodies; they do not add acceptance claims. Previous releases and assets remain available.
+This draft follows the Keep a Changelog structure. Each heading uses the existing release tag and publication date, because several packages share plugin version 0.1.0. The entries summarize the six original Release bodies, with current product naming updated to the owner's official 0.1.0 designation; they do not add test or compatibility claims. Previous releases and assets remain available.
 
 ## [v0.1.0-installers.20261013-host-fix] - 2026-10-13
 
@@ -18,7 +18,7 @@ This draft follows the Keep a Changelog structure. Each heading uses the existin
 
 ### Known limits
 
-- Windows remains an unsigned preview pending real-machine acceptance. Reopen the host or reload the plugin after installation; universal DAW hot swapping and gap-free audio are not promised.
+- Windows 0.1.0 is unsigned; compatibility across all DAW hosts has not been verified. Reopen the host or reload the plugin after installation; universal DAW hot swapping and gap-free audio are not promised.
 - Eight directed checks passed on the final EXE, with seven unaffected earlier installer cases reused. Two invalid recovery-report cases were checked in native PowerShell clone fixtures. No full DSP/UI matrix was rerun.
 - Restoration preserved 153 files, 71 directories and recorded identities; the scan-root modification time changed. Original observer false-failure records were retained and reconciled against raw evidence.
 - The unchanged macOS PKG is arm64 only, unsigned and not notarized.
