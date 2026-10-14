@@ -67,7 +67,7 @@ def main():
     junit = ET.parse(native/'ctest.xml').getroot()
     if int(junit.get('failures', '0')) or int(junit.get('errors', '0')):
         raise SystemExit('Native CTest failures')
-    installer = ROOT/'build/installer/JUST-0.1.0-Windows-x64-preview-setup.exe'
+    installer = ROOT/'build/installer/JUST-0.1.0-Windows-x64-Setup.exe'
     installer_build = read(ROOT/'build/installer/installer-build.json')
     installer_tests = read(ROOT/'build/windows-evidence/installer/installer-tests.json')
     installer_sha = digest(installer)

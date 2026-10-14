@@ -5,9 +5,9 @@ JUST **0.1.0** is the current formal product release. A successful build or
 isolated installation test does not establish full DAW compatibility or audio
 coverage; those remain unverified.
 
-The current NSIS source retains the window name `JUST 0.1.0 Windows x64 Preview`
-and the embedded `PREVIEW-NOTICE.txt` resource. Published installer bytes and
-those internal strings are unchanged by this documentation update. See
+The current NSIS source uses the window name `JUST 0.1.0 Windows x64`.
+The embedded notice keeps its internal `PREVIEW-NOTICE.txt` filename. Existing
+published installer assets retain their original bytes and filenames. See
 [current naming and release status](../../docs/github-presentation/CURRENT-NAMING.md).
 
 The installer offers ten independent components, all selected by default:
@@ -37,7 +37,7 @@ NSIS 3 compiler through PATH or its standard Program Files location;
 
 Default build outputs:
 
-- `build/installer/JUST-0.1.0-Windows-x64-preview-setup.exe`
+- `build/installer/JUST-0.1.0-Windows-x64-Setup.exe`
 - `build/installer/SHA256SUMS.txt`
 - `build/installer/installer-build.json`
 - `build/installer/makensis.log`
@@ -93,7 +93,7 @@ are allowed. `/SELECT=` is for silent runs; interactive runs use the component
 checkboxes.
 
 ```powershell
-$exe = '.\build\installer\JUST-0.1.0-Windows-x64-preview-setup.exe'
+$exe = '.\build\installer\JUST-0.1.0-Windows-x64-Setup.exe'
 Start-Process $exe -Wait -WindowStyle Hidden -ArgumentList '/S /SELECT=eq,delay /BACKUPROOT="D:\test\backups" /REPORT="D:\test\reports\install.json" /D=D:\test\VST3'
 ```
 
