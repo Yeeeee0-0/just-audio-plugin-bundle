@@ -10,7 +10,7 @@ Ten free, open-source VST3 effects — EQ, reverb, delay, dynamics, modulation a
 
 [Explore the ten plugins](#plugins) · [Downloads](#downloads) · [Installation](#installation)
 
-**Download 0.1.0:** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) (unsigned) · [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) (arm64 only; unsigned, not notarized).
+**Download 0.1.0:** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261014-formal-name/JUST-0.1.0-Windows-x64-Setup.exe) (unsigned) · [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg) (arm64 only; unsigned, not notarized).
 
 ## About
 
@@ -39,7 +39,9 @@ JUST is a personal project shared as open source: ten independent audio effects,
 
 ### Windows x64
 
-[Download JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **unsigned official 0.1.0 release**; compatibility across all DAW hosts has not been verified.
+[Download JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261014-formal-name/JUST-0.1.0-Windows-x64-Setup.exe) — **unsigned official 0.1.0 release**; compatibility across all DAW hosts has not been verified.
+
+Installer naming/packaging revision dated **2026-10-14**. Product version remains 0.1.0; all ten plugin DLLs and 151 payload files are unchanged from the previous host-fix package.
 
 ### macOS Apple silicon
 
@@ -49,7 +51,7 @@ JUST is a personal project shared as open source: ten independent audio effects,
 
 | Original asset / 原附件名 | Bytes / 字节 | SHA-256 |
 | --- | ---: | --- |
-| `JUST-0.1.0-Windows-x64-preview-setup.exe` | 4,031,050 | `22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040` |
+| `JUST-0.1.0-Windows-x64-Setup.exe` | 4,028,911 | `2ecf9337208a2d44df026fee2f7819b3e50008cc0e8b77a790d4f950ab662ca2` |
 | `JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg` | 11,254,806 | `c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc` |
 
 </details>
@@ -84,7 +86,7 @@ If macOS blocks the package or plugin, obtain a Developer ID signed and notarize
 | --- | --- |
 | macOS Apple silicon (`arm64`) | Ten Release bundles. PKG unsigned and not notarized; plugins use development ad-hoc signatures, not Developer ID. Deployment target is macOS 11.0, which has not been runtime-tested. |
 | Intel macOS / Universal | Build presets exist; no binaries are provided and runtime support is unverified. |
-| Windows x64 | Official 0.1.0 release, unsigned. The Setup launcher is x86 and contains ten AMD64 plugins; no ARM64. Eight installer/REAPER checks completed; compatibility across all DAW hosts has not been verified. |
+| Windows x64 | Official 0.1.0 release, unsigned. The Setup launcher is x86 and contains ten AMD64 plugins; no ARM64. This packaging revision passed 51 installer checks and directed GUI/rollback/restore checks; compatibility across all DAW hosts has not been verified. |
 | Linux | Core tests only, without VST3; no plugin release. |
 
 - Compressor and Gate save lookahead settings but process with zero actual lookahead and zero latency.
@@ -94,7 +96,7 @@ If macOS blocks the package or plugin, obtain a Developer ID signed and notarize
 - Windows Setup and plugins are unsigned.
 - Compatibility across all DAW hosts has not been verified; support in every host is not guaranteed.
 
-See the [current release record](docs/releases/0.1.0-installers-20261013-host-fix.md) for the detailed verification scope.
+See the [current release record](docs/releases/0.1.0-installers-20261014-formal-name.md) for the 51 installer checks, observed ten-component selection and normal GUI cancel, locked-file refusal/rollback, and actual-uninstaller cancel/restore evidence. DSP tests, real DAW checks and the full uninstall suite were not rerun; the Setup completion page was not observed. The [earlier host-fix record](docs/releases/0.1.0-installers-20261013-host-fix.md) retains its limited REAPER evidence; it is not a retest of this EXE.
 
 ## Build from source
 

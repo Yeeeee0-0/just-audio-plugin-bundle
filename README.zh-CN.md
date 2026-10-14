@@ -10,7 +10,7 @@
 
 [查看十款插件](#插件一览) · [下载](#下载) · [安装](#安装)
 
-**下载 0.1.0：** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)（未签名）· [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg)（仅 arm64；未签名、未公证）。
+**下载 0.1.0：** [Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261014-formal-name/JUST-0.1.0-Windows-x64-Setup.exe)（未签名）· [macOS Apple silicon PKG](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261012/JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg)（仅 arm64；未签名、未公证）。
 
 ## 简介
 
@@ -39,7 +39,9 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，均已
 
 ### Windows x64
 
-[下载 JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe) — **未签名的正式 0.1.0**；完整 DAW 宿主兼容性覆盖尚未验证。
+[下载 JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261014-formal-name/JUST-0.1.0-Windows-x64-Setup.exe) — **未签名的正式 0.1.0**；完整 DAW 宿主兼容性覆盖尚未验证。
+
+这是 **2026-10-14** 的安装器名称／包装修订。产品版本仍为 0.1.0；十个插件 DLL 和 151 项载荷文件与上一版宿主修复包完全一致。
 
 ### macOS Apple silicon
 
@@ -49,7 +51,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，均已
 
 | Original asset / 原附件名 | Bytes / 字节 | SHA-256 |
 | --- | ---: | --- |
-| `JUST-0.1.0-Windows-x64-preview-setup.exe` | 4,031,050 | `22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040` |
+| `JUST-0.1.0-Windows-x64-Setup.exe` | 4,028,911 | `2ecf9337208a2d44df026fee2f7819b3e50008cc0e8b77a790d4f950ab662ca2` |
 | `JUST-Audio-Plugin-Bundle-0.1.0-macOS-arm64-b99abd3-selectable-unsigned.pkg` | 11,254,806 | `c1359f53d5307ff994c4d8fd1e8930e0f8a5996c3140dc31a09fea69cc4f56cc` |
 
 </details>
@@ -84,7 +86,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，均已
 | --- | --- |
 | macOS Apple silicon（`arm64`） | 十个 Release bundle。PKG 未签名、未公证；插件带开发用 ad-hoc 签名，不是 Developer ID。部署目标 macOS 11.0，但没有在 11.0 上实测。 |
 | Intel macOS / Universal | 有构建 preset；不提供二进制，运行支持未验证。 |
-| Windows x64 | 正式 0.1.0，未签名。Setup 启动程序是 x86，内含十个 AMD64 插件，不含 ARM64。完成八项安装器/REAPER 检查，完整 DAW 宿主兼容性覆盖尚未验证。 |
+| Windows x64 | 正式 0.1.0，未签名。Setup 启动程序是 x86，内含十个 AMD64 插件，不含 ARM64。本次包装修订通过 51 项安装检查及定向 GUI／回滚／恢复检查；完整 DAW 宿主兼容性覆盖尚未验证。 |
 | Linux | 只能构建核心测试，不含 VST3；不发布插件。 |
 
 - Compressor 和 Gate 会保存 lookahead 设置，但实际处理时 lookahead 和延迟均为 0。
@@ -94,7 +96,7 @@ JUST 是开源分享的个人项目，包含十款独立音频效果器，均已
 - Windows 安装器和插件都未签名。
 - 完整 DAW 宿主兼容性覆盖尚未验证，不保证所有宿主都能使用。
 
-详细验证范围见 [当前发布记录](docs/releases/0.1.0-installers-20261013-host-fix.md)。
+51 项安装检查、实际观察的十项选择与正常 GUI 取消、锁定拒绝／回滚，以及实际卸载器取消／恢复证据见 [当前发布记录](docs/releases/0.1.0-installers-20261014-formal-name.md)。本轮未重跑 DSP、真实 DAW 检查或完整卸载套件；未观察 Setup 完成页。[旧宿主修复记录](docs/releases/0.1.0-installers-20261013-host-fix.md) 保留有限 REAPER 证据，不代表对本次 EXE 的重测。
 
 ## 从源码构建
 
