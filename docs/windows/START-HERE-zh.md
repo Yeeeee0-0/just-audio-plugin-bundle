@@ -1,12 +1,12 @@
 # JUST 0.1.0 正式版 Windows x64：下载、安装与撤销
 
-推荐下载 [JUST 0.1.0 Windows 安装器宿主修复](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261013-host-fix) 中的 [JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261013-host-fix/JUST-0.1.0-Windows-x64-preview-setup.exe)，大小 **4,031,050 字节**，SHA-256：
+推荐下载 [JUST 0.1.0 安装器名称／包装修订（2026-10-14）](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/tag/v0.1.0-installers.20261014-formal-name) 中的 [JUST 0.1.0 Windows x64 Setup](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/releases/download/v0.1.0-installers.20261014-formal-name/JUST-0.1.0-Windows-x64-Setup.exe)，大小 **4,028,911 字节**，SHA-256：
 
 ```text
-22946543862a919f32621aabee3c00d294d97f6e11cb8e6c4e525a92373c1040
+2ecf9337208a2d44df026fee2f7819b3e50008cc0e8b77a790d4f950ab662ca2
 ```
 
-这是 JUST **0.1.0 正式版**的未签名 Windows x64 VST3 安装包。完整 DAW 兼容性与音频覆盖尚未验证。安装器启动程序为 x86，内含十款 AMD64/PE32+ 插件，不含 Windows ARM64 插件。详见[本次发布记录](../releases/0.1.0-installers-20261013-host-fix.md)；旧安装包和发布历史保留。
+这是 JUST **0.1.0 正式版**的未签名 Windows x64 VST3 安装包，包装修订日期为 **2026-10-14**。本次只更新安装器名称、文案和输出文件名；产品版本仍为 0.1.0，十个插件 DLL 和 151 项载荷文件与上一版宿主修复包完全一致。完整 DAW 兼容性与音频覆盖尚未验证。安装器启动程序为 x86，内含十款 AMD64/PE32+ 插件，不含 Windows ARM64 插件。详见[本次发布记录](../releases/0.1.0-installers-20261014-formal-name.md)；旧安装包和发布历史保留。
 
 ## 安装
 
@@ -23,8 +23,10 @@
 
 ## 验证范围
 
-最终 EXE 的八项定向检查完成，覆盖真实取消、运行中安装／还原、编辑窗口锁定拒绝与正常重开；复用旧包七项未受影响证据，未重跑完整 DSP/UI 矩阵。实际还原的 153 文件、71 目录及身份记录一致；顶层目录修改时间会变化。检查器原误判记录保留，以原始记录核清。DLL、UI、DSP、版本与美术未变。此结果不承诺所有 DAW 热替换或音频无间断。
+本次新 EXE 通过 **51 项安装检查**，覆盖默认十组件完整 SHA、只选 EQ、备份／恢复、未选组件与第三方/private 测试哨兵保持、注入失败回滚及未选载荷篡改拒绝。实际查看欢迎页正式名称与默认十项选择，并通过 Esc → Yes 正常取消；隔离夹具验证锁定文件拒绝与回滚；实际生成的卸载器通过正常 GUI 取消及有界静默恢复。
+
+本轮未重跑 DSP、真实 DAW/REAPER 音频检查或完整卸载套件，未观察 Setup 安装完成页。插件 DLL、插件 UI、DSP、产品版本与美术未变。[旧宿主修复记录](../releases/0.1.0-installers-20261013-host-fix.md) 保留此前有限 REAPER 检查和恢复证据，不代表对本次 EXE 的重测。此结果不承诺所有 DAW 热替换或音频无间断。
 
 ## English quick start
 
-Download the Setup above and verify SHA-256. Save your project. Hosts may remain running if selected bundles can be moved safely; close a locking plugin editor and retry if installation refuses. Select components (all ten by default), keep the report and transaction backup, then normally reopen the host or reload plugins. Undo using the exact original transaction's uninstaller. Private projects, settings and licenses are outside the installer's scope. Eight directed installer/REAPER branches were checked; full DAW compatibility and audio coverage have not been verified. See the [release record](../releases/0.1.0-installers-20261013-host-fix.md).
+Download the Setup above and verify SHA-256. Save your project. Hosts may remain running if selected bundles can be moved safely; close a locking plugin editor and retry if installation refuses. Select components (all ten by default), keep the report and transaction backup, then normally reopen the host or reload plugins. Undo using the exact original transaction's uninstaller. Private projects, settings and licenses are outside the installer's scope. This naming/packaging revision keeps product version 0.1.0 and the same ten DLLs and 151 payload files. The new EXE passed 51 installer checks, with observed ten-component selection and normal GUI cancel, locked-file refusal/rollback, and actual-uninstaller cancel/restore checks. DSP tests, real DAW/REAPER audio checks and the full uninstall suite were not rerun; the Setup completion page was not observed. Full DAW compatibility and audio coverage have not been verified. See the [release record](../releases/0.1.0-installers-20261014-formal-name.md).

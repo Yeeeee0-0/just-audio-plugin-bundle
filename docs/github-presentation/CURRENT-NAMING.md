@@ -1,5 +1,8 @@
 # 当前 0.1.0 软件命名盘点与后续方案
 
+> **2026-10-14 更新 / Update:** 正式名称修订已在 [PR #2](https://github.com/Yeeeee0-0/just-audio-plugin-bundle/pull/2) 合并。当前新安装包为 `JUST-0.1.0-Windows-x64-Setup.exe`（4,028,911 字节，SHA-256 `2ecf9337208a2d44df026fee2f7819b3e50008cc0e8b77a790d4f950ab662ca2`），见 [新发布记录](../releases/0.1.0-installers-20261014-formal-name.md)。产品版本和插件载荷仍为 0.1.0；未签名及验证限制继续披露。下文完整保留修订前的盘点与候选方案，旧包哈希只对应旧 URL。
+> Formal naming is now merged in PR #2. The current installer is the new Setup above; see the linked release record for verification and limits. The following inventory and options retain their historical context; old hashes apply only to old URLs.
+
 当前展示定位按所有者授权使用 **JUST 0.1.0 正式版**。这项定位不改变签名状态，也不把有限范围的检查写成完整宿主/音频验收。本文件只提出当前软件可见名称的后续处理方案；本轮没有改代码、脚本、安装器、二进制、线上 Release 状态或任何已有附件名。
 
 ## 当前 EXE：文件身份和静态资源
